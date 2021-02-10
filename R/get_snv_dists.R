@@ -11,6 +11,7 @@
 
 # get intra- and inter-facility pairwise snv distances (might want to change this name to explain better what we're outputting)
 # dists - snv distance matrix returned by dist.dna
+# should we run dist.dna in here? I guess it depends whether any other functions need that as input, then it would be in its own prep function?
 # locs - locations of isolates (e.g. facility of isolation)
 # pt - patient isolate was taken from (optional; will remove pairwise snv distances between the same patient)
 get_snv_dists <- function(dists, locs, pt){
