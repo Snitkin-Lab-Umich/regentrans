@@ -13,9 +13,12 @@
 
 # get intra- and inter-facility pairwise snv distances (might want to change this name to explain better what we're outputting)
 # dists - snv distance matrix returned by dist.dna
-# locs - locations of isolates (e.g. facility of isolation) 
-# pt - patient isolate was taken from (optional; will remove pairwise snv distances between the same patient)
-get_snv_dists <- function(dists, locs, pt){
+# locs - locations of isolates (e.g. facility of isolation), named with the same names as dists
+# pt - patient isolate was taken from (optional; will remove pairwise snv distances between the same patient), named with the same name as dists
+get_snv_dists <- function(dists, locs, pt = NULL){
+  # put checks at beginning
+  check_names(rownames(dists), colnames(dists)) # see how many overlap - in this function you'll  put warnings
+  # possibly make a subset function (so all are the same)
   loc_sub <- locs[rownames(dists)]
   pt_sub <- pt[rownames(dists)]
   # snps <- dists[lower.tri(dists, diag = FALSE)] <- NA
@@ -46,11 +49,12 @@ get_frac_intra <- function(dists, threshs = seq(1,50,1)){
 
 # get clusters
 # tr - tree
-# locs - locations
+# locs - locations - named vector where names are same as tree tip labels # maybe make this more general?
 # pureness - how pure the cluster is (<= 0.5)
+# maybe add bootstrap value
 get_clusters <- function(tr, locs, pureness = 1){ # pureness shouldn't be <= 0.5?
   locs_sub <- locs[tr$tip.label]
-  subtrs_sub <- subtrees(tr)
+  subtrs_sub <- ape::subtrees(tr)
   pure_subtrees <- get_largest_subtree(subtrs_sub, locs_sub, bootstrap = NULL, pureness = pureness) # NOTE: this function is in snitkitr right now, but I think we should migrate it to this package (or at least include it here as well); this _might_ be buggy, so definitely good to add unit tests for it
   pure_subtr_info <- bind_cols(f_id=locs_sub,
                                subtr_size=unlist(pure_subtrees$largest_st),
