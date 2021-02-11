@@ -26,3 +26,8 @@ get_snv_dists <- function(dists, locs, pt){
   snps
   bind_cols(snps %>% filter(pt1 != pt2) %>% mutate(intra=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
 }
+
+#check that names being subsetted are in both
+#error if none match
+#write in condition for optional input (patients)
+#warning if not all match
