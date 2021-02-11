@@ -1,10 +1,11 @@
 # get clusters
 # tr - tree
-# locs - locations
+# locs - locations #named vector #could be body site, infection vs. colinization, etc. maybe change the name to be groups?
 # pureness - how pure the cluster is (<= 0.5)
+#bootstrap value should be an argument here
 get_clusters <- function(tr, locs, pureness = 1){ # pureness shouldn't be <= 0.5?
   locs_sub <- locs[tr$tip.label]
-  subtrs_sub <- subtrees(tr)
+  subtrs_sub <- ape::subtrees(tr)
   pure_subtrees <- get_largest_subtree(subtrs_sub, locs_sub, bootstrap = NULL, pureness = pureness) # NOTE: this function is in snitkitr right now, but I think we should migrate it to this package (or at least include it here as well); this _might_ be buggy, so definitely good to add unit tests for it
   pure_subtr_info <- bind_cols(f_id=locs_sub,
                                subtr_size=unlist(pure_subtrees$largest_st),
