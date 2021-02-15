@@ -14,20 +14,62 @@
 # should we run dist.dna in here? I guess it depends whether any other functions need that as input, then it would be in its own prep function?
 # locs - locations of isolates (e.g. facility of isolation)
 # pt - patient isolate was taken from (optional; will remove pairwise snv distances between the same patient)
+
+
+
+
+
+#' Title
+#'
+#' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
+#' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
+#' @param pt a named vector of patient that isolate was taken from with the name being sample ID (optional)
+#'
+#' @return snp_facility_paris, a matrix of inter- and intra-facility pariwise snv distances
+#' @export
+#'
+#' @examples
 get_snv_dists <- function(dists, locs, pt){
+  #checks
+  check_get_snv_dists_input_no_pt(dists, locs)
+
+  #check pt if it isn't missing
+  if(!missing(pt)){
+    check_get_snv_dists_input_pt(dists, locs, pt)
+    #subset by pt
+    pt_sub <- pt[rownames(dists)]
+  }
+
+  #subset by locs
   loc_sub <- locs[rownames(dists)]
-  pt_sub <- pt[rownames(dists)]
+
+  #what is this doing?
   # snps <- dists[lower.tri(dists, diag = FALSE)] <- NA
+
+  #make df
   snps <- na.omit(data.frame(as.table(as.matrix(dists))))
+
+  #add locs
   snps$loc1 <- loc_sub[snps$Var1]
   snps$loc2 <- loc_sub[snps$Var2]
-  snps$pt1 <- pt_sub[snps$Var1]
-  snps$pt2 <- pt_sub[snps$Var2]
-  snps
-  bind_cols(snps %>% filter(pt1 != pt2) %>% mutate(intra=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
+
+  #do pt stuff
+  if(!missing(pt)){
+    #add pts
+    snps$pt1 <- pt_sub[snps$Var1]
+    snps$pt2 <- pt_sub[snps$Var2]
+    #add labels
+    snp_facility_pairs <- bind_cols(snps %>% filter(pt1 != pt2) %>% mutate(intra=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
+  }
+  else{
+    #add labels
+    #old code without subset
+    #snp_facility_pairs <- bind_cols(snps %>% mutate(intra=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
+    snp_facility_pairs <- bind_cols(snps %>% mutate(intra=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')) %>% filter(!is.na(intra)))
+  }
+  #return snp matrix
+  return(snp_facility_pairs)
 }
 
-#check that names being subsetted are in both
-#error if none match
-#write in condition for optional input (patients)
-#warning if not all match
+#how to plot this?
+#tests both with and without pt

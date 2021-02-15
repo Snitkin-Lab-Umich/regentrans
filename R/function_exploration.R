@@ -2,6 +2,15 @@
 
 #load libraries
 library(ape)
+library(dplyr)
+library(devtools)
+#source checks
+source("/Users/sophiehoffman/Desktop/regentrans/R/checks.R")
+#source tests
+source("/Users/sophiehoffman/Desktop/regentrans/R/tests.R")
+
+#devtools::load_all("/Users/sophiehoffman/Desktop/regentrans")
+#load_all("/Users/sophiehoffman/Desktop/regentrans")
 
 #metadata path
 #/nfs/turbo/umms-esnitkin/Project_REALM/Analysis/NDM_transmission/2020-12-16_manuscript-figures/data/kp_st147_metadata.csv
@@ -23,18 +32,19 @@ tree <- read.tree("/Users/sophiehoffman/Desktop/gl_mount/Project_REALM/Sequence_
 dists <- dist.dna(x = fasta, as.matrix = TRUE)
 
 #locs - locations of isolates (e.g. facility of isolation)
-#using pt_id here
-#will we do pre-processing outside or inside of the function definition
-#named list, where names are same as names of dist.dna output
+#named vector, where names are same as names of dist.dna output
 locs <- metadata$f_id
 names(locs) <- metadata$name
-#unname(locs[hi])
-#hi <- c("REALM_CRE_165", "REALM_CRE_164")
 
 #pt
 pt <- metadata$pt_id
 names(pt) <- metadata$name
-#unname(pt[hi])
+
+#for the test data I have to remove the last char of each of the row and col names
+rownames(dists) <- substr(rownames(dists), 1, nchar(rownames(dists))-1)
+colnames(dists) <- substr(colnames(dists), 1, nchar(colnames(dists))-1)
+
+
 
 
 
