@@ -66,3 +66,173 @@ get_clusters <- function(tr, locs, pureness = 1){ # pureness shouldn't be <= 0.5
   return(pure_subtr_info=pure_subtr_info) #maybe add pureness of cluster? 
 }
 
+## Shortest path functions
+
+# find k shortest paths (yen's algorithm)
+# Resources:
+#   - pseudocode on wikipedia: https://en.wikipedia.org/wiki/Yen%27s_algorithm
+#   - python function: https://gist.github.com/ALenfant/5491853
+# input:
+#   - graph = igraph graph
+#   - from = start vertex
+#   - to = target vertex
+#   - num_k = number of shortest paths to find
+# output:
+#   - list of paths and distances for k shortest paths
+k_shortest_paths <- function(graph, from, to, num_k, weight=NULL){
+  
+  # SET GRAPH EDGE WEIGHTS
+  if(!is.null(weight)){
+    E(graph)$weight = weight
+  }
+  
+  # first shortest path from source to target
+  A <- list(as_ids(shortest_paths(graph,from,to,mode='out',output='vpath')$vpath[[1]]))
+  A_costs = list(distances(graph,from,to,mode='out',algorithm='dijkstra'))
+  
+  # initialize heap to store potential kth shortest path
+  B = list()
+  B_costs = list()
+  
+  #print(paste('Path 1'))
+  #print(as_ids(A[[1]]))
+  
+  if(num_k == 1){
+    return(list(paths = A,dist = A_costs))
+  }
+  
+  for(k in 2:num_k){
+    #print(paste('Path',k))
+    # spur node ranges from first node to next to last node in shortest path
+    for(i in 1:(length((A[[k-1]]))-1)){
+      # spur node retrieved from previous k-shortest path, k-1
+      spurNode = (A[[k-1]])[i]
+      # sequence of nodes from source to spur node of previous k-shortest path
+      rootPath = A[[k-1]][1:i]
+      
+      # store removed edges
+      removed_edges = c()
+      removed_edge_attr = list()
+      
+      #c = 0
+      for(path in A){
+        if(length(path) > i){
+          if(all((rootPath) == (path[1:i]))){
+            # remove links that are part of previous shortest paths that share the same root path
+            edge = paste((path[i:(i+1)]),collapse = '|')
+            removed_edges = c(removed_edges, edge)
+            #c = c+1
+            #removed_edge_attr[[c]] = list(path[i],path[i+1],edge_attr(g,index=edge))
+            
+          }
+        }
+      }
+      
+      V(graph)$names = as_ids(V(graph))
+      
+      
+      newgraph = delete_edges(graph,unique(removed_edges))
+      
+      for(node in (rootPath)){
+        if(node != spurNode){
+          newgraph = delete_vertices(newgraph,c(node))
+        }
+      }
+      
+      spurNode = (V(graph)$names[as_ids(V(graph)) %in% spurNode])
+      spurNode = (V(newgraph)[V(newgraph)$names %in% (spurNode)])
+      
+      # calculate spur path from spur node to sink
+      spurPath = as_ids(shortest_paths(newgraph,names(spurNode),as.character(to),mode='out',output='vpath')$vpath[[1]])
+      
+      if(length(spurPath) > 1){
+        
+        totalPath = c((rootPath), (spurPath)[2:length(spurPath)])
+        
+        totalPathCost = sum(E(graph)$weight[(get.edge.ids(graph,rep((totalPath),each=2)[2:(length((totalPath))*2-1)]))])
+        
+        
+        # add potential k-shortest path to heap
+        B[[length(B)+1]] = totalPath
+        B_costs[[length(B_costs)+1]] = totalPathCost
+      }
+      
+    }
+    
+    # sort potential k-shortest paths by cost
+    B = B[order(unlist(B_costs))]
+    B_costs = B_costs[order(unlist(B_costs))]
+    
+    # lowest cost path is k-shortest path
+    for(i in 1:length(B_costs)){
+      cost_ = B_costs[i]
+      path_ = B[i]
+      if(!(paste((path_[[1]]),collapse = '_') %in% (lapply(A, function(x) paste((unlist(x)),collapse = '_'))))){
+        # found new path to add
+        A[[k]] = path_[[1]]
+        A_costs[[k]] = cost_[[1]]
+        break
+      }
+    }
+    
+    #print((as_ids(A[[k]])))
+  }
+  return(list(paths = A,dist = A_costs))
+}
+
+
+# GET DISTANCE MATRICES FOR THE K SHORTEST PATHS 
+# inupt: 
+#   - k = k shortest paths (integer)
+#   - graph = graph (igraph object)
+#   - alpha - ignore for now
+#   - ltach_names - vertex names of facilities of interest
+#   - weight - weight of edges to use to calculate shortest graphs (if NULL, uses E(graph)$weight)
+# returns list with each matrix being shortest distance for kth shortest path
+get_dist_mat_ksp = function(k, graph, ltach_indices, weight = NULL){
+  
+  # SET GRAPH EDGE WEIGHTS
+  if(!is.null(weight)){
+    E(graph)$weight = weight
+  }
+  
+  # GET K SHORTEST PATHS BETWEEN VERTICES OF INTEREST
+  ksp = list()
+  
+  for(i in ltach_indices){
+    for(j in ltach_indices){
+      if(i != j){
+        sp_k = k_shortest_paths(graph,i,j,k,weight)
+        ksp[[paste(i,j,sep='_')]] = sp_k
+      }
+    }
+  }
+  
+  # CALCULATE DISTANCE MATRIX FOR EACH K
+  dist_mats = vector('list',k)
+  for(x in 1:length(dist_mats)){
+    dist_mats[[x]] = matrix(0, nrow=length(ltach_indices),ncol=length(ltach_indices))
+    colnames(dist_mats[[x]]) = ltach_indices
+    rownames(dist_mats[[x]]) = ltach_indices
+  }
+  
+  paths = list() #vector('list',k)
+  
+  ksp_count = 0
+  for(sps in ksp){
+    ksp_count = ksp_count + 1
+    i = (strsplit(names(ksp)[ksp_count],'_')[[1]][1])
+    j = (strsplit(names(ksp)[ksp_count],'_')[[1]][2])
+    c = 0
+      paths[[paste(i,j,sep = '_')]] = sps$path
+    c = 0
+    #distances
+    for(d in sps$dist){
+      c = c+1
+      dist_mats[[c]][i,j] = d
+    }
+  }
+  
+  return(list('dist_mats' = dist_mats, 'paths' = paths))
+  
+}
