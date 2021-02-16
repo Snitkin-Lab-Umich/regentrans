@@ -48,6 +48,8 @@ get_snv_dists <- function(dists, locs, pt){
 
   #make df
   snps <- na.omit(data.frame(as.table(as.matrix(dists))))
+  #change freq colname?
+  colnames(snps) <- c("Var1", "Var2", "Pairwise_dists")
 
   #add locs
   snps$loc1 <- loc_sub[snps$Var1]
