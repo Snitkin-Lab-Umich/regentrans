@@ -7,19 +7,19 @@
 check_dists <- function(dists){
   #if it is not a matrix
   if(!any(class(dists) == "matrix")){
-    stop(paste("The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided:", 
+    stop(paste("The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided:",
                class(dists)))
   }
   #make sure it is a correlation matrix (aka equal dimensions)
   if(dim(dists)[1] != dim(dists)[2]){
-    stop(paste("The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but the dimensions of your matrix are not equal. The matrix you provided is", 
+    stop(paste("The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but the dimensions of your matrix are not equal. The matrix you provided is",
                dim(dists)[1], "x", dim(dists)[2]))
   }
   #make sure there are at least 2 columns and 2 rows? Don't just want to correlate one sample to itself
   #only need ot check one dimension because the previous check made sure they were the same
   if(nrow(dists) < 2){
     stop(paste("Your SNV matrix only has ", nrow(dists), " samples. Please use a SNV distance matrix that includes 2 or more samples"))
-  }  
+  }
 
 }
 
@@ -32,14 +32,14 @@ check_locs <- function(locs, dists){
   }
   #check that the locs object has at least 2 items
   if(length(locs) < 2){
-    stop(paste("You have only supplied locations for "), length(locs), 
+    stop(paste("You have only supplied locations for "), length(locs),
          " isolates. Please supply a named vector of locations for at least 2 isolates")
   }
   #check that there are less than or equal to the number of samples in the vector than in the dists matrix
   if(length(locs) > nrow(dists)){
-    stop(paste("You have supplied a list of more isolates (n = ", length(locs), 
-               ") with locations than exist in your SNV distance matrix (n = ", 
-               nrow(dists), 
+    stop(paste("You have supplied a list of more isolates (n = ", length(locs),
+               ") with locations than exist in your SNV distance matrix (n = ",
+               nrow(dists),
                ". Please make sure you have at least as many isolates in your SNV matrix as you have in your isolate location list."))
   }
 }
@@ -53,19 +53,19 @@ check_pt <- function(pt, dists){
   }
   #check that the pt object has at least 2 items
   if(length(pt) < 2){
-    stop(paste("You have only supplied patient IDs for "), length(locs), 
+    stop(paste("You have only supplied patient IDs for "), length(locs),
          " isolates. Please supply a named vector of patient IDs for at least 2 isolates")
   }
   #check that there are less than or equal to the number of samples in the vector than in the dists matrix
   if(length(pt) > nrow(dists)){
-    stop(paste("You have supplied a list of more isolates (n = ", length(locs), 
-               ") with locations than exist in your SNV distance matrix (n = ", 
-               nrow(dists), 
+    stop(paste("You have supplied a list of more isolates (n = ", length(locs),
+               ") with locations than exist in your SNV distance matrix (n = ",
+               nrow(dists),
                ". Please make sure you have at least as many isolates in your SNV matrix as you have in your isolate location list."))
   }
 }
 
-#check that samples and lengths of pt and locs vectors are the same 
+#check that samples and lengths of pt and locs vectors are the same
 check_pt_vs_locs <- function(pt, locs){
   #check that there are the same number of samples in the pt vector as in the locs vector
   #here would I want to subet it myself
@@ -115,10 +115,91 @@ check_get_snv_dists_input_no_pt <- function(dists, locs){
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_frac_intra FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
+check_snv_dists <- function(snv_dists){
+  #check the type
+  if(!(class(snv_dists) == "data.frame")){
+    stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but you provided: ",
+               class(snv_dists)))
+  }
+  #check the number of columns
+  if(!(ncol(snv_dists) == 8 | ncol(snv_dists) == 6)){
+    stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but you provided a data.frame with ",
+               ncol(snv_dists), " columns."))
+  }
+  #check the colnames
+  if(!((ncol(snv_dists) == 8 &&
+        all(colnames(snv_dists) == c("Var1", "Var2", "Pairwise_dists", "loc1", "loc2", "pt1",  "pt2", "intra"))) ||
+       (ncol(snv_dists) == 6 &&
+        all(colnames(snv_dists) == c("Var1", "Var2", "Pairwise_dists", "loc1", "loc2", "intra"))))){
+    stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has ",
+               ncol(snv_dists), " columns that are not the output columns needed."))
+  }
+  #check that there are at least one row
+  if(nrow(snv_dists) < 1){
+      stop(paste("Your snv_dists input has ", nrow(snv_dists), " facility pairs. Please use an snv_dists input that has 1 or more pairs (rows)"))
+  }
+  #is it worth checking the column types?
+}
 
+#some vector of numbers, max number isn't > max snv distance or negative
+check_threshs <- function(threshs, snv_dists){
+  #check numeric vector
+  if(!(is.vector(threshs) && class(threshs) == "numeric")){
+    stop(paste("threshs must be a numeric vector, you provided a ", typeof(threshs)))
+  }
+  #check that max number isn't > max snv distance or negative
+  #we are not meeting this condition right now so I will just throw a warning
+  if(!max(threshs) <= max(snv_dists$Pairwise_dists)){
+    stop(paste("Your max threshold ", max(threshs), " is greater than your max CNV distance of ", max(snv_dists$Pairwise_dists),
+                  "If you are using the default thereshold input, please enter a numeric vector of thresholds"))
+  }
+  if(any(threshs < 0)){
+    stop("You provided a threshold below 0")
+  }
+}
 
+check_get_frac_intra_input <- function(snv_dists, threshs){
+  #checks snv_dists input
+  check_snv_dists(snv_dists)
+  #check threshs input
+  check_threshs(threshs, snv_dists)
+}
 
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR get_frac_intra FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
+#############################################################################################################################################
+#*******************************************************************************************************************************************#
+#***********************************************START CHECKS FOR get_clusters FUNCTION*****************************************************#
+#*******************************************************************************************************************************************#
+#check that the tree object is a tree
+check_tree <- function(tr){
+  if(!(class(tr) == "phylo")){
+    stop(paste("The tr object must be a phylogenetic tree, read into R using the ape::read.tree() function. You have supplied a ",
+               class(tr)))
+  }
+}
+
+#check that the pureness is a double between 1 and .5
+check_pureness <- function(pureness){
+  if(!(typeof(pureness) == "double")){
+    stop(paste("The pureness value must be a double, you supplied type ", typeof(pureness)))
+  }
+  if(pureness <= 0.5 || pureness > 1){
+    stop(paste("The pureness value must be between 0.5 and 1, you supplied a value of ", pureness))
+  }
+}
+
+#check bootstrap value is an int value or null for now
+check_bootstrap <- function(bootstrap){
+  if(!(is.null(bootstrap) || typeof(bootstrap) == "double")){
+    stop(paste("The bootstrap value must be a double or NULL, you supplied type ", typeof(bootstrap)))
+  }
+}
+
+
+#*******************************************************************************************************************************************#
+#***********************************************END CHECKS FOR get_clusters FUNCTION*******************************************************#
+#*******************************************************************************************************************************************#
+#############################################################################################################################################
 
