@@ -9,7 +9,16 @@
 #     "5" (first character of patient ID) = facility ID
 # Returns a facil x facil matrix with Fsp values
 
-facility_fsp <- function(snp_dist, facil)
+#' Make facility x facility matrix with Fsp values
+#'
+#' @param snp_dist variant matrix (sample genomes x single nucleotide variants) either output of prewas::load_vcf_file or a matrix in the correct format
+#' @param facil facilities for pairwise comparison
+#'
+#' @return matrix of facility x facility matrix with Fsp values
+#' @export
+#'
+#' @examples
+get_facility_fsp <- function(snp_dist, facil)
 {
 
   # SUBSET SAMPLES BASED ON FACILITY

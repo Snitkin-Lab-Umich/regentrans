@@ -4,8 +4,7 @@
 library(ape)
 library(dplyr)
 library(devtools)
-install.packages("oak")
-library(oak)
+
 #source checks
 source("/Users/sophiehoffman/Desktop/regentrans/R/checks.R")
 #source tests
@@ -14,13 +13,16 @@ source("/Users/sophiehoffman/Desktop/regentrans/R/tests.R")
 source("/Users/sophiehoffman/Desktop/regentrans/R/get_snv_dists.R")
 #source get_frac_intra
 source("/Users/sophiehoffman/Desktop/regentrans/R/get_frac_intra.R")
-#get_frac_intra_from_snv_dists
+#source get_frac_intra_from_snv_dists
 source("/Users/sophiehoffman/Desktop/regentrans/R/get_frac_intra_from_snv_dists.R")
-
+#source get_largest_subtree
+source("/Users/sophiehoffman/Desktop/regentrans/R/get_largest_subtree.R")
+#source reverse_list_str
+source("/Users/sophiehoffman/Desktop/regentrans/R/reverse_list_str.R")
 
 
 #devtools::load_all("/Users/sophiehoffman/Desktop/regentrans")
-#load_all("/Users/sophiehoffman/Desktop/regentrans")
+#load_all()
 
 #metadata path
 #/nfs/turbo/umms-esnitkin/Project_REALM/Analysis/NDM_transmission/2020-12-16_manuscript-figures/data/kp_st147_metadata.csv
@@ -70,4 +72,14 @@ frac_intra_2 <- get_frac_intra_from_snv_dists(dists, locs, pt, threshs)
 #############################################################################################################################################
 #get_clusters
 tr <- tree
+tr$tip.label <- substr(tr$tip.label, 1, nchar(tr$tip.label)-1)
+
+#for running tests
+locs_sub <-locs_sub[!is.na(locs_sub)]
+
+#############################################################################################################################################
+#get_facility_fsp
+snp_dist <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Nursing_Home/Sequence_data/final_genomics_files/2019-07-19_Filtered_Pathways_VREfm", sep = " ", header = FALSE, skip = 1)
+#what are the dimensions? Is that what the first line of the file is?
+dim(snp_dist)
 

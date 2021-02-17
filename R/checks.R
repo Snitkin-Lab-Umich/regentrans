@@ -24,7 +24,7 @@ check_dists <- function(dists){
 }
 
 #checks locs input to get_snv_dists function
-check_locs <- function(locs, dists){
+check_locs <- function(locs){
   #check that the locs object is a named vector
   #if it is not a vector or has no names then not good (check both of these in tests)
   if(!(is.vector(locs)) | is.null(names(locs))){
@@ -34,13 +34,6 @@ check_locs <- function(locs, dists){
   if(length(locs) < 2){
     stop(paste("You have only supplied locations for "), length(locs),
          " isolates. Please supply a named vector of locations for at least 2 isolates")
-  }
-  #check that there are less than or equal to the number of samples in the vector than in the dists matrix
-  if(length(locs) > nrow(dists)){
-    stop(paste("You have supplied a list of more isolates (n = ", length(locs),
-               ") with locations than exist in your SNV distance matrix (n = ",
-               nrow(dists),
-               ". Please make sure you have at least as many isolates in your SNV matrix as you have in your isolate location list."))
   }
 }
 
@@ -80,6 +73,13 @@ check_pt_vs_locs <- function(pt, locs){
 
 #check that the names of the isolates in locs actually exist in the SNV matrix
 check_dists_vs_locs <- function(dists, locs){
+  #check that there are less than or equal to the number of samples in the vector than in the dists matrix
+  if(length(locs) > nrow(dists)){
+    stop(paste("You have supplied a list of more isolates (n = ", length(locs),
+               ") with locations than exist in your SNV distance matrix (n = ",
+               nrow(dists),
+               ". Please make sure you have at least as many isolates in your SNV matrix as you have in your isolate location list."))
+  }
   #check if the names of the locs isolates are a subset of the names of the dist matrix isolates
   if(!all(names(locs) %in% rownames(dists))){
     stop("Some of the isolates you have provided locations for are not in the SNV distance matrix (dists). Please subset the locs vector to include only isolates in the SNV distance matrix (dists).")
@@ -103,7 +103,7 @@ check_get_snv_dists_input_no_pt <- function(dists, locs){
   #check that the dists object is the snv object returned by dist.dna
   check_dists(dists)
   #check that the locs object is a named vector
-  check_locs(locs, dists)
+  check_locs(locs)
   #check that the locs names exist in the dists dataframe
   check_dists_vs_locs(dists, locs)
 }
@@ -197,6 +197,38 @@ check_bootstrap <- function(bootstrap){
   }
 }
 
+#check that the names of the isolates in locs actually exist in the SNV matrix
+check_tr_vs_locs <- function(tr, locs){
+  #check that there are less than or equal to the number of samples in the vector than in the tree tip labels
+  if(length(locs) > length(tr$tip.label)){
+    stop(paste("You have supplied a list of more isolates (n = ", length(locs),
+               ") with locations than exist in your tree (n = ",
+               length(tr$tip.label),
+               ". Please make sure you have at least as many isolates in your SNV matrix as you have in your isolate location list."))
+  }
+  #check if the names of the locs isolates are a subset of the names of the dist matrix isolates
+  if(!all(names(locs) %in% tr$tip.label)){
+    stop("Some of the isolates you have provided locations for are not in the SNV distance matrix (dists). Please subset the locs vector to include only isolates in the SNV distance matrix (dists).")
+  }
+  #warn if they will be subsetting??
+  if(!setequal(names(locs), tr$tip.label)){
+    warning("You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
+  }
+}
+
+#check get_clusters mandatory inputs
+check_get_clusters_inputs <- function(tr, locs, pureness, bootstrap){
+  #check that the tree is a tree
+  check_tree(tr)
+  #check the locs input
+  check_locs(locs)
+  #check tr vs. locs
+  check_tr_vs_locs(tr, locs)
+  #check pureness
+  check_pureness(pureness)
+  #check bootstrap
+  check_bootstrap(bootstrap)
+}
 
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR get_clusters FUNCTION*******************************************************#
