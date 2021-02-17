@@ -19,7 +19,7 @@
 
 
 
-#' Title
+#' Get matrix of inter- and intra-facility pariwise snv distances
 #'
 #' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
 #' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID

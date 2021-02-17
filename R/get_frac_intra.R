@@ -3,12 +3,12 @@
 # threshs - what snv thresholds to use #some vector of numbers, max number isn't > max snv distance or negative
 # what if we call it snv_dists? because the other one is getting snv_dists?
 
-#' Title
+#' Get fraction of intra-facility pairs for different snv thresholds
 #'
 #' @param snv_dists the output object of the get_snv_dists function
 #' @param threshs SNV thresholds to use
 #'
-#' @return
+#' @return fraction of intra-facility pairs for different snv thresholds
 #' @export
 #'
 #' @examples
