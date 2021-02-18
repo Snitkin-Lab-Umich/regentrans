@@ -30,7 +30,8 @@ metadata <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_REALM/Analys
 
 #alignment path
 #/nfs/turbo/umms-esnitkin/Project_REALM/Sequence_data/output_files/2020_12_09_variant_calling_ST147/2020_12_11_12_49_38_core_results/gubbins/2020_12_11_12_49_38_Kp46596_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta
-fasta <- ape::read.dna("/Users/sophiehoffman/Desktop/gl_mount/Project_REALM/Sequence_data/output_files/2020_12_09_variant_calling_ST147/2020_12_11_12_49_38_core_results/gubbins/2020_12_11_12_49_38_Kp46596_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta", format = "fasta")
+fasta <- ape::read.dna("/Users/sophiehoffman/Desktop/gl_mount/Project_REALM/Sequence_data/output_files/2020_12_09_variant_calling_ST147/2020_12_11_12_49_38_core_results/gubbins/2020_12_11_12_49_38_Kp46596_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta",
+                       format = "fasta")
 
 
 #tree path
@@ -42,7 +43,7 @@ tree <- ape::read.tree("/Users/sophiehoffman/Desktop/gl_mount/Project_REALM/Sequ
 
 #dists - snv distance matrix returned by dist.dna
 #use as.matrix = true for the dist.dna function
-dists <- dist.dna(x = fasta, as.matrix = TRUE)
+dists <- dist.dna(x = fasta, as.matrix = TRUE, model = "N")
 
 #locs - locations of isolates (e.g. facility of isolation)
 #named vector, where names are same as names of dist.dna output
