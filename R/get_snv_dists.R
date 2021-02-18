@@ -29,7 +29,7 @@
 #' @export
 #'
 #' @examples
-get_snv_dists <- function(dists, locs, pt){
+get_snv_dists <- function(dists, locs, pt = NULL){
   #checks
   check_get_snv_dists_input_no_pt(dists, locs)
 
@@ -41,10 +41,8 @@ get_snv_dists <- function(dists, locs, pt){
   }
 
   #subset by locs
+  #list ones in common before subsetting
   loc_sub <- locs[rownames(dists)]
-
-  #what is this doing?
-  # snps <- dists[lower.tri(dists, diag = FALSE)] <- NA
 
   #make df
   snps <- na.omit(data.frame(as.table(as.matrix(dists))))
