@@ -20,6 +20,15 @@ check_dists <- function(dists){
   if(nrow(dists) < 2){
     stop(paste("Your SNV matrix only has ", nrow(dists), " samples. Please use a SNV distance matrix that includes 2 or more samples"))
   }
+  #check that the data is numeric
+  if(!(all(sapply(dists, class) == "numeric") || all(sapply(dists, class) == "integer"))){
+    stop(paste("The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided an object that does not contain only numeric data, it includes type:",
+               unique(sapply(dists, class))))
+  }
+  #check that all of the data is >= 0
+  if(any(dists < 0)){
+    stop("The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided an object with values < 0")
+  }
 
 }
 
@@ -61,13 +70,13 @@ check_pt <- function(pt, dists){
 #check that samples and lengths of pt and locs vectors are the same
 check_pt_vs_locs <- function(pt, locs){
   #check that there are the same number of samples in the pt vector as in the locs vector
-  #here would I want to subet it myself
+  #where would I want to subet myself?
   if(length(pt) != length(locs)){
-    stop(paste("You have supplied a patient vector of length ", length(pt), " and  location vector of length ", length(locs), ". Please subset these lists so that they have the same number of isolates."))
+    warning(paste("You have supplied a patient vector of length ", length(pt), " and  location vector of length ", length(locs), ". We will subset these lists so that they have the same isolates."))
   }
   #check that the names match between pt and locs
   if(!setequal(names(pt), names(locs))){
-    stop("You have not supplied patient IDs (pt) and locations (locs) for the same samples. Pleasesubset these vectors so that they contain the same isolates.")
+    warning("You have not supplied patient IDs (pt) and locations (locs) for the same samples. We will these vectors so that they contain the same isolates.")
   }
 }
 
@@ -83,6 +92,10 @@ check_dists_vs_locs <- function(dists, locs){
   #check if the names of the locs isolates are a subset of the names of the dist matrix isolates
   if(!all(names(locs) %in% rownames(dists))){
     stop("Some of the isolates you have provided locations for are not in the SNV distance matrix (dists). Please subset the locs vector to include only isolates in the SNV distance matrix (dists).")
+  }
+  #check that there are at least 2 dists and locs in common
+  if(length(intersect(rownames(dists), names(locs))) < 2){
+    stop(paste("You have not provided locations of at least 2 isolates in your SNV distance matrix (dists). Please provide locations for at least 2 isolates in your SNV distance matrix."))
   }
   #warn if they will be subsetting??
   if(!setequal(names(locs), rownames(dists))){
@@ -128,9 +141,9 @@ check_snv_dists <- function(snv_dists){
   }
   #check the colnames
   if(!((ncol(snv_dists) == 8 &&
-        all(colnames(snv_dists) == c("Var1", "Var2", "Pairwise_dists", "loc1", "loc2", "pt1",  "pt2", "intra"))) ||
+        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1",  "Patient2", "Pair_Type"))) ||
        (ncol(snv_dists) == 6 &&
-        all(colnames(snv_dists) == c("Var1", "Var2", "Pairwise_dists", "loc1", "loc2", "intra"))))){
+        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2" "Pair_Type"))))){
     stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has ",
                ncol(snv_dists), " columns that are not the output columns needed."))
   }
@@ -138,7 +151,12 @@ check_snv_dists <- function(snv_dists){
   if(nrow(snv_dists) < 1){
       stop(paste("Your snv_dists input has ", nrow(snv_dists), " facility pairs. Please use an snv_dists input that has 1 or more pairs (rows)"))
   }
-  #is it worth checking the column types?
+  #check pairwise dist column is numeric
+  if(!class(snv_dists$Pairwise_Dists) == "numeric"){
+    stop(paste("Your snv_dists input does not have numeric pairwise distances, you supplied one with type",
+               class(snv_dists$Pairwise_Dists)))
+  }
+
 }
 
 #some vector of numbers, max number isn't > max snv distance or negative
@@ -190,10 +208,15 @@ check_pureness <- function(pureness){
   }
 }
 
-#check bootstrap value is an int value or null for now
+
 check_bootstrap <- function(bootstrap){
+  #check bootstrap value is an int value or null
   if(!(is.null(bootstrap) || typeof(bootstrap) == "double")){
     stop(paste("The bootstrap value must be a double or NULL, you supplied type ", typeof(bootstrap)))
+  }
+  #check that the value is between 0 and 100
+  if(bootstrap < 0 || bootstrap > 100){
+    stop(paste("The bootstrap value must be between 0 and 100, you supplied a value of"), bootstrap)
   }
 }
 

@@ -34,38 +34,45 @@ get_snv_dists <- function(dists, locs, pt = NULL){
   check_get_snv_dists_input_no_pt(dists, locs)
 
   #check pt if it isn't missing
-  if(!missing(pt)){
+  if(!is.null(pt)){
     check_get_snv_dists_input_pt(dists, locs, pt)
-    #subset by pt
-    pt_sub <- pt[rownames(dists)]
+    #subset pt and locs to represent the same isolates,
+    #and make sure we only subset to the rownames dists has in common
+    isolates <- intersect(intersect(names(locs), names(pt)), rownames(dists))
+    #subset pt
+    pt_sub <- pt[isolates]
+  }
+  else{
+    #make the subsetted isolates object if there is no pt
+    isolates <- intersect(names(locs), rownames(dists))
   }
 
   #subset by locs
   #list ones in common before subsetting
-  loc_sub <- locs[rownames(dists)]
+  loc_sub <- locs[isolates]
 
   #make df
   snps <- na.omit(data.frame(as.table(as.matrix(dists))))
   #change freq colname?
-  colnames(snps) <- c("Var1", "Var2", "Pairwise_dists")
+  colnames(snps) <- c("Isolate1", "Isolate2", "Pairwise_Dists")
 
   #add locs
-  snps$loc1 <- loc_sub[snps$Var1]
-  snps$loc2 <- loc_sub[snps$Var2]
+  snps$Loc1 <- loc_sub[snps$Isolate1]
+  snps$Loc2 <- loc_sub[snps$Isolate2]
 
   #do pt stuff
-  if(!missing(pt)){
+  if(!is.null(pt)){
     #add pts
-    snps$pt1 <- pt_sub[snps$Var1]
-    snps$pt2 <- pt_sub[snps$Var2]
+    snps$Patient1 <- pt_sub[snps$Isolate1]
+    snps$Patient2 <- pt_sub[snps$Isolate2]
     #add labels
-    snp_facility_pairs <- bind_cols(snps %>% filter(pt1 != pt2) %>% mutate(intra=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
+    snp_facility_pairs <- bind_cols(snps %>% filter(Patient1 != Patient2) %>% mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
   }
   else{
     #add labels
     #old code without subset
     #snp_facility_pairs <- bind_cols(snps %>% mutate(intra=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
-    snp_facility_pairs <- bind_cols(snps %>% mutate(intra=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')) %>% filter(!is.na(intra)))
+    snp_facility_pairs <- bind_cols(snps %>% mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
   }
   #return snp matrix
   return(snp_facility_pairs)

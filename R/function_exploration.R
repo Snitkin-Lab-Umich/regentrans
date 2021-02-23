@@ -59,6 +59,7 @@ rownames(dists) <- substr(rownames(dists), 1, nchar(rownames(dists))-1)
 colnames(dists) <- substr(colnames(dists), 1, nchar(colnames(dists))-1)
 #run the function
 snv_dists <- get_snv_dists(dists, locs, pt)
+snv_dist_no_pt <- get_snv_dists(dists, locs)
 
 #############################################################################################################################################
 #get_frac_intra
@@ -80,7 +81,6 @@ locs_sub <-locs_sub[!is.na(locs_sub)]
 
 #############################################################################################################################################
 #get_facility_fsp
-snp_dist <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Nursing_Home/Sequence_data/final_genomics_files/2019-07-19_Filtered_Pathways_VREfm", sep = " ", header = FALSE, skip = 1)
-#what are the dimensions? Is that what the first line of the file is?
-dim(snp_dist)
+#want to use fasta object I think
+snp_dist <- dists
 
