@@ -7,14 +7,25 @@
 #'
 #' @param snv_dists the output object of the get_snv_dists function
 #' @param threshs SNV thresholds to use
+#' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
+#' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
+#' @param pt a named vector of patient that isolate was taken from with the name being sample ID (optional)
 #'
 #' @return fraction of intra-facility pairs for different snv thresholds
 #' @export
 #'
-#' @examples
-get_frac_intra <- function(snv_dists, threshs = seq(1,50,1)){
-  #check inputs
-  check_get_frac_intra_input(snv_dists, threshs)
+#' @examples either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
+get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, threshs = seq(1,50,1)){
+
+  #if there is a snv_dists input, check inputs
+  if(!is.null(snv_dists)){
+    check_get_frac_intra_input(snv_dists, threshs)
+  }
+  else{
+    #if there isn't run get_snv_dists
+    snv_dists <- get_snv_dists(dists, locs, pt)
+    check_threshs(threshs, snv_dists)
+  }
 
   intra_cts <- t(sapply(threshs, function(i){
     intra <- snv_dists$intra[snv_dists$Pairwise_dists < i & !is.na(snv_dists$intra)]

@@ -13,7 +13,7 @@
 #' @param pureness how pure each cluster should be (must be > 0.5) (optional, defauly = 1)
 #' @param bootstrap Bootstrap support to use to filter unconfident tree edges (optional, default = NULL)
 #'
-#' @return data.frame of facility clusters on phylogeny
+#' @return data.frame of facility clusters on phylogeny. Index indicates which element that cluster is in the list of subtrees. NA indicates it is not part of a subtree.
 #' @export
 #'
 #' @examples
@@ -21,16 +21,28 @@ get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){ # pureness s
   #check inputs
   check_get_clusters_inputs(tr, locs, pureness, bootstrap)
 
-  locs_sub <- locs[tr$tip.label]
+  #get the names of the things in common
+  isolates <- intersect(tr$tip.label, names(locs))
+
+  locs_sub <- locs[isolates]
   subtrs_sub <- ape::subtrees(tr)
   pure_subtrees <- get_largest_subtree(subtrs = subtrs_sub, isolate_labels = locs_sub, bootstrap = bootstrap, pureness = pureness) # NOTE: this function is in snitkitr right now, but I think we should migrate it to this package (or at least include it here as well); this _might_ be buggy, so definitely good to add unit tests for it
   pure_subtr_info <- bind_cols(f_id=locs_sub,
                                subtr_size=unlist(pure_subtrees$largest_st),
-                               index=unlist(pure_subtrees$largest_st_i))
+                               index=unlist(pure_subtrees$largest_st_i),
+                               isolate_name=names(locs_sub))
   # change singletons from 0 to 1
   pure_subtr_info <- pure_subtr_info %>% mutate(subtr_size=ifelse(subtr_size==0 & index == 1, 1, subtr_size))
   # remove duplicates (singletons aren't duplicates)
   pure_subtr_info <- pure_subtr_info[!duplicated(pure_subtr_info) | pure_subtr_info$subtr_size == 1,]
+  # change index from 1 to NA
+  pure_subtr_info <- pure_subtr_info %>% mutate(index=ifelse(index==1, NA, index))
+  #add a column to indicate the isolate name if the index = NA
+  pure_subtr_info <- pure_subtr_info %>% mutate(isolate_name=ifelse(is.na(index), isolate_name, " "))
+
+  #potential returns if we want to return subtrees too
+  #returns <- list("pure_subtree_info" = pure_subtr_info, "subtrees" = pure_subtrees, "cluster_pureness" = pureness)
+
   return(pure_subtr_info=pure_subtr_info) #maybe add pureness of cluster?
 }
 
