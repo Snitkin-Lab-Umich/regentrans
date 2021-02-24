@@ -82,5 +82,5 @@ locs_sub <-locs_sub[!is.na(locs_sub)]
 #############################################################################################################################################
 #get_facility_fsp
 #want to use fasta object I think
-snp_dist <- dists
+rownames(fasta) <- substr(rownames(fasta), 1, nchar(rownames(fasta))-1)
 

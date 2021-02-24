@@ -257,4 +257,39 @@ check_get_clusters_inputs <- function(tr, locs, pureness, bootstrap){
 #***********************************************END CHECKS FOR get_clusters FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
 #############################################################################################################################################
+#############################################################################################################################################
+#*******************************************************************************************************************************************#
+#***********************************************START CHECKS FOR get_facility_fsp FUNCTION*****************************************************#
+#*******************************************************************************************************************************************#
+#check that the fasta file is a dna bin object
+check_dna_bin <- function(fasta){
+  if(class(fasta) != "DNAbin"){
+    stop(paste("The fasta object must be of class DNAbin, you have supplied an object of class ",
+               class(fasta)))
+  }
+}
+
+#make sure there are at least two rownames in the fasta that match rownames in the
+check_fasta_vs_locs <- function(fasta, locs){
+  #check that there are at least 2 names of locs represented by rownames in the fasta for subsetting
+  if(length(intersect(rownames(fasta), names(locs))) < 2){
+    stop("Please provde a fasta object and locs object with at least two samples in common")
+  }
+}
+
+#do I need to check something here about how they are related? Its just confusing because how do they know what facility??
+check_facility_fsp <- function(fasta, locs){
+  #check fasta
+  check_dna_bin(fasta)
+  #check locs
+  check_locs(locs)
+  #check fasta vs locs
+  check_fasta_vs_locs(fasta, locs)
+}
+
+
+#*******************************************************************************************************************************************#
+#***********************************************END CHECKS FOR get_facility_fsp FUNCTION*******************************************************#
+#*******************************************************************************************************************************************#
+#############################################################################################################################################
 

@@ -8,8 +8,8 @@
 
 #' Make facility x facility matrix with Fsp values. Calculates fst as described in Donker et al. 2017
 #'
-#' @param snp_dist ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta(?)
-#' @param facil locations names for pairwise comparison
+#' @param snp_dist ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
+#' @param locs locations names for pairwise comparison
 #'
 #' @return matrix of facility x facility matrix with Fsp values
 #' @export
@@ -17,19 +17,32 @@
 #' @examples
 
 
-donker_facility_fst <- function(dists, locs){
-
-  #subset the snp_dist matrix to be just the rows and columns that are in locs
-  dists <- dists[names(locs),names(locs)]
-
-  sample_locs = unname(locs)
+get_facility_fsp <- function(fasta, locs){
+  #check the DNAbin object and locs
+  check_facility_fsp(fasta, locs)
+  #make a list of the ones they have in common for subsetting
+  isolates <- intersect(names(locs), rownames(fasta))
+  #subset the DNAbin object to the samples they have in common
+  fasta<-fasta[isolates,]
+  #subset the locs object to the samples they have in common
+  locs <- locs[isolates]
+  #order the locs object to match the order of rownames of the fasta
+  locs <- locs[order(match(names(locs),rownames(fasta)))]
+  #change the rownames of the fasta to the location names
+  rownames(fasta) <- unname(locs)
+  #make a list of the location names
+  sample_locs = rownames(fasta)
+  #unique list of locations
+  locs = unique(unname(locs))
 
   #CALCULATE INTRA- AND INTER-FACILITY DISTANCE
   facil_dist = matrix(0, ncol = length(locs), nrow = length(locs), dimnames = list(locs, locs))
-  for(f1 in unname(locs)){
-    for(f2 in unname(locs)){
+  for(f1 in locs){
+    for(f2 in locs){
       if (f1 == f2) {next}
-      subset_snp_mat = dists[sample_locs %in% c(f1, f2), ]
+      #subset fasta file to just that those locations
+      subset_snp_mat = fasta[sample_locs %in% c(f1, f2), ]
+      #columns
       subset_snp_mat = subset_snp_mat[,apply(subset_snp_mat, 2, FUN = function(x){sum(x != x[1] | x == 'N') > 0})]
       subset_f1 = rownames(subset_snp_mat) %in% f1 #substr(sapply(rownames(subset_snp_mat), FUN = function(x){strsplit(x, "-")[[1]][2]}), 1, 1) %in% f1
       subset_f2 = rownames(subset_snp_mat) %in% f2 #substr(sapply(rownames(subset_snp_mat), FUN = function(x){strsplit(x, "-")[[1]][2]}), 1, 1) %in% f2
@@ -67,9 +80,8 @@ donker_facility_fst <- function(dists, locs){
       within_f2_sum = sum(within_f2)
       Fsp = (((within_f1_sum + within_f2_sum) / 2) - between_sum) / ((within_f1_sum + within_f2_sum) / 2)
       facil_dist[f1,f2] = Fsp
-    }#end for #1
-    print(f1)
-  }#end for #2
+    }#end loop 1
+  }#end loop 2
     return(facil_dist);
 }#end facility_fst
 
@@ -87,9 +99,11 @@ donker_facility_fst <- function(dists, locs){
   # {
   #
   #   # SUBSET SAMPLES BASED ON FACILITY
+  #   #gets list of facility IDs from the rownames of the snp_dist matrix
   #   sample_facil = substr(sapply(rownames(snp_dist), FUN = function(x){strsplit(x, "-")[[1]][2]}), 1, 1)
   #
   #   #CALCULATE INTRA- AND INTER-FACILITY DISTANCE
+  #   #makes empty data frame of facility x facility
   #   facil_dist = matrix(0, ncol = length(facil), nrow = length(facil), dimnames = list(facil, facil))
   #
   #   for(f1 in facil)
