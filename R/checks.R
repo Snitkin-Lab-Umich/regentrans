@@ -143,7 +143,7 @@ check_snv_dists <- function(snv_dists){
   if(!((ncol(snv_dists) == 8 &&
         all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1",  "Patient2", "Pair_Type"))) ||
        (ncol(snv_dists) == 6 &&
-        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2" "Pair_Type"))))){
+        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type"))))){
     stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has ",
                ncol(snv_dists), " columns that are not the output columns needed."))
   }
