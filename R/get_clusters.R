@@ -46,4 +46,4 @@ get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){ # pureness s
   return(pure_subtr_info=pure_subtr_info) #maybe add pureness of cluster?
 }
 
-#what does the output mean here? how would I plot it?
+
