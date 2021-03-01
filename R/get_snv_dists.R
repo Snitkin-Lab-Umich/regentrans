@@ -31,11 +31,10 @@
 #' @examples
 get_snv_dists <- function(dists, locs, pt = NULL){
   #checks
-  check_get_snv_dists_input_no_pt(dists, locs)
+  check_get_snv_dists_input(dists, locs, pt)
 
   #check pt if it isn't missing
   if(!is.null(pt)){
-    check_get_snv_dists_input_pt(dists, locs, pt)
     #subset pt and locs to represent the same isolates,
     #and make sure we only subset to the rownames dists has in common
     isolates <- intersect(intersect(names(locs), names(pt)), rownames(dists))
@@ -51,8 +50,11 @@ get_snv_dists <- function(dists, locs, pt = NULL){
   #list ones in common before subsetting
   loc_sub <- locs[isolates]
 
+  #subset dists to isolates
+  dists_sub <- dists[isolates, isolates]
+
   #make df
-  snps <- na.omit(data.frame(as.table(as.matrix(dists))))
+  snps <- na.omit(data.frame(as.table(as.matrix(dists_sub))))
   #change freq colname?
   colnames(snps) <- c("Isolate1", "Isolate2", "Pairwise_Dists")
 
@@ -70,8 +72,6 @@ get_snv_dists <- function(dists, locs, pt = NULL){
   }
   else{
     #add labels
-    #old code without subset
-    #snp_facility_pairs <- bind_cols(snps %>% mutate(intra=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
     snp_facility_pairs <- bind_cols(snps %>% mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
   }
   #return snp matrix

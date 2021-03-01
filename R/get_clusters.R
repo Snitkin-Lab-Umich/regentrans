@@ -13,7 +13,7 @@
 #' @param pureness how pure each cluster should be (must be > 0.5) (optional, defauly = 1)
 #' @param bootstrap Bootstrap support to use to filter unconfident tree edges (optional, default = NULL)
 #'
-#' @return data.frame of facility clusters on phylogeny. Index indicates which element that cluster is in the list of subtrees. NA indicates it is not part of a subtree.
+#' @return list where pure_subtree_info is a data.frame of facility clusters on phylogeny, index indicates which element that cluster is in the list of subtrees, NA indicates it is not part of a subtree; subtrees is an object of the actual subtrees (can be used for plotting);cluster_pureness is the purness of each cluster
 #' @export
 #'
 #' @examples
@@ -41,9 +41,9 @@ get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){ # pureness s
   pure_subtr_info <- pure_subtr_info %>% mutate(isolate_name=ifelse(is.na(index), isolate_name, " "))
 
   #potential returns if we want to return subtrees too
-  #returns <- list("pure_subtree_info" = pure_subtr_info, "subtrees" = pure_subtrees, "cluster_pureness" = pureness)
+  returns <- list("pure_subtree_info" = pure_subtr_info, "subtrees" = pure_subtrees, "cluster_pureness" = pureness)
 
-  return(pure_subtr_info=pure_subtr_info) #maybe add pureness of cluster?
+  return(returns)
 }
 
 

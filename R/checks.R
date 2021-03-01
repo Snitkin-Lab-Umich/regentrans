@@ -58,12 +58,9 @@ check_pt <- function(pt, dists){
     stop(paste("You have only supplied patient IDs for "), length(locs),
          " isolates. Please supply a named vector of patient IDs for at least 2 isolates")
   }
-  #check that there are less than or equal to the number of samples in the vector than in the dists matrix
-  if(length(pt) > nrow(dists)){
-    stop(paste("You have supplied a list of more isolates (n = ", length(locs),
-               ") with locations than exist in your SNV distance matrix (n = ",
-               nrow(dists),
-               ". Please make sure you have at least as many isolates in your SNV matrix as you have in your isolate location list."))
+  #check that there are at least 2 dists and locs in common
+  if(length(intersect(rownames(dists), names(pt))) < 2){
+    stop(paste("You have not provided patient IDs for at least 2 isolates in your SNV distance matrix (dists). Please provide patient IDs for at least 2 isolates in your SNV distance matrix."))
   }
 }
 
@@ -84,14 +81,10 @@ check_pt_vs_locs <- function(pt, locs){
 check_dists_vs_locs <- function(dists, locs){
   #check that there are less than or equal to the number of samples in the vector than in the dists matrix
   if(length(locs) > nrow(dists)){
-    stop(paste("You have supplied a list of more isolates (n = ", length(locs),
+    warning(paste("You have supplied a list of more isolates (n = ", length(locs),
                ") with locations than exist in your SNV distance matrix (n = ",
                nrow(dists),
-               ". Please make sure you have at least as many isolates in your SNV matrix as you have in your isolate location list."))
-  }
-  #check if the names of the locs isolates are a subset of the names of the dist matrix isolates
-  if(!all(names(locs) %in% rownames(dists))){
-    stop("Some of the isolates you have provided locations for are not in the SNV distance matrix (dists). Please subset the locs vector to include only isolates in the SNV distance matrix (dists).")
+               "). Will subset"))
   }
   #check that there are at least 2 dists and locs in common
   if(length(intersect(rownames(dists), names(locs))) < 2){
@@ -103,22 +96,22 @@ check_dists_vs_locs <- function(dists, locs){
   }
 }
 
-#wrapper for if pt is included
-check_get_snv_dists_input_pt <- function(dists, locs, pt){
-  #check that the pt object is a named vector
-  check_pt(pt, dists)
-  #check that the pt and dists objects have the same lengths
-  check_pt_vs_locs(pt, locs)
-}
-
-#wrapper function if pt not included
-check_get_snv_dists_input_no_pt <- function(dists, locs){
+#wrapper for input to snv_dists
+check_get_snv_dists_input <- function(dists, locs, pt){
+  #check everything that is common (aka no pt) first
   #check that the dists object is the snv object returned by dist.dna
   check_dists(dists)
   #check that the locs object is a named vector
   check_locs(locs)
   #check that the locs names exist in the dists dataframe
   check_dists_vs_locs(dists, locs)
+  #if there is a pt
+  if(!is.null(pt)){
+    #check that the pt object is a named vector
+    check_pt(pt, dists)
+    #check that the pt and dists objects have the same lengths
+    check_pt_vs_locs(pt, locs)
+  }
 }
 
 #*******************************************************************************************************************************************#
@@ -271,11 +264,23 @@ check_dna_bin <- function(fasta){
 
 #make sure there are at least two rownames in the fasta that match rownames in the
 check_fasta_vs_locs <- function(fasta, locs){
+  common_isolates <- intersect(rownames(fasta), names(locs))
   #check that there are at least 2 names of locs represented by rownames in the fasta for subsetting
-  if(length(intersect(rownames(fasta), names(locs))) < 2){
+  if(length(common_isolates) < 2){
     stop("Please provde a fasta object and locs object with at least two samples in common")
   }
+  #warn if they are subsetting based on hospitals having less than 2 isolates
+  if(any(table(locs[locs %in% common_isolates]) < 1)){
+    warning(paste("You have provided at least one isolate that is the only one in its location. Will subset to exclude location ",
+                  which(unlist(table(locs) <= 1))))
+  }
+  #check that at least two of the locs that the fasta and locs have in common appear more than once
+  if(length(which(unlist(table(locs[locs %in% common_isolates]) > 1))) < 2){
+    stop("Please provide isolates that appear hospitals at least once")
+  }
 }
+
+
 
 #do I need to check something here about how they are related? Its just confusing because how do they know what facility??
 check_facility_fsp <- function(fasta, locs){
