@@ -73,6 +73,13 @@ names(locs) <- paste0("PCMP_H", metadata$isolate_no)
 pt <- metadata$patient_id
 names(pt) <- paste0("PCMP_H", metadata$isolate_no)
 ##########################################################
+##################github data prep
+##########################################################
+Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input.rds")
+locs <- Penn_test_input$locs
+pt <- Penn_test_input$pt
+fasta <- Penn_test_input$fasta
+dists <- Penn_test_input$dists
 
 #############################################################################################################################################
 #prep for the get_snv_dists function
