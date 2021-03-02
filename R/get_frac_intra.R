@@ -17,25 +17,23 @@
 #' @examples either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
 get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, threshs = seq(1,50,1)){
 
-  #if there is a snv_dists input, check inputs
-  if(!is.null(snv_dists)){
-    check_get_frac_intra_input(snv_dists, threshs)
-  }
-  else{
-    #if there isn't run get_snv_dists
-    snv_dists <- get_snv_dists(dists, locs, pt)
-    check_threshs(threshs, snv_dists)
+  #make one check
+  run_snv_dists <- check_get_frac_intra_input(snv_dists = snv_dists, threshs = threshs, dists = dists, locs = locs, pt = pt)
+
+  if(run_snv_dists){
+    cat("Running get_snv_dists...")
+    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
   }
 
   intra_cts <- t(sapply(threshs, function(i){
-    intra <- snv_dists$intra[snv_dists$Pairwise_dists < i & !is.na(snv_dists$intra)]
+    intra <- snv_dists$Pair_Type[snv_dists$Pairwise_Dists < i]
     im <- c(i,
             table(factor(intra,levels=c('Intra-facility pair','Inter-facility pair'))),
             round(mean(intra == 'Intra-facility pair'),2),
             round(mean(intra == 'Inter-facility pair'),2))
-    names(im) <- c('thresh','inter','intra','frac_intra','frac_inter')
     im
   }))
+  colnames(intra_cts) <- c('Thresh','n_Inter','n_Intra','Frac_Intra','Frac_Inter')
   return(data.frame(intra_cts))
 }
 

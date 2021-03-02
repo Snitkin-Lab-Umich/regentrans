@@ -140,7 +140,7 @@ check_snv_dists <- function(snv_dists){
     stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has ",
                ncol(snv_dists), " columns that are not the output columns needed."))
   }
-  #check that there are at least one row
+  #check that there is at least one row
   if(nrow(snv_dists) < 1){
       stop(paste("Your snv_dists input has ", nrow(snv_dists), " facility pairs. Please use an snv_dists input that has 1 or more pairs (rows)"))
   }
@@ -160,8 +160,8 @@ check_threshs <- function(threshs, snv_dists){
   }
   #check that max number isn't > max snv distance or negative
   #we are not meeting this condition right now so I will just throw a warning
-  if(!max(threshs) <= max(snv_dists$Pairwise_dists)){
-    stop(paste("Your max threshold ", max(threshs), " is greater than your max CNV distance of ", max(snv_dists$Pairwise_dists),
+  if(!max(threshs) <= max(snv_dists$Pairwise_Dists)){
+    stop(paste("Your max threshold ", max(threshs), " is greater than your max CNV distance of ", max(snv_dists$Pairwise_Dists),
                   "If you are using the default thereshold input, please enter a numeric vector of thresholds"))
   }
   if(any(threshs < 0)){
@@ -169,11 +169,25 @@ check_threshs <- function(threshs, snv_dists){
   }
 }
 
-check_get_frac_intra_input <- function(snv_dists, threshs){
+check_get_frac_intra_input <- function(snv_dists, threshs, dists, locs, pt){
+  #if SNV_dists doesnt exist and they didn't input locs and dists
+  if(is.null(snv_dists) & is.null(dists) & is.null(locs)){
+    stop("Please provide either an SNV dists matrix or dists and locs objecst so we can generate one for you.")
+  }
+  #make the SNV dists object if it needs to be made
+  if(is.null(snv_dists)){
+    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
+    run_snv_dists <- TRUE
+  }
+  else{
+    run_snv_dists <- FALSE
+  }
   #checks snv_dists input
   check_snv_dists(snv_dists)
   #check threshs input
   check_threshs(threshs, snv_dists)
+  #return the snv_dists made
+  return(run_snv_dists)
 }
 
 #*******************************************************************************************************************************************#
@@ -208,7 +222,7 @@ check_bootstrap <- function(bootstrap){
     stop(paste("The bootstrap value must be a double or NULL, you supplied type ", typeof(bootstrap)))
   }
   #check that the value is between 0 and 100
-  if(bootstrap < 0 || bootstrap > 100){
+  if((bootstrap < 0 || bootstrap > 100) && !is.null(bootstrap)){
     stop(paste("The bootstrap value must be between 0 and 100, you supplied a value of"), bootstrap)
   }
 }
@@ -275,7 +289,7 @@ check_fasta_vs_locs <- function(fasta, locs){
                   which(unlist(table(locs) <= 1))))
   }
   #check that at least two of the locs that the fasta and locs have in common appear more than once
-  if(length(which(unlist(table(locs[locs %in% common_isolates]) > 1))) < 2){
+  if(length(which(unlist(table(locs[names(locs) %in% common_isolates]) > 1))) < 2){
     stop("Please provide isolates that appear hospitals at least once")
   }
 }
