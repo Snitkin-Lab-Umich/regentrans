@@ -79,11 +79,12 @@ source("/Users/sophiehoffman/Desktop/regentrans/R/get_facility_fsp.R")
 ##########################################################
 ##################github data prep
 ##########################################################
-Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input.rds")
+Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input_2.rds")
 locs <- Penn_test_input$locs
 pt <- Penn_test_input$pt
 fasta <- Penn_test_input$fasta
 dists <- Penn_test_input$dists
+tr <- Penn_test_input$tr
 
 #############################################################################################################################################
 #prep for the get_snv_dists function
@@ -119,4 +120,6 @@ cluster_pureness <- clusters$cluster_pureness
 #############################################################################################################################################
 #get_facility_fsp
 fsp <- get_facility_fsp(fasta,locs)
+#save this output just because its such a pain to generate
+write.csv(fsp, "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_Fsp_output")
 

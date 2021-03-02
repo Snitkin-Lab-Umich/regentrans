@@ -60,10 +60,10 @@ get_facility_fsp <- function(fasta, locs){
         #skip multi-allelic sites
         if (length(alleles) > 2){0} else{
           #find allele frequency for each allele at each site
-          f1_allele1 = allele_freq_btwn(x, subset_f1, 1)
-          f1_allele2 = allele_freq_btwn(x, subset_f1, 2)
-          f2_allele1 = allele_freq_btwn(x, subset_f2, 1)
-          f2_allele2 = allele_freq_btwn(x, subset_f2, 2)
+          f1_allele1 = allele_freq_btwn(x, subset_f1, 1, alleles)
+          f1_allele2 = allele_freq_btwn(x, subset_f1, 2, alleles)
+          f2_allele1 = allele_freq_btwn(x, subset_f2, 1, alleles)
+          f2_allele2 = allele_freq_btwn(x, subset_f2, 2, alleles)
           #calculate between pop variation for each allele site?
           f1_allele1 * f1_allele2 * f2_allele1 * f2_allele2}
       })
@@ -86,11 +86,11 @@ get_facility_fsp <- function(fasta, locs){
 
 
 #find allele frequency for each allele at each site
-allele_freq_btwn <- function(x, subset, allele_n){
+allele_freq_btwn <- function(x, subset, allele_n, alleles){
   return(sum(as.character(x)[subset] %in% alleles[allele_n])/sum(subset))
 }
 
-allele_freq_within <- function(x, allele_n){
+allele_freq_within <- function(x, allele_n, alleles){
   return(sum(as.character(x) %in% alleles[allele_n])/length(x))
 }
 
@@ -99,8 +99,8 @@ within_pop_var <- function(subset_snp_mat, subset){
   within_f = apply(f_subset_snp_mat, 2, FUN = function(x){
     alleles = names(table(as.character(x)))
     if (length(alleles) > 2){0}else{
-      f_allele1 = allele_freq_within(x, 1)
-      f_allele2 = allele_freq_within(x, 2)
+      f_allele1 = allele_freq_within(x, 1, alleles)
+      f_allele2 = allele_freq_within(x, 2, alleles)
 
       (f_allele1 * f_allele2)^2}
   })
@@ -142,23 +142,23 @@ within_pop_var <- function(subset_snp_mat, subset){
 #       subset_f2 = rownames(subset_snp_mat) %in% f2
 #       #BETWEEN POPLUATION VARIATION
 #       #loop over columns (variants)
-#       between = apply(subset_snp_mat, 2, FUN = function(x){
-#         #get alleles present at the site
-#         alleles = names(table(as.character(x)))
-#         #skip multi-allelic sites
-#         if (length(alleles) > 2){0} else{
-#           #find allele frequency for each allele at each site
-#           #make function to call x4
-#           # f1_allele1 = sum(as.character(x)[subset_f1] %in% alleles[1])/sum(subset_f1)
-#           # f1_allele2 = sum(as.character(x)[subset_f1] %in% alleles[2])/sum(subset_f1)
-#           # f2_allele1 = sum(as.character(x)[subset_f2] %in% alleles[1])/sum(subset_f2)
-#           # f2_allele2 = sum(as.character(x)[subset_f2] %in% alleles[2])/sum(subset_f2)
-#           f1_allele1 = allele_freq_btwn(x, subset_f1, 1)
-#           f1_allele2 = allele_freq_btwn(x, subset_f1, 2)
-#           f2_allele1 = allele_freq_btwn(x, subset_f2, 1)
-#           f2_allele2 = allele_freq_btwn(x, subset_f2, 2)
-#           f1_allele1 * f1_allele2 * f2_allele1 * f2_allele2}
-#       })
+      between = apply(subset_snp_mat, 2, FUN = function(x){
+        #get alleles present at the site
+        alleles = names(table(as.character(x)))
+        #skip multi-allelic sites
+        if (length(alleles) > 2){0} else{
+          #find allele frequency for each allele at each site
+          #make function to call x4
+          f1_allele1 = sum(as.character(x)[subset_f1] %in% alleles[1])/sum(subset_f1)
+          f1_allele2 = sum(as.character(x)[subset_f1] %in% alleles[2])/sum(subset_f1)
+          f2_allele1 = sum(as.character(x)[subset_f2] %in% alleles[1])/sum(subset_f2)
+          f2_allele2 = sum(as.character(x)[subset_f2] %in% alleles[2])/sum(subset_f2)
+          # f1_allele1 = allele_freq_btwn(x, subset_f1, 1)
+          # f1_allele2 = allele_freq_btwn(x, subset_f1, 2)
+          # f2_allele1 = allele_freq_btwn(x, subset_f2, 1)
+          # f2_allele2 = allele_freq_btwn(x, subset_f2, 2)
+          f1_allele1 * f1_allele2 * f2_allele1 * f2_allele2}
+      })
 #       #sum
 #       between_sum = sum(between)
 #       #WITHIN POPULATION 1 VARIATION
