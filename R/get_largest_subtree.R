@@ -2,7 +2,7 @@
 #'
 #' @param subtrs Subtrees created using ape::subtrees to look for clustering on. Should include all isolates of interest.
 #' @param isolate_labels Named vector of labels by which pure clusters are defined. Names must be equivalent to tree tip label names.
-#' @param control_labels Named vector of labels known to cluster. Names must be equivalent to tree tip label names. This controls for clustering by requiring that the pure clusters must contain multiple of the control labels. 
+#' @param control_labels Named vector of labels known to cluster. Names must be equivalent to tree tip label names. This controls for clustering by requiring that the pure clusters must contain multiple of the control labels.
 #' @param bootstrap Bootstrap support to use to filter unconfident tree edges (keeps > bootstrap; NULL = keep all; default: 90).
 #' @param pureness How pure the subtree has to be to call it a "pure" subtree (default: 1; range 0-1).
 #'
@@ -10,11 +10,14 @@
 #' @export
 #'
 get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, bootstrap = 90, pureness = 1){
+  #checks
+  check_get_largest_subtree_input(subtrs, isolate_labels, control_labels, bootstrap, pureness)
+
   largest_st_info = future.apply::future_lapply(names(isolate_labels), function(i){
-    #DETERMINE THE LARGEST CLUSTER WHICH EACH ISOLATE BELONGS TO. 
+    #DETERMINE THE LARGEST CLUSTER WHICH EACH ISOLATE BELONGS TO.
     #CLUSTERS ARE DEFINED AS:
     # 1) HAVE ONLY A SINGLE EPI LABEL, 2) HAVE BOOTSTRAP SUPPORT GREATER THAN 90, 3) INCLUDE MORE THAN ONE CONTROL LABEL
-    sts = future.apply::future_sapply(subtrs, FUN = function(st){ 
+    sts = future.apply::future_sapply(subtrs, FUN = function(st){
       i_in_subtree = sum(grepl(i, st$tip.label, perl = TRUE)) > 0 # isolate is in subtree
       st_labs <- isolate_labels[intersect(st$tip.label, names(isolate_labels))]
       one_label = length(unique(st_labs)) == 1 # only one label in subtree
@@ -30,7 +33,7 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, boo
       }
       multiple_control = ifelse(is.null(control_labels), TRUE, # always true if not controlling for another variable
                                 length(unique(control_labels[intersect(st$tip.label, names(control_labels))])) > 1) # more than one control label in subtree
-      if(i_in_subtree && one_label && good_bootstrap && multiple_control && isolate_labels[i] == labs_max_lab){ 
+      if(i_in_subtree && one_label && good_bootstrap && multiple_control && isolate_labels[i] == labs_max_lab){
         length(intersect(names(isolate_labels[isolate_labels == labs_max_lab]), st$tip.label))
       }else{
         0
