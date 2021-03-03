@@ -62,7 +62,7 @@ source("/Users/sophiehoffman/Desktop/regentrans/R/get_facility_fsp.R")
 #alignment path Penn
 #/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta
 #fasta <- ape::read.dna("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta",
-                       format = "fasta")
+#                       format = "fasta")
 
 #tree path Penn
 #/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile
@@ -121,5 +121,5 @@ cluster_pureness <- clusters$cluster_pureness
 #get_facility_fsp
 fsp <- get_facility_fsp(fasta,locs)
 #save this output just because its such a pain to generate
-write.csv(fsp, "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_Fsp_output")
+#write.csv(fsp, "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_Fsp_output.csv", row.names = TRUE, col.names = TRUE, quote = FALSE)
 

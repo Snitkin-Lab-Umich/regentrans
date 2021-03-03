@@ -1,5 +1,5 @@
 #checks for regentrans inputs
-
+#########################################################get_snv_dists####################################################################################
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_snv_dists FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
@@ -36,7 +36,7 @@ check_dists <- function(dists){
 check_locs <- function(locs){
   #check that the locs object is a named vector
   #if it is not a vector or has no names then not good (check both of these in tests)
-  if(!(is.vector(locs)) | is.null(names(locs))){
+  if(!(is.vector(locs)) || is.null(names(locs))){
     stop("The locs object must be a a named list of locations named by sample IDs")
   }
   #check that the locs object has at least 2 items
@@ -117,7 +117,7 @@ check_get_snv_dists_input <- function(dists, locs, pt){
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR get_snv_dists FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
-#############################################################################################################################################
+#########################################################get_frac_intra####################################################################################
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_frac_intra FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
@@ -193,7 +193,7 @@ check_get_frac_intra_input <- function(snv_dists, threshs, dists, locs, pt){
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR get_frac_intra FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
-#############################################################################################################################################
+#########################################################get_clusters####################################################################################
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_clusters FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
@@ -263,8 +263,7 @@ check_get_clusters_inputs <- function(tr, locs, pureness, bootstrap){
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR get_clusters FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
-#############################################################################################################################################
-#############################################################################################################################################
+#########################################################get_facility_fsp####################################################################################
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_facility_fsp FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
@@ -310,5 +309,136 @@ check_facility_fsp <- function(fasta, locs){
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR get_facility_fsp FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
-#############################################################################################################################################
+##########################################################allele_freq functions####################################################################################
+#*******************************************************************************************************************************************#
+#***********************************************START CHECKS FOR allele_freq functions FUNCTION*****************************************************#
+#*******************************************************************************************************************************************#
+check_allele_freq_input <- function(x, subset, allele_n, alleles){
+  #one option for allele_freq_between where subset !null
+  #check x
+  if(!(class(x) == "DNAbin" || class(x) == "raw")){
+    stop(paste("The x you have provided is not a DNAbin, you provided a"),
+         class(x))
+  }
+  #check allele_n is either 1 or 2
+  if(!(allele_n == 1 || allele_n == 2)){
+    stop(paste("the allele_n value you have provided must be 1 or 2, you have provided",
+               allele_n))
+  }
 
+  #check alleles is character vector of length two
+  if(!(class(alleles) == "character" && length(alleles) == 2)){
+    stop(paste("the alleles vector must be a character vector of length 2"))
+  }
+
+  #one option for allele_freq_within where subset !null
+  #check subset
+  if(!is.null(subset)){
+    #check subset
+    if(class(subset) != "logical"){
+      stop(paste("The subset vector you have provided is not logical, you provided a",
+                 class(subset)))
+    }
+  }
+
+}
+#*******************************************************************************************************************************************#
+#***********************************************END CHECKS FOR allele_freq functions FUNCTION*******************************************************#
+#*******************************************************************************************************************************************#
+
+##########################################################within_pop_var####################################################################################
+#*******************************************************************************************************************************************#
+#***********************************************START CHECKS FOR within_pop_var functions FUNCTION*****************************************************#
+#*******************************************************************************************************************************************#
+within_pop_var_input_checks <- function(subset_snp_mat, subset){
+  #check subset
+  if(class(subset) != "logical"){
+    stop(paste("The subset vector you have provided is not logical, you provided a",
+               class(subset)))
+  }
+  #check subset_snp_mat is DNAbin
+  if(!(class(subset_snp_mat) == "DNAbin" || class(subset_snp_mat) == "raw")){
+    stop(paste("The subset_snp_mat you have provided is not a DNAbin, you provided a"),
+         class(x))
+  }
+
+}
+#*******************************************************************************************************************************************#
+#***********************************************END CHECKS FOR within_pop_var FUNCTION*******************************************************#
+#*******************************************************************************************************************************************#
+
+#########################################################reverse_list_str####################################################################################
+#*******************************************************************************************************************************************#
+#***********************************************START CHECKS FOR reverse_list_str FUNCTION*****************************************************#
+#*******************************************************************************************************************************************#
+check_reverse_list_str_input <- function(ls){
+  #check that it is a list
+  if(class(ls) != "list"){
+    stop(paste("The ls object must be a list but you provided:",
+               class(dists)))
+  }
+  #check that the elemets of the lists are lists
+  if(!all(unname(sapply(ls, class)) == "list")){
+    stop(paste("The ls object must be a list of lists but you provided at lease one element that is not a list"))
+  }
+}
+#*******************************************************************************************************************************************#
+#***********************************************END CHECKS FOR reverse_list_str FUNCTION*******************************************************#
+#*******************************************************************************************************************************************#
+#########################################################get_largest_subtree####################################################################################
+#*******************************************************************************************************************************************#
+#***********************************************START CHECKS FOR get_largest_subtree FUNCTION*****************************************************#
+#*******************************************************************************************************************************************#
+#check that subtrs are Subtrees created using ape::subtrees to look for clustering on.
+#Should include all isolates of interest.
+check_subtrs <- function(subtrs, isolate_labels){
+  #check that it is a list
+  if(class(subtrs) != "list"){
+    stop(paste("The subtrs object must be the result of calling ape::subtrees, the object you have provided is not a list"))
+  }
+  #check that all of the elements of the list have class
+  if(!all(unname(sapply(subtrs, class)) == "phylo")){
+    stop(paste("The subtrs object must be the result of calling ape::subtrees, the contents of the list you provided are not of type phylo"))
+  }
+}
+
+#check tip labels vs. isolate list
+check_subtrs_vs_isolate_labs <- function(subtrs, isolate_labels){
+  #check that all isolates of interest are included
+  isolates <- ""
+  for(i in 1:length(subtrs)){
+    isolates <- c(isolates, subtrs[[i]]$tip.label)
+  }
+  if(length(intersect(isolates, names(isolate_labels))) != length(isolate_labels)){
+    stop(paste("The subtrs object must include all of the isolates provided in the isolate_labels object"))
+  }
+}
+
+#Named vector of labels known to cluster. Names must be equivalent to tree tip label names.
+#This controls for clustering by requiring that the pure clusters must contain multiple of the control labels.
+check_control_labels <- function(control_labels){
+  #can be null or a named vector
+  if(!(is.null(control_labels) || (is.vector(control_labels)) || is.null(names(control_labels)))){
+    stop(paste("control_labels must be either a null (default) or a named vector of labels known to cluster"))
+  }
+}
+
+check_get_largest_subtree_input <- function(subtrs, isolate_labels, control_labels, bootstrap, pureness){
+  #use check_locs to check that it is a named vector of more than one isolate
+  check_locs(isolate_labels)
+  #check list of trees and that names are the same
+  check_subtrs(subtrs)
+  #check subtress vs. isolate labels
+  check_subtrs_vs_isolate_labs(subtrs, isolate_labels)
+  #check control labels
+  check_control_labels(control_labels)
+  #check control labels vs. isolate labs
+  check_subtrs_vs_isolate_labs(subtrs, control_labels)
+  #check bootstrap value
+  check_bootstrap(bootstrap)
+  #check pureness
+  check_pureness(pureness)
+}
+#*******************************************************************************************************************************************#
+#***********************************************END CHECKS FOR get_largest_subtree FUNCTION*******************************************************#
+#*******************************************************************************************************************************************#
