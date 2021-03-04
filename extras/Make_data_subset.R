@@ -53,6 +53,19 @@ fasta <- Penn_test_input$fasta
 dists <- Penn_test_input$dists
 tr <- Penn_test_input$tr
 
+##save penn data
+Penn_all_input <- list("locs" = locs_Penn, "pt" = pt_Penn, "fasta" = fasta_Penn, "dists" = dists, "tr" = tree_Penn)
+
+getwd()
+setwd("/Users/sophiehoffman/Desktop/regentrans/extras")
+saveRDS(Penn_all_input, file = "Penn_test_input_all.rds")
+
+Penn_all_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input_all.rds")
+locs_Penn <- Penn_all_input$locs
+pt_Penn <- Penn_all_input$pt
+fasta_Penn <- Penn_all_input$fasta
+dists_Penn <- Penn_all_input$dists
+tr_Penn <- Penn_all_input$tr
 
 
 
