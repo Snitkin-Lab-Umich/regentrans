@@ -57,25 +57,25 @@ source("/Users/sophiehoffman/Desktop/regentrans/R/get_facility_fsp.R")
 ###################penn data prep#########################
 #metadata path Penn
 #/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv
-#metadata <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv")
+metadata_penn <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv")
 
 #alignment path Penn
 #/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta
-#fasta <- ape::read.dna("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta",
-#                       format = "fasta")
+fasta_Penn <- ape::read.dna("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta",
+                       format = "fasta")
 
 #tree path Penn
 #/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile
-#tree <- ape::read.tree("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile")
+tree_Penn <- ape::read.tree("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile")
 
 #locs - locations of isolates (e.g. facility of isolation)
 #named vector, where names are same as names of dist.dna output
-#locs <- metadata$ltach
-#names(locs) <- paste0("PCMP_H", metadata$isolate_no)
+locs_Penn <- metadata_penn$ltach
+names(locs_Penn) <- paste0("PCMP_H", metadata_penn$isolate_no)
 
 #pt
-#pt <- metadata$patient_id
-#names(pt) <- paste0("PCMP_H", metadata$isolate_no)
+pt_Penn <- metadata_penn$patient_id
+names(pt_Penn) <- paste0("PCMP_H", metadata_penn$isolate_no)
 ##########################################################
 ##################github data prep
 ##########################################################
@@ -91,7 +91,8 @@ tr <- Penn_test_input$tr
 
 #dists - snv distance matrix returned by dist.dna
 #use as.matrix = true for the dist.dna function
-#dists <- dist.dna(x = fasta, as.matrix = TRUE, model = "N")
+dists_pwdt <- dist.dna(x = fasta_Penn, as.matrix = TRUE, model = "N", pairwise.deletion = TRUE)
+
 
 #run the function
 snv_dists <- get_snv_dists(dists, locs, pt)
