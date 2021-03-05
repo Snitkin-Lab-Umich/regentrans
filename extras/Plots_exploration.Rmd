@@ -12,14 +12,15 @@ library(devtools)
 library(ggtree)
 library(pheatmap)
 library(ggplot2)
+library(phytools)
 
 #load test data
-Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input_2.rds")
-locs <- Penn_test_input$locs
-pt <- Penn_test_input$pt
-fasta <- Penn_test_input$fasta
-dists <- Penn_test_input$dists
-tr <- Penn_test_input$tr
+# Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input_2.rds")
+# locs <- Penn_test_input$locs
+# pt <- Penn_test_input$pt
+# fasta <- Penn_test_input$fasta
+# dists <- Penn_test_input$dists
+# tr <- Penn_test_input$tr
 
 #load real data
 Penn_all_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input_all.rds")
@@ -28,6 +29,9 @@ pt_Penn <- Penn_all_input$pt
 fasta_Penn <- Penn_all_input$fasta
 dists_Penn <- Penn_all_input$dists
 tr_Penn <- Penn_all_input$tr
+
+metadata_penn <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv")
+
 
 #source checks
 source("/Users/sophiehoffman/Desktop/regentrans/R/checks.R")
@@ -52,68 +56,79 @@ theme_set(theme_bw() + theme(#axis.text.x = element_text(angle=90,vjust = 0.5, h
   strip.background = element_rect(fill="white",linetype='blank'), text=element_text(size=15)))
 ```
 
-##get_frac_intra plots
-```{r}
-snv_dists <- get_snv_dists(dists, locs, pt)
-snv_dists_df <- as.data.frame(snv_dists)
-ggplot() + 
-  geom_histogram(data = subset(snv_dists_df,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists), fill = "red", alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_df,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists),fill = "blue", alpha = 0.5) 
-```
-```{r}
-ggplot() + 
-  geom_histogram(data = subset(snv_dists_df,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists), fill = "red", alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_df,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists),fill = "blue", alpha = 0.5) + 
-  facet_wrap(~ Loc1) 
-```
-try by first filtering to values < 100
-```{r}
-colors <- c("Intra-facility pair" = "red", "Inter-facility pair" = "blue")
-ggplot() + 
-  geom_histogram(data = subset(snv_dists_df,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 100), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_df,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 100), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.5) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors)
-```
-```{r}
-colors <- c("Intra-facility pair" = "red", "Inter-facility pair" = "blue")
-ggplot() + 
-  geom_histogram(data = subset(snv_dists_df,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 100), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_df, Pair_Type == "Intra-facility pair" & Pairwise_Dists < 100), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.5) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + facet_wrap(~ Loc1)
-```
+##Isolate Pairs < 1000 SNVs
 
-```{r}
+```{r, fig.height=10, fig.width=10}
 snv_dists_Penn <- get_snv_dists(dists_Penn, locs_Penn, pt_Penn)
 snv_dists_df_Penn <- as.data.frame(snv_dists_Penn)
 colors <- c("Intra-facility pair" = "red", "Inter-facility pair" = "blue")
 ggplot() + 
   geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.5) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + facet_wrap(~ Loc1)
+  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.5) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + facet_wrap(~ Loc1, ncol = 4) + ggtitle("All Penn Isolate Pairs < 1000 SNV distance by facility")
 ```
-```{r}
-colors <- c("Intra-facility pair" = "red", "Inter-facility pair" = "blue")
+```{r, fig.height=5, fig.width=10}
 ggplot() + 
   geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.5) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors)
+  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.5) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + ggtitle("All Penn Isolate Pairs < 1000 SNV distance")
 ```
-```{r}
-snv_dists_Penn <- get_snv_dists(dists_pwdt, locs_Penn, pt_Penn)
-snv_dists_df_Penn <- as.data.frame(snv_dists_Penn)
-colors <- c("Intra-facility pair" = "red", "Inter-facility pair" = "blue")
+##Isolate Pairs < 20 SNVs
+
+```{r, fig.height=5, fig.width=10}
 ggplot() + 
-  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.5) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors)
+  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
+  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + ggtitle("All Penn Isolate Pairs < 20 SNV distance")
 ```
 
-
-```{r}
-colors <- c("Intra-facility pair" = "red", "Inter-facility pair" = "blue")
+```{r, fig.height=10, fig.width=10}
 ggplot() + 
-  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors)
+  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
+  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + ggtitle("All Penn Isolate Pairs < 20 SNV distance by Facility") + facet_wrap(~ Loc1, ncol = 4)
 ```
 
-```{r}
-colors <- c("Intra-facility pair" = "red", "Inter-facility pair" = "blue")
+##Isolate Pairs Over time 
+```{r, fig.height=10, fig.width=10}
+#add time to the snv_dists_df_Penn thing 
+metadata_penn$isolate_char <- paste0("PCMP_H", metadata_penn$isolate_no)
+#add the date of isolate #1 to the snv_dists_df_Penn 
+snv_dists_df_Penn_dated <- snv_dists_df_Penn %>% left_join(metadata_penn, by = c("Isolate1" = "isolate_char"))
 ggplot() + 
-  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_df_Penn,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + facet_wrap(~ Loc1)
+  geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
+  geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + ggtitle("All Penn Isolate Pairs < 20 SNV distance by Date of first isolate") + facet_wrap(~ cx_date, ncol = 4)
 ```
+```{r, fig.height=10, fig.width=10}
+ggplot() + 
+  geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
+  geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + ggtitle("All Penn Isolate Pairs < 1000 SNV distance by Date of first isolate") + facet_wrap(~ cx_date, ncol = 4)
+```
+
+## get_clusters
+```{r, fig.height=4, fig.width=7}
+#run get clusters
+#subset locs_Penn to have the same as tr_Penn
+common <- intersect(tr_Penn$tip.label, names(locs_Penn))
+locs_Penn_tr_sub <- locs_Penn[common]
+clusters <- get_clusters(tr_Penn,locs_Penn_tr_sub)
+#dissect output
+pure_subtree_info <- clusters$pure_subtree_info
+subtrees <- clusters$subtrees
+
+ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2) + labs(y = "Number of Isolates in \nPhylogenetic Cluster", x = "Facility ID", title = "Pure Subtree Information")
+```
+
+### Plot the tree with location annotation, ST 258 only 
+```{r, fig.height=10, fig.width=10}
+#remove the non-st258 tips 
+#read in kleborate results
+locs <- as.data.frame(locs_Penn_tr_sub)
+locs$ID <- rownames(locs)
+kleb <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/Reports/kleborate/penn_kleborate_results.txt", sep = "\t")
+penn_locs_sub <- locs %>% left_join(kleb, by = c("ID" = "strain")) %>% filter(ST == "ST258") %>% select(ID, locs_Penn_tr_sub)
+colnames(penn_locs_sub) <- c("ID", "f_id")
+
+#subset the tree
+tr_sub <- keep.tip(tr_Penn,penn_locs_sub$ID)
+
+tr_Penn_mpr = midpoint.root(tr_sub)
+gheatmap(ggtree(tr_Penn_mpr, layout = "circular"),as.data.frame(locs_Penn_tr_sub), color = NA)
+```
+
