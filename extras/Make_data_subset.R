@@ -54,7 +54,7 @@ dists <- Penn_test_input$dists
 tr <- Penn_test_input$tr
 
 ##save penn data
-Penn_all_input <- list("locs" = locs_Penn, "pt" = pt_Penn, "fasta" = fasta_Penn, "dists" = dists, "tr" = tree_Penn)
+Penn_all_input <- list("locs" = locs_Penn, "pt" = pt_Penn, "fasta" = fasta_Penn, "dists" = dists_Penn, "tr" = tr_Penn)
 
 getwd()
 setwd("/Users/sophiehoffman/Desktop/regentrans/extras")
