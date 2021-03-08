@@ -10,6 +10,7 @@
 #'
 #' @param snp_dist ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
 #' @param locs locations names for pairwise comparison
+#' @param form can be "long" or "matrix", default is matrix. Determines output format
 #'
 #' @return matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp values bween 0 (HP=HS) and 1 (Hp = 0)
 #' @export
@@ -18,9 +19,9 @@
 
 
 #######################try to make sapply########
-get_facility_fsp <- function(fasta, locs){
+get_facility_fsp <- function(fasta, locs, form = "matrix"){
   #check the DNAbin object and locs
-  check_facility_fsp(fasta, locs)
+  check_facility_fsp(fasta, locs, form)
   #make a vector of only locs that appear more than once
   locs_over_one <- which(unlist(table(locs) > 1))
   locs_subset <- locs[locs %in% names(locs_over_one)]
@@ -80,6 +81,11 @@ get_facility_fsp <- function(fasta, locs){
   #add row and column names
   rownames(facil_dist) <- locs_unique
   colnames(facil_dist) <- locs_unique
+  #change to long form if that is specified
+  if(form != "matrix"){
+    facil_dist <- na.omit(data.frame(as.table(as.matrix(facil_dist)))) %>% filter(Freq != 0)
+    colnames(facil_dist) <- c("Facil_1", "Facil_2", "Fsp_val")
+  }
   return(facil_dist);
 }#end facility_fst
 

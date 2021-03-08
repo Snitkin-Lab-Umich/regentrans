@@ -296,7 +296,12 @@ check_fasta_vs_locs <- function(fasta, locs){
 
 
 #do I need to check something here about how they are related? Its just confusing because how do they know what facility??
-check_facility_fsp <- function(fasta, locs){
+check_facility_fsp <- function(fasta, locs, form){
+  #check form
+  if(!(form == "matrix" || form == "long")){
+    stop(paste("form must be either 'long' or 'matrix' to determine output format, you have provided",
+               form))
+  }
   #check fasta
   check_dna_bin(fasta)
   #check locs

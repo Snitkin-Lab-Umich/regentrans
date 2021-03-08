@@ -33,12 +33,13 @@ get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){ # pureness s
                                isolate_name=names(locs_sub))
   # change singletons from 0 to 1
   pure_subtr_info <- pure_subtr_info %>% mutate(subtr_size=ifelse(subtr_size==0 & index == 1, 1, subtr_size))
-  # remove duplicates (singletons aren't duplicates)
-  pure_subtr_info <- pure_subtr_info[!duplicated(pure_subtr_info) | pure_subtr_info$subtr_size == 1,]
   # change index from 1 to NA
   pure_subtr_info <- pure_subtr_info %>% mutate(index=ifelse(index==1, NA, index))
   #add a column to indicate the isolate name if the index = NA
   pure_subtr_info <- pure_subtr_info %>% mutate(isolate_name=ifelse(is.na(index), isolate_name, " "))
+  # remove duplicates (singletons aren't duplicates)
+  pure_subtr_info <- pure_subtr_info[!duplicated(pure_subtr_info$index) | pure_subtr_info$subtr_size == 1,]
+
 
   #potential returns if we want to return subtrees too
   returns <- list("pure_subtree_info" = pure_subtr_info, "subtrees" = pure_subtrees, "cluster_pureness" = pureness)

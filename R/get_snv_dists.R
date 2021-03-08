@@ -28,7 +28,7 @@
 #' @return snp_facility_paris, a matrix of inter- and intra-facility pariwise snv distances
 #' @export
 #'
-#' @examples
+#' @examples to reduce this dataframe to include only one row that represents each pair, use the subset_pairs() function on the output of this function
 get_snv_dists <- function(dists, locs, pt = NULL){
   #checks
   check_get_snv_dists_input(dists, locs, pt)
