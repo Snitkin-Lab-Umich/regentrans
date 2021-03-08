@@ -1,8 +1,8 @@
 #tests for regentrans - to be made when the public facing dataset is available
 ####################################test data######################################
-test_locs <- locs[1:4]
-test_pt <- pt[1:4]
-test_dists <- dists[names(test_locs), names(test_locs)]
+#test_locs <- locs[1:4]
+#test_pt <- pt[1:4]
+#test_dists <- dists[names(test_locs), names(test_locs)]
 
 
 ####################################test checks######################################
