@@ -42,7 +42,7 @@ get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){ # pureness s
 
 
   #potential returns if we want to return subtrees too
-  returns <- list("pure_subtree_info" = pure_subtr_info, "subtrees" = pure_subtrees, "cluster_pureness" = pureness)
+  returns <- list("pure_subtree_info" = pure_subtr_info, "subtrees" = subtrs_sub, "cluster_pureness" = pureness)
 
   return(returns)
 }
