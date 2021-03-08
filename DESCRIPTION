@@ -1,13 +1,13 @@
 Package: regentrans
-Title: What the Package Does (One Line, Title Case)
+Title: Studying Regional Pathogen Transmission Using Genomics
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Sophie",
+           family = "Hoffman",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "shoffm@umich.edu",
+           comment = c(ORCID = "0000-0003-2518-6422"))
+Description: Tools and framework for studying regional pathogen transmission using genomic data.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
