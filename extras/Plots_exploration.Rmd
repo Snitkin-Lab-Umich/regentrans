@@ -100,6 +100,30 @@ ggplot() +
   geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
   geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + ggtitle("All Penn Isolate Pairs < 1000 SNV distance by Date of first isolate") + facet_wrap(~ cx_date, ncol = 4)
 ```
+```{r, fig.height=50, fig.width=50}
+ggplot() + 
+  geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
+  geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + ggtitle("All Penn Isolate Pairs < 1000 SNV distance by Date by Location of first isolate") + facet_wrap(Loc1 ~ cx_date)
+```
+```{r, fig.height=50, fig.width=50}
+ggplot() + 
+  geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
+  geom_histogram(data = subset(snv_dists_df_Penn_dated,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + ggtitle("All Penn Isolate Pairs < 20 SNV distance by Date by Location of first isolate") + facet_wrap(Loc1 ~ cx_date)
+```
+```{r, fig.height=50, fig.width=50}
+facility_sum <- which(unlist(table(locs_Penn) > 10))
+snv_dists_df_Penn_dated_sub <- snv_dists_df_Penn_dated %>% filter(Loc1 %in% names(facility_sum))
+
+ggplot() + 
+  geom_histogram(data = subset(snv_dists_df_Penn_dated_sub,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
+  geom_histogram(data = subset(snv_dists_df_Penn_dated_sub,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.2, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") + scale_color_manual(values = colors) + ggtitle("All Penn Isolate Pairs < 20 SNV distance by Date by Location of first isolate") + facet_grid(Loc1 ~ cx_date)
+```
+
+```{r, fig.height=4, fig.width=7}
+#plot how many isolates are present in each facil in each month 
+n_isolates <- snv_dists_df_Penn_dated %>% group_by(cx_date, Loc1) %>% summarize(n = n())
+ggplot(data = n_isolates) + geom_bar(mapping = aes(x = cx_date, y = n, fill = Loc1), stat = "identity", position = "dodge") + labs(x = "Date (month)", y = "Number of isolates from facility", title = "Distribution of number of isolates by facility over time ")
+```
 
 ## get_clusters
 ```{r, fig.height=4, fig.width=7}
