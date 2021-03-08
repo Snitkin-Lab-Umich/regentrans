@@ -5,23 +5,7 @@ library(ape)
 library(dplyr)
 library(devtools)
 
-#source checks
-source("/Users/sophiehoffman/Desktop/regentrans/R/checks.R")
-#source tests
-source("/Users/sophiehoffman/Desktop/regentrans/R/tests.R")
-#source get_snv_dists
-source("/Users/sophiehoffman/Desktop/regentrans/R/get_snv_dists.R")
-#source get_frac_intra
-source("/Users/sophiehoffman/Desktop/regentrans/R/get_frac_intra.R")
-#source get_largest_subtree
-source("/Users/sophiehoffman/Desktop/regentrans/R/get_largest_subtree.R")
-#source reverse_list_str
-source("/Users/sophiehoffman/Desktop/regentrans/R/reverse_list_str.R")
-#source get_clusters
-source("/Users/sophiehoffman/Desktop/regentrans/R/get_clusters.R")
-#source get_facility_fsp
-source("/Users/sophiehoffman/Desktop/regentrans/R/get_facility_fsp.R")
-
+load_all()
 
 #devtools::load_all("/Users/sophiehoffman/Desktop/regentrans")
 #load_all()
@@ -79,7 +63,7 @@ source("/Users/sophiehoffman/Desktop/regentrans/R/get_facility_fsp.R")
 ##########################################################
 ##################github data prep
 ##########################################################
-Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input_2.rds")
+Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/data/Penn_test_input_2.rds")
 locs <- Penn_test_input$locs
 pt <- Penn_test_input$pt
 fasta <- Penn_test_input$fasta
