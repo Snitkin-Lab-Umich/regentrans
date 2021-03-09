@@ -39,19 +39,19 @@ dists <- dist.dna(x = fasta_sub, as.matrix = TRUE, model = "N")
 
 #make list
 #Penn_test_input <- list("locs" = locs_sub, "pt" = pt_sub, "fasta" = fasta_sub, "dists" = dists)
-Penn_test_input <- list("locs" = locs, "pt" = pt, "fasta" = fasta, "dists" = dists, "tr" = tr_subset)
+Penn_test_input <- list("locs" = locs, "pt" = pt, "fasta" = fasta, "dists" = dists, "tr" = tr)
 
 getwd()
-setwd("/Users/sophiehoffman/Desktop/regentrans/extras")
-saveRDS(Penn_test_input, file = "Penn_test_input_2.rds")
+setwd("/Users/sophiehoffman/Desktop/regentrans/data")
+saveRDS(Penn_test_input, file = "Penn_test_input_3.rds")
 
 #test read back in
-Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input_2.rds")
-locs <- Penn_test_input$locs
-pt <- Penn_test_input$pt
-fasta <- Penn_test_input$fasta
-dists <- Penn_test_input$dists
-tr <- Penn_test_input$tr
+Penn_test_input2 <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/data/Penn_test_input_3.rds")
+locs2 <- Penn_test_input$locs
+pt2 <- Penn_test_input$pt
+fasta2 <- Penn_test_input$fasta
+dists2 <- Penn_test_input$dists
+tr2 <- Penn_test_input$tr
 
 ##save penn data
 Penn_all_input <- list("locs" = locs_Penn, "pt" = pt_Penn, "fasta" = fasta_Penn, "dists" = dists_Penn, "tr" = tr_Penn)
