@@ -23,8 +23,11 @@ get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){ # pureness s
 
   #get the names of the things in common
   isolates <- intersect(tr$tip.label, names(locs))
-
+  #subset locs
   locs_sub <- locs[isolates]
+  #subset the tree
+  tr <- keep.tip(tr,isolates)
+
   subtrs_sub <- ape::subtrees(tr)
   pure_subtrees <- get_largest_subtree(subtrs = subtrs_sub, isolate_labels = locs_sub, bootstrap = bootstrap, pureness = pureness) # NOTE: this function is in snitkitr right now, but I think we should migrate it to this package (or at least include it here as well); this _might_ be buggy, so definitely good to add unit tests for it
   pure_subtr_info <- bind_cols(f_id=locs_sub,

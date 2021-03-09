@@ -5,6 +5,7 @@ library(ape)
 library(dplyr)
 library(devtools)
 library(regentrans)
+source("/Users/sophiehoffman/Desktop/regentrans/R/checks.R")
 
 load_all()
 #devtools::load_data(pkg = "regentrans")
@@ -95,7 +96,7 @@ snv_dist_no_pt <- get_snv_dists(dists, locs)
 #############################################################################################################################################
 #get_frac_intra
 threshs <- seq(1,19041, by=1)
-frac_intra <- get_frac_intra(snv_dists = snv_dists, threshs = threshs)
+#frac_intra <- get_frac_intra(snv_dists = snv_dists, threshs = threshs)
 frac_intra_2 <- get_frac_intra(dists = dists, locs = locs, pt = pt, threshs = threshs)
 
 #############################################################################################################################################

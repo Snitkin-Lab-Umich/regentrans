@@ -73,7 +73,7 @@ check_pt_vs_locs <- function(pt, locs){
   }
   #check that the names match between pt and locs
   if(!setequal(names(pt), names(locs))){
-    warning("You have not supplied patient IDs (pt) and locations (locs) for the same samples. We will these vectors so that they contain the same isolates.")
+    warning("You have not supplied patient IDs (pt) and locations (locs) for the same samples. We will subset these vectors so that they contain the same isolates.")
   }
 }
 
@@ -176,6 +176,7 @@ check_get_frac_intra_input <- function(snv_dists, threshs, dists, locs, pt){
   }
   #make the SNV dists object if it needs to be made
   if(is.null(snv_dists)){
+    #checks for get_snv_dists are done within here
     snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
     run_snv_dists <- TRUE
   }
@@ -223,26 +224,21 @@ check_bootstrap <- function(bootstrap){
   }
   #check that the value is between 0 and 100
   if((bootstrap < 0 || bootstrap > 100) && !is.null(bootstrap)){
-    stop(paste("The bootstrap value must be between 0 and 100, you supplied a value of"), bootstrap)
+    stop(paste("The bootstrap value must be between 0 and 100, you supplied a value of "), bootstrap)
   }
 }
 
 #check that the names of the isolates in locs actually exist in the SNV matrix
 check_tr_vs_locs <- function(tr, locs){
-  #check that there are less than or equal to the number of samples in the vector than in the tree tip labels
-  if(length(locs) > length(tr$tip.label)){
-    stop(paste("You have supplied a list of more isolates (n = ", length(locs),
-               ") with locations than exist in your tree (n = ",
-               length(tr$tip.label),
-               ". Please make sure you have at least as many isolates in your SNV matrix as you have in your isolate location list."))
-  }
-  #check if the names of the locs isolates are a subset of the names of the dist matrix isolates
-  if(!all(names(locs) %in% tr$tip.label)){
-    stop("Some of the isolates you have provided locations for are not in the SNV distance matrix (dists). Please subset the locs vector to include only isolates in the SNV distance matrix (dists).")
+  #check that there are at least two in common and warn that we will subset
+  if(length(intersect(names(locs), tr$tip.label)) < 2){
+    stop(paste("You must supply a locs object with at least two IDs in common with your tip labels of your tr object, you have provided ",
+               length(intersect(names(locs), tr$tip.label)),
+               " isolates in common."))
   }
   #warn if they will be subsetting??
   if(!setequal(names(locs), tr$tip.label)){
-    warning("You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
+    warning("You have not provided the same set of locs and tip labels on the tree. Will subset")
   }
 }
 
@@ -289,14 +285,14 @@ check_fasta_vs_locs <- function(fasta, locs){
   }
   #check that at least two of the locs that the fasta and locs have in common appear more than once
   if(length(which(unlist(table(locs[names(locs) %in% common_isolates]) > 1))) < 2){
-    stop("Please provide isolates that appear hospitals at least once")
+    stop("Please provide isolates that appear in a facility at least once")
   }
 }
 
 
 
 #do I need to check something here about how they are related? Its just confusing because how do they know what facility??
-check_facility_fsp <- function(fasta, locs, form){
+check_facility_fsp_input <- function(fasta, locs, form){
   #check form
   if(!(form == "matrix" || form == "long")){
     stop(paste("form must be either 'long' or 'matrix' to determine output format, you have provided",
