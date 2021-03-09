@@ -21,7 +21,7 @@
 #######################try to make sapply########
 get_facility_fsp <- function(fasta, locs, form = "matrix"){
   #check the DNAbin object and locs
-  check_facility_fsp(fasta, locs, form)
+  check_facility_fsp_input(fasta, locs, form)
   #make a vector of only locs that appear more than once
   locs_over_one <- which(unlist(table(locs) > 1))
   locs_subset <- locs[locs %in% names(locs_over_one)]
