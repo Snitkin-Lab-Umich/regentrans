@@ -67,5 +67,11 @@ fasta_Penn <- Penn_all_input$fasta
 dists_Penn <- Penn_all_input$dists
 tr_Penn <- Penn_all_input$tr
 
+####save in RData file format
+save(locs, file="/Users/sophiehoffman/Desktop/regentrans/data/locs.RData")
+save(pt, file="/Users/sophiehoffman/Desktop/regentrans/data/pt.RData")
+save(fasta, file="/Users/sophiehoffman/Desktop/regentrans/data/fasta.RData")
+save(dists, file="/Users/sophiehoffman/Desktop/regentrans/data/dists.RData")
+save(tr, file="/Users/sophiehoffman/Desktop/regentrans/data/tr.RData")
 
 

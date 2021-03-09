@@ -4,8 +4,12 @@
 library(ape)
 library(dplyr)
 library(devtools)
+library(regentrans)
 
 load_all()
+#devtools::load_data(pkg = "regentrans")
+#devtools::install_github('Snitkin-Lab-Umich/regentrans')
+
 
 #devtools::load_all("/Users/sophiehoffman/Desktop/regentrans")
 #load_all()
@@ -63,7 +67,7 @@ load_all()
 ##########################################################
 ##################github data prep
 ##########################################################
-Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/data/Penn_test_input_2.rds")
+Penn_test_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/data/Penn_test_input_3.rds")
 locs <- Penn_test_input$locs
 pt <- Penn_test_input$pt
 fasta <- Penn_test_input$fasta
