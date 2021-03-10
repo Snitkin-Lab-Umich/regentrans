@@ -361,13 +361,31 @@ test_that("check_get_largest_subtree_input works", {
   #one where tree is a subset of locs
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr_2, isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = 1),
-    "The subtrs object must include all of the isolates provided in the isolate_labels object"
+    "The subtrs object must include all of the isolates provided in the,  isolate_labels object"
   )
   #one where control labels is wrong
-  #WHAT IS HAPPENING HERE??
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = "NULL", bootstrap = NULL, pureness = 1),
-    "The subtrs object must include all of the isolates provided in the isolate_labels object"
+    "The subtrs object must include all of the isolates provided in the,  control_labels object"
   )
   #one where pureness is wrong
+  expect_error(
+    check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = "1"),
+    "The pureness value must be a double, you supplied type  character"
+  )
+  expect_error(
+    check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = 100),
+    "The pureness value must be between 0.5 and 1, you supplied a value of  100"
+  )
+  #one where bootstrap is wrong
+  expect_error(
+    check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = "NULL", pureness = 1),
+    "The bootstrap value must be a double or NULL, you supplied type  character"
+  )
+  expect_error(
+    check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = 1000, pureness = 1),
+    "The bootstrap value must be between 0 and 100, you supplied a value of 1000"
+  )
 })
+
+

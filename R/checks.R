@@ -416,14 +416,16 @@ check_subtrs <- function(subtrs, isolate_labels){
 }
 
 #check tip labels vs. isolate list
-check_subtrs_vs_isolate_labs <- function(subtrs, isolate_labels){
+check_subtrs_vs_isolate_labs <- function(subtrs, isolate_labels, type){
   #check that all isolates of interest are included
   isolates <- ""
   for(i in 1:length(subtrs)){
     isolates <- c(isolates, subtrs[[i]]$tip.label)
   }
   if(length(intersect(isolates, names(isolate_labels))) != length(isolate_labels)){
-    stop(paste("The subtrs object must include all of the isolates provided in the isolate_labels object"))
+    stop(paste("The subtrs object must include all of the isolates provided in the, ",
+               type,
+               "object"))
   }
 }
 
@@ -442,11 +444,11 @@ check_get_largest_subtree_input <- function(subtrs, isolate_labels, control_labe
   #check list of trees and that names are the same
   check_subtrs(subtrs)
   #check subtress vs. isolate labels
-  check_subtrs_vs_isolate_labs(subtrs, isolate_labels)
+  check_subtrs_vs_isolate_labs(subtrs, isolate_labels, "isolate_labels")
   #check control labels
   check_control_labels(control_labels)
   #check control labels vs. isolate labs
-  check_subtrs_vs_isolate_labs(subtrs, control_labels)
+  check_subtrs_vs_isolate_labs(subtrs, control_labels, "control_labels")
   #check bootstrap value
   check_bootstrap(bootstrap)
   #check pureness
@@ -455,3 +457,5 @@ check_get_largest_subtree_input <- function(subtrs, isolate_labels, control_labe
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR get_largest_subtree FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
+
+
