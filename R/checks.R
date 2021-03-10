@@ -278,14 +278,20 @@ check_fasta_vs_locs <- function(fasta, locs){
   if(length(common_isolates) < 2){
     stop("Please provde a fasta object and locs object with at least two samples in common")
   }
+  #if they don't have them all in common, warn that we are subsetting
+  if((length(common_isolates) != length(locs)) || (length(common_isolates) != nrow(fasta))){
+    warning(paste("You have provided ",
+                  length(common_isolates),
+                  " isolate IDs in common between locs and your fasta. Will subset."))
+  }
   #warn if they are subsetting based on hospitals having less than 2 isolates
-  if(any(table(locs[locs %in% common_isolates]) < 1)){
+  if(any(table(locs[names(locs) %in% common_isolates]) < 2)){
     warning(paste("You have provided at least one isolate that is the only one in its location. Will subset to exclude location ",
-                  which(unlist(table(locs) <= 1))))
+                  which(unlist(table(locs) < 2))))
   }
   #check that at least two of the locs that the fasta and locs have in common appear more than once
   if(length(which(unlist(table(locs[names(locs) %in% common_isolates]) > 1))) < 2){
-    stop("Please provide isolates that appear in a facility at least once")
+    stop("Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities")
   }
 }
 
@@ -321,15 +327,21 @@ check_allele_freq_input <- function(x, subset, allele_n, alleles){
     stop(paste("The x you have provided is not a DNAbin, you provided a"),
          class(x))
   }
+  #check allele_n is numeric
+  if(class(allele_n) != "numeric"){
+    stop(paste("The allele_n value you have provided must be numeric 1 or 2, you have provided type",
+               class(allele_n)))
+  }
   #check allele_n is either 1 or 2
   if(!(allele_n == 1 || allele_n == 2)){
-    stop(paste("the allele_n value you have provided must be 1 or 2, you have provided",
+    stop(paste("The allele_n value you have provided must be 1 or 2, you have provided",
                allele_n))
   }
 
   #check alleles is character vector of length two
-  if(!(class(alleles) == "character" && length(alleles) == 2)){
-    stop(paste("the alleles vector must be a character vector of length 2"))
+  if(!(class(alleles) == "character" && length(alleles) == 2 && length(intersect(alleles, c("a", "c", "t", "g"))) == 2)){
+    stop(paste("The alleles vector must be a character vector of length 2, you have provided, ",
+               paste(alleles, sep = " ", collapse = " ")))
   }
 
   #one option for allele_freq_within where subset !null
@@ -337,7 +349,7 @@ check_allele_freq_input <- function(x, subset, allele_n, alleles){
   if(!is.null(subset)){
     #check subset
     if(class(subset) != "logical"){
-      stop(paste("The subset vector you have provided is not logical, you provided a",
+      stop(paste("The subset vector you have provided is not logical, you provided a ",
                  class(subset)))
     }
   }
@@ -360,7 +372,7 @@ within_pop_var_input_checks <- function(subset_snp_mat, subset){
   #check subset_snp_mat is DNAbin
   if(!(class(subset_snp_mat) == "DNAbin" || class(subset_snp_mat) == "raw")){
     stop(paste("The subset_snp_mat you have provided is not a DNAbin, you provided a"),
-         class(x))
+         class(subset_snp_mat))
   }
 
 }
@@ -376,7 +388,7 @@ check_reverse_list_str_input <- function(ls){
   #check that it is a list
   if(class(ls) != "list"){
     stop(paste("The ls object must be a list but you provided:",
-               class(dists)))
+               paste(class(ls), sep = " ", collapse = " ")))
   }
   #check that the elemets of the lists are lists
   if(!all(unname(sapply(ls, class)) == "list")){
