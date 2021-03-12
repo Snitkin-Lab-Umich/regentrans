@@ -18,7 +18,10 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, boo
     #CLUSTERS ARE DEFINED AS:
     # 1) HAVE ONLY A SINGLE EPI LABEL, 2) HAVE BOOTSTRAP SUPPORT GREATER THAN 90, 3) INCLUDE MORE THAN ONE CONTROL LABEL
     sts = future.apply::future_sapply(subtrs, FUN = function(st){
-      i_in_subtree = sum(grepl(i, st$tip.label, perl = TRUE)) > 0 # isolate is in subtree
+      print(i)
+      print(st$tip.label)
+      i_in_subtree = i %in% st$tip.label # isolate is in subtree
+      print(i_in_subtree)
       st_labs <- isolate_labels[intersect(st$tip.label, names(isolate_labels))]
       one_label = length(unique(st_labs)) == 1 # only one label in subtree
       labs_tab <- table(st_labs)
