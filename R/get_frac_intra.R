@@ -11,7 +11,7 @@
 #' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
 #' @param pt a named vector of patient that isolate was taken from with the name being sample ID (optional)
 #'
-#' @return fraction of intra-facility pairs for different snv thresholds
+#' @return fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data
 #' @export
 #'
 #' @examples either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
@@ -33,7 +33,9 @@ get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NUL
             round(mean(intra == 'Inter-facility pair'),2))
     im
   }))
-  colnames(intra_cts) <- c('Thresh','n_Inter','n_Intra','Frac_Intra','Frac_Inter')
+  colnames(intra_cts) <- c('Thresh','n_Intra','n_Inter','Frac_Intra','Frac_Inter')
+  #remove all of the rows that have NaN as the fraction
+  intra_cts <- intra_cts %>% as.data.frame() %>% filter(!is.na(Frac_Intra), !is.na(Frac_Inter))
   return(data.frame(intra_cts))
 }
 

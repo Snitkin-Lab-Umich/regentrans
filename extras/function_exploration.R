@@ -4,7 +4,7 @@
 library(ape)
 library(dplyr)
 library(devtools)
-library(regentrans)
+#library(regentrans)
 source("/Users/sophiehoffman/Desktop/regentrans/R/checks.R")
 
 load_all()
