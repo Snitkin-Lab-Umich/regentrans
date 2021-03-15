@@ -339,7 +339,8 @@ check_allele_freq_input <- function(x, subset, allele_n, alleles){
   }
 
   #check alleles is character vector of length two
-  if(!(class(alleles) == "character" && length(alleles) == 2 && length(intersect(alleles, c("a", "c", "t", "g"))) == 2)){
+  # & length(intersect(alleles, c("a", "c", "t", "g"))) == 2
+  if(!(class(alleles) == "character" & length(alleles) == 2)){
     stop(paste("The alleles vector must be a character vector of length 2, you have provided, ",
                paste(alleles, sep = " ", collapse = " ")))
   }

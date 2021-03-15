@@ -60,7 +60,7 @@ get_facility_fsp <- function(fasta, locs, form = "matrix"){
         #skip multi-allelic sites
         if (length(alleles) > 2){0} else{
           #find allele frequency for each allele at each site
-          f1_allele1 = allele_freq_btwn(x, subset_f1, 1, alleles)
+          f1_allele1 = allele_freq_btwn(x = x, subset = subset_f1, allele_n = 1, alleles = alleles)
           f1_allele2 = allele_freq_btwn(x, subset_f1, 2, alleles)
           f2_allele1 = allele_freq_btwn(x, subset_f2, 1, alleles)
           f2_allele2 = allele_freq_btwn(x, subset_f2, 2, alleles)

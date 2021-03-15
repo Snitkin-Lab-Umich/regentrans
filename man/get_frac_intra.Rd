@@ -24,7 +24,7 @@ get_frac_intra(
 \item{threshs}{SNV thresholds to use}
 }
 \value{
-fraction of intra-facility pairs for different snv thresholds
+fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data
 }
 \description{
 Get fraction of intra-facility pairs for different snv thresholds
