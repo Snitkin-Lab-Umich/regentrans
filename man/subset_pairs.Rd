@@ -15,3 +15,6 @@ a data.frame of isolate pairs subsetted to one row representing each pair
 \description{
 subset_pairs
 }
+\examples{
+subset_pairs(snv_dists)
+}

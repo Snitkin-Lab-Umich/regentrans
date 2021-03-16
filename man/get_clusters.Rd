@@ -21,3 +21,6 @@ list where pure_subtree_info is a data.frame of facility clusters on phylogeny, 
 \description{
 Get facility clusters on phylogeny
 }
+\examples{
+get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
+}
