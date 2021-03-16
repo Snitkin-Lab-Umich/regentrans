@@ -265,7 +265,7 @@ check_get_clusters_inputs <- function(tr, locs, pureness, bootstrap){
 #*******************************************************************************************************************************************#
 #check that the fasta file is a dna bin object
 check_dna_bin <- function(fasta){
-  if(class(fasta) != "DNAbin"){
+  if(all(class(fasta) != "DNAbin")){
     stop(paste("The fasta object must be of class DNAbin, you have supplied an object of class ",
                class(fasta)))
   }

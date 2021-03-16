@@ -19,3 +19,6 @@ matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp
 \description{
 Make facility x facility matrix with Fsp values. Calculates fst as described in Donker et al. 2017
 }
+\examples{
+get_facility_fsp(fasta, locs, form = "matrix")
+}

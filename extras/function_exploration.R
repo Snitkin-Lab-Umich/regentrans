@@ -8,6 +8,9 @@ library(devtools)
 source("/Users/sophiehoffman/Desktop/regentrans/R/checks.R")
 
 load_all()
+document()
+devtools::test()
+devtools::check()
 #devtools::load_data(pkg = "regentrans")
 #devtools::install_github('Snitkin-Lab-Umich/regentrans')
 
