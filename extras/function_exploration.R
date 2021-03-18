@@ -4,6 +4,7 @@
 library(ape)
 library(dplyr)
 library(devtools)
+library(phytools)
 #library(regentrans)
 source("/Users/sophiehoffman/Desktop/regentrans/R/checks.R")
 
@@ -100,7 +101,7 @@ snv_dist_no_pt <- get_snv_dists(dists, locs)
 #get_frac_intra
 threshs <- seq(1,19041, by=1)
 #frac_intra <- get_frac_intra(snv_dists = snv_dists, threshs = threshs)
-frac_intra_2 <- get_frac_intra(dists = dists, locs = locs, pt = pt, threshs = threshs)
+frac_intra_2 <- get_frac_intra(dists = dists, locs = locs, pt = pt)
 
 #############################################################################################################################################
 #get_clusters
@@ -118,3 +119,6 @@ fsp <- get_facility_fsp(fasta,locs)
 #write.csv(fsp, "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_Fsp_output.csv", row.names = TRUE, col.names = TRUE, quote = FALSE)
 #for testing
 facil_dist <- read.csv("/Users/sophiehoffman/Desktop/regentrans/extras/Penn_Fsp_output.csv", row.names = 1, header = TRUE)
+
+#prune tree
+tr_2 <- prune_tree(tree, pt)
