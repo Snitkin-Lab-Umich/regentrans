@@ -35,7 +35,10 @@ get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NUL
   }))
   colnames(intra_cts) <- c('Thresh','n_Intra','n_Inter','Frac_Intra','Frac_Inter')
   #remove all of the rows that have NaN as the fraction
-  intra_cts <- intra_cts %>% as.data.frame() %>% filter(!is.na(Frac_Intra), !is.na(Frac_Inter))
+  #intra_cts <- intra_cts %>% as.data.frame() %>% filter(!is.na(Frac_Intra), !is.na(Frac_Inter))
+  intra_cts <- intra_cts %>% as.data.frame() %>% dplyr::mutate(Frac_Intra=ifelse(is.na(Frac_Intra), 0, Frac_Intra)) %>%
+    dplyr::mutate(Frac_Inter=ifelse(is.na(Frac_Inter), 0, Frac_Inter))
+
   return(data.frame(intra_cts))
 }
 
