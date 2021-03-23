@@ -1,6 +1,6 @@
 #tests for patient transfer
 #make a source destination pair test matrix
-mat <- data.frame(matrix(data = c(0, 20, 30,
+mat <- data.frame(matrix(data = c(0, 20, 12,
                         20, 0, 26,
                         30, 26, 0), nrow = 3, ncol = 3))
 rownames(mat) <- c("A", "B", "C")
@@ -16,6 +16,15 @@ names(test_pt) <- names(pt[1:4])
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt)
 
+test_pt_trans <- patient_transfer(pat_flow, test_snv_dists, thresh = 50)
 
-patient_transfer(pat_flow, test_snv_dists)
-
+test_that("patient_transfer works", {
+  #check ncols
+  expect_true(ncol(test_pt_trans) == 4)
+  #check colnames
+  expect_true(all(colnames(test_pt_trans) == c("facil_1", "facil_2", "n_closely_related_pairs", "n_transfers")))
+  #check coltypes
+  expect_true(all(sapply(test_pt_trans, class) == c("character", "character", "numeric", "numeric")))
+  #check that there are <= nrow pat_dlow
+  expect_true(nrow(test_pt_trans) <= nrow(pat_flow))
+})
