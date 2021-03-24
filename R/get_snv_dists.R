@@ -56,7 +56,15 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
   }
   #if there is a patient transfer network, add it
   if(!is.null(pt_trans_net)){
-    snp_facility_pairs %>% dplyr::left_join(pt_trans_net, by = c("Loc1" = "source_facil", "Loc2" = "dest_facil"))
+    #edit the network to make sure pairs exist forward and backward
+    #make a dataframe?
+    tidy_pt_trans_net <- tidyr::pivot_wider(pt_trans_net, names_from = source_facil, values_from = n_transfers)
+    #if the matrix is symmetric
+    #symmetry <- isSymmetric(as.matrix(tidy_pt_trans_net[,2:ncol(tidy_pt_trans_net)]))
+    pt_trans_net <- data.frame(as.table(as.matrix(tidy_pt_trans_net))) %>% filter(Var2 != "dest_facil") %>% `colnames<-`(c("source_facil", "dest_facil", "n_transfers"))
+    snp_facility_pairs <- snp_facility_pairs %>% dplyr::left_join(pt_trans_net, by = c("Loc1" = "source_facil", "Loc2" = "dest_facil"))
+    snp_facility_pairs$n_transfers <- as.numeric(snp_facility_pairs$n_transfers)
+    #edit the ones that didn't match to be something
   }
   #return snp matrix
   return(snp_facility_pairs)

@@ -9,6 +9,7 @@ get_frac_intra(
   dists = NULL,
   locs = NULL,
   pt = NULL,
+  pt_trans_net = NULL,
   threshs = seq(1, 50, 1)
 )
 }

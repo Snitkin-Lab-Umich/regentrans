@@ -8,6 +8,20 @@ test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_
 #one without pt
 test_snv_dist_no_pt <- get_snv_dists(dists = test_dists, locs = test_locs)
 
+mat <- data.frame(matrix(data = c(0, 20, 12,
+                                  20, 0, 26,
+                                  30, 26, 0), nrow = 3, ncol = 3))
+rownames(mat) <- c("A", "B", "C")
+colnames(mat) <- c("A", "B", "C")
+test_pt_trans_net <- na.omit(data.frame(as.table(as.matrix(mat))))
+#pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
+colnames(test_pt_trans_net) <- c("source_facil", "dest_facil", "n_transfers")
+test_pt_trans_net$n_transfers <- as.numeric(test_pt_trans_net$n_transfers)
+
+test_snv_dists_pt_trans <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = test_pt_trans_net)
+test_snv_dists_pt_trans_no_pt <- get_snv_dists(dists = test_dists, locs = test_locs, pt = NULL, pt_trans_net = test_pt_trans_net)
+
+
 test_that("get_snv_dists works", {
   #for with pt
   #check col #s
@@ -38,4 +52,13 @@ test_that("get_snv_dists works", {
   expect_true(all(setequal(unique(test_snv_dists$Isolate1), unique(test_snv_dists$Isolate2)) & setequal(unique(test_snv_dists$Isolate2), unique(names(test_locs)))))
   #same with locs
   expect_true(all(setequal(unique(test_snv_dists$Loc1), unique(test_snv_dists$Loc2)) & setequal(unique(test_snv_dists$Loc2), unique(test_locs))))
+
+  #one with pt_trans net and pt
+  expect_true(ncol(test_snv_dists_pt_trans) == 9)
+  #check coltypes
+  expect_true(class(test_snv_dists_pt_trans[,9]) == "numeric")
+
+  #one with pt_trans_net and no pt
+  expect_true(ncol(test_snv_dists_pt_trans_no_pt) == 7)
+
 })

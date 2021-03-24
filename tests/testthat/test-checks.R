@@ -44,133 +44,126 @@ test_pt_trans_net_3 <- test_pt_trans_net
 colnames(test_pt_trans_net_3) <- c("A", "B", "C")
 test_pt_trans_net_4 <- test_pt_trans_net
 test_pt_trans_net_4$n_transfers <- as.character(test_pt_trans_net_4$n_transfers)
+test_pt_trans_net_5 <- test_pt_trans_net %>% filter(source_facil == "A", dest_facil == "A")
+
+test_snv_dists_pt_trans <- get_snv_dists(test_dists, test_locs, test_pt, test_pt_trans_net)
+
 
 
 ####################################test get_snv_dists######################################
 test_that("check_get_snv_dists_input works", {
   #check ones that should pass
   #with pt
-  expect_true(is.null(check_get_snv_dists_input(test_dists, test_locs, test_pt)))
+  expect_true(is.null(check_get_snv_dists_input(test_dists, test_locs, test_pt, pt_trans_net=NULL)))
   #without pt
-  expect_true(is.null(check_get_snv_dists_input(test_dists, test_locs, pt=NULL)))
+  expect_true(is.null(check_get_snv_dists_input(test_dists, test_locs, pt=NULL, pt_trans_net=NULL)))
   #one input - dists
   expect_error(
-    check_get_snv_dists_input(dists = test_dists),
+    check_get_snv_dists_input(dists = test_dists, pt_trans_net=NULL),
     'argument "locs" is missing, with no default'
   )
   #one input - locs
   expect_error(
-    check_get_snv_dists_input(locs = test_locs),
+    check_get_snv_dists_input(locs = test_locs, pt_trans_net=NULL),
     'argument "dists" is missing, with no default'
   )
   #no locs input
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, pt = test_pt),
+    check_get_snv_dists_input(dists = test_dists, pt = test_pt, pt_trans_net=NULL),
     'argument "locs" is missing, with no default'
   )
   #test_dists not a dists object
   expect_error(
-    check_get_snv_dists_input(dists = "test_dists", locs = test_locs),
+    check_get_snv_dists_input(dists = "test_dists", locs = test_locs, pt_trans_net=NULL),
     "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character"
   )
   #locs not a named list
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = "test_locs"),
+    check_get_snv_dists_input(dists = test_dists, locs = "test_locs", pt_trans_net=NULL),
     "The locs object must be a a named list of locations named by sample IDs"
   )
   #pt not a named list
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs, pt = "test_pt"),
+    check_get_snv_dists_input(dists = test_dists, locs = test_locs, pt = "test_pt", pt_trans_net=NULL),
     "The pt object must be a a named list of locations named by sample IDs"
   )
   #dist names not matching locs names
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs_2, pt = test_pt),
+    check_get_snv_dists_input(dists = test_dists, locs = test_locs_2, pt = test_pt, pt_trans_net=NULL),
     "You have not provided locations of at least 2 isolates in your SNV distance matrix (dists). Please provide locations for at least 2 isolates in your SNV distance matrix."
   )
   #dist names not matching pt names
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs, pt = test_pt_2),
+    check_get_snv_dists_input(dists = test_dists, locs = test_locs, pt = test_pt_2, pt_trans_net=NULL),
     "You have not provided patient IDs for at least 2 isolates in your SNV distance matrix (dists). Please provide patient IDs for at least 2 isolates in your SNV distance matrix."
   )
   #one with less than two in common
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs_4, pt = test_pt),
+    check_get_snv_dists_input(dists = test_dists, locs = test_locs_4, pt = test_pt, pt_trans_net=NULL),
     "You have only supplied locations for 1 isolates. Please supply a named vector of locations for at least 2 isolates"
   )
   #warnings
   #dist names being a subset of locs names
-  expect_warning(
-    check_get_snv_dists_input(dists = test_dists_2, locs = test_locs, pt = test_pt),
-    "1: In check_dists_vs_locs(dists, locs) :
-  You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset
-2: In check_dists_vs_locs(dists, locs) :
-  You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset"
-  )
+  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists_2, locs = test_locs, pt = test_pt, pt_trans_net=NULL))
+  expect_true(warnings[1] == "You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset")
+  expect_true(warnings[2] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
   #locs names being a subset of dists names
-  expect_warning(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs_3, pt = test_pt),
-    "1: In check_dists_vs_locs(dists, locs) :
-  You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset
-2: In check_pt_vs_locs(pt, locs) :
-  You have supplied a patient vector of length  4  and  location vector of length  3 . We will subset these lists so that they have the same isolates.
-3: In check_pt_vs_locs(pt, locs) :
-  You have not supplied patient IDs (pt) and locations (locs) for the same samples. We will these vectors so that they contain the same isolates."
-  )
+  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists, locs = test_locs_3, pt = test_pt, pt_trans_net=NULL))
+  expect_true(warnings[1] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
+  expect_true(warnings[2] == "You have supplied a patient vector of length  4  and  location vector of length  3 . We will subset these lists so that they have the same isolates.")
+  expect_true(warnings[3] == "You have not supplied patient IDs (pt) and locations (locs) for the same samples. We will subset these vectors so that they contain the same isolates.")
   #pt names being a subset of dists names
-  expect_warning(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs, pt = test_pt_3),
-    "1: In check_pt_vs_locs(pt, locs) :
-  You have supplied a patient vector of length  3  and  location vector of length  4 . We will subset these lists so that they have the same isolates.
-2: In check_pt_vs_locs(pt, locs) :
-  You have not supplied patient IDs (pt) and locations (locs) for the same samples. We will these vectors so that they contain the same isolates."
-  )
-  #dists names being a subset of pt names
-  expect_warning(
-    check_get_snv_dists_input(dists = test_dists_2, locs = test_locs, pt = test_pt),
-    "1: In check_dists_vs_locs(dists, locs) :
-  You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset
-2: In check_dists_vs_locs(dists, locs) :
-  You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset"
-  )
+  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists, locs = test_locs, pt = test_pt_3, pt_trans_net=NULL))
+  expect_true(warnings[1] == "You have supplied a patient vector of length  3  and  location vector of length  4 . We will subset these lists so that they have the same isolates.")
+  expect_true(warnings[2] == "You have not supplied patient IDs (pt) and locations (locs) for the same samples. We will subset these vectors so that they contain the same isolates.")
+
+  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists_2, locs = test_locs, pt = test_pt, pt_trans_net=NULL))
+  expect_true(warnings[1] == "You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset")
+  expect_true(warnings[2] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
+
 })
 
 ##################################test get_frac_intra#####################################
 test_that("check_get_frac_intra_input works", {
   #normal one that works with snv_dists input
-  expect_false(check_get_frac_intra_input(snv_dists = test_snv_dists, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL))
+  expect_false(check_get_frac_intra_input(snv_dists = test_snv_dists, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL))
   #normal one that works without snv_dists input
-  expect_true(check_get_frac_intra_input(snv_dists = NULL, threshs = seq(1,50,1), dists = test_dists, locs = test_locs, pt = test_pt))
+  expect_true(check_get_frac_intra_input(snv_dists = NULL, threshs = seq(1,50,1), dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = NULL))
   #one that's input isn't snv_dists input at all
   expect_error(
-    check_get_frac_intra_input(snv_dists = "test_snv_dists", threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL),
+    check_get_frac_intra_input(snv_dists = "test_snv_dists", threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
     "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character"
   )
   #one that's input is similar but wrong # cols
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists_2, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL),
-    "The snv_dists object must be the output of the get_snv_dists() function, but you provided a data.frame with  7  columns."
+    check_get_frac_intra_input(snv_dists = test_snv_dists_2, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
+    "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  7  columns that are not the output columns needed."
   )
   #one that's input is similar but not correct rownames
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists_3, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL),
+    check_get_frac_intra_input(snv_dists = test_snv_dists_3, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
     "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  8  columns that are not the output columns needed."
   )
   #one that's input is similar but not numeric dist col
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists_4, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL),
+    check_get_frac_intra_input(snv_dists = test_snv_dists_4, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
     "Your snv_dists input does not have numeric pairwise distances, you supplied one with type character"
   )
   #one that's input doesn't work for get_snv_dists
   expect_error(
-    check_get_frac_intra_input(snv_dists = NULL, threshs = seq(1,50,1), dists = "test_dists", locs = test_locs, pt = test_pt),
+    check_get_frac_intra_input(snv_dists = NULL, threshs = seq(1,50,1), dists = "test_dists", locs = test_locs, pt = test_pt, pt_trans_net = NULL),
     "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character"
   )
   #one where threshs isn't a numeric vector
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists, threshs = "seq(1,50,1)", dists = NULL, locs = NULL, pt = NULL),
+    check_get_frac_intra_input(snv_dists = test_snv_dists, threshs = "seq(1,50,1)", dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
     "threshs must be a numeric vector, you provided a  character"
   )
+  #one with patient transfer network snv_dists
+  expect_false(check_get_frac_intra_input(snv_dists = test_snv_dists_pt_trans, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL))
+  #one with patient transfer network no snv_dists
+  expect_true(check_get_frac_intra_input(snv_dists = NULL, threshs = seq(1,50,1), dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = test_pt_trans_net))
+
 })
 
 ##################################test get_clusters#####################################
@@ -235,7 +228,7 @@ test_that("check_facility_fsp_input works", {
   #one that doesn't work because no more than one isolate/facility
   expect_error(
     check_facility_fsp_input(fasta = test_fasta, locs = test_locs, form = "matrix"),
-    "Please provide isolates that appear hospitals at least once"
+    "Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities"
   )
   #check form input
   expect_error(
@@ -442,6 +435,10 @@ test_that("check_pt_transfer_input works", {
   #one where pt_trans_net has wrong coltypes
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_4, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
                "The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided  factor factor character ")
-
-
+  #one where there aren't at least two locations in common
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_5, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+               "The pt_trans_net don't have at least two locations in common with the locs object.")
+  #one where there aren't all in common
+  expect_warning(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+                 "Not all of the locations you have provided between locs and the pt_trans_network match. Will subset. ")
 })

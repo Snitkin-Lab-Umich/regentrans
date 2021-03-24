@@ -122,7 +122,7 @@ check_pt_trans_net <- function(pt_trans_net, locs){
     #make sure facilities have something in common with the locs and say we will subset if they are not all in common
     #make sure there are at least two in common
     if(as.numeric(length(intersect(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs)))) < 2){
-      stop(paste("The pt_trans_net have at least two locations in common with the locs object. "))
+      stop(paste("The pt_trans_net don't have at least two locations in common with the locs object. "))
     }
     #if not all in common warn you will subset
     !setequal(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs))
@@ -150,7 +150,9 @@ check_get_snv_dists_input <- function(dists, locs, pt, pt_trans_net){
     check_pt_vs_locs(pt, locs)
   }
   #check whether pt_trans_net is null or a directed graph
-  check_pt_trans_net(pt_trans_net, locs)
+  if(!is.null(pt_trans_net)){
+    check_pt_trans_net(pt_trans_net, locs)
+  }
 }
 
 #*******************************************************************************************************************************************#
@@ -167,13 +169,17 @@ check_snv_dists <- function(snv_dists){
                class(snv_dists)))
   }
   #check the number of columns
-  if(!(ncol(snv_dists) == 8 | ncol(snv_dists) == 6)){
+  if(!(ncol(snv_dists) %in% 6:9)){
     stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but you provided a data.frame with ",
                ncol(snv_dists), " columns."))
   }
   #check the colnames
   if(!((ncol(snv_dists) == 8 &&
         all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1",  "Patient2", "Pair_Type"))) ||
+       (ncol(snv_dists) == 9 &&
+        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1",  "Patient2", "Pair_Type", "n_transfers"))) ||
+       (ncol(snv_dists) == 7 &&
+        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type", "n_transfers"))) ||
        (ncol(snv_dists) == 6 &&
         all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type"))))){
     stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has ",
@@ -208,7 +214,7 @@ check_threshs <- function(threshs, snv_dists){
   }
 }
 
-check_get_frac_intra_input <- function(snv_dists, threshs, dists, locs, pt){
+check_get_frac_intra_input <- function(snv_dists, threshs, dists, locs, pt, pt_trans_net){
   #if SNV_dists doesnt exist and they didn't input locs and dists
   if(is.null(snv_dists) & is.null(dists) & is.null(locs)){
     stop("Please provide either an SNV dists matrix or dists and locs objecst so we can generate one for you.")
@@ -216,7 +222,7 @@ check_get_frac_intra_input <- function(snv_dists, threshs, dists, locs, pt){
   #make the SNV dists object if it needs to be made
   if(is.null(snv_dists)){
     #checks for get_snv_dists are done within here
-    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
+    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt, pt_trans_net = pt_trans_net)
     run_snv_dists <- TRUE
   }
   else{
@@ -326,7 +332,7 @@ check_fasta_vs_locs <- function(fasta, locs){
   #warn if they are subsetting based on hospitals having less than 2 isolates
   if(any(table(locs[names(locs) %in% common_isolates]) < 2)){
     warning(paste("You have provided at least one isolate that is the only one in its location. Will subset to exclude location ",
-                  which(unlist(table(locs) < 2))))
+                  paste(which(unlist(table(locs) < 2)), sep = " ", collapse = " ")))
   }
   #check that at least two of the locs that the fasta and locs have in common appear more than once
   if(length(which(unlist(table(locs[names(locs) %in% common_isolates]) > 1))) < 2){
@@ -363,7 +369,7 @@ check_allele_freq_input <- function(x, subset, allele_n, alleles){
   #one option for allele_freq_between where subset !null
   #check x
   if(!(class(x) == "DNAbin" || class(x) == "raw")){
-    stop(paste("The x you have provided is not a DNAbin, you provided a"),
+    stop(paste("The x you have provided is not a DNAbin, you provided a "),
          class(x))
   }
   #check allele_n is numeric
@@ -389,7 +395,7 @@ check_allele_freq_input <- function(x, subset, allele_n, alleles){
   if(!is.null(subset)){
     #check subset
     if(class(subset) != "logical"){
-      stop(paste("The subset vector you have provided is not logical, you provided a ",
+      stop(paste("The subset vector you have provided is not logical, you provided a",
                  class(subset)))
     }
   }
@@ -463,7 +469,7 @@ check_subtrs_vs_isolate_labs <- function(subtrs, isolate_labels, type){
     isolates <- c(isolates, subtrs[[i]]$tip.label)
   }
   if(length(intersect(isolates, names(isolate_labels))) != length(isolate_labels)){
-    stop(paste("The subtrs object must include all of the isolates provided in the, ",
+    stop(paste("The subtrs object must include all of the isolates provided in the",
                type,
                "object"))
   }

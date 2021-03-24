@@ -15,14 +15,14 @@
 #' @export
 #'
 #' @examples either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
-get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, threshs = seq(1,50,1)){
+get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL, threshs = seq(1,50,1)){
 
   #make one check
-  run_snv_dists <- check_get_frac_intra_input(snv_dists = snv_dists, threshs = threshs, dists = dists, locs = locs, pt = pt)
+  run_snv_dists <- check_get_frac_intra_input(snv_dists = snv_dists, threshs = threshs, dists = dists, locs = locs, pt = pt, pt_trans_net = pt_trans_net)
 
   if(run_snv_dists){
     cat("Running get_snv_dists...")
-    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
+    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt, pt_trans_net = pt_trans_net)
   }
 
   intra_cts <- t(sapply(threshs, function(i){
