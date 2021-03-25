@@ -6,7 +6,7 @@
 #checks dists input to get_snv_dists function
 check_dists <- function(dists){
   #if it is not a matrix
-  if(!any(class(dists) == "matrix" || class(dists) == "data.frame")){
+  if(!(any(class(dists) == "matrix") || any(class(dists) == "data.frame"))){
     stop(paste("The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided:",
                class(dists)))
   }
