@@ -323,6 +323,10 @@ check_fasta_vs_locs <- function(fasta, locs){
   if(length(common_isolates) < 2){
     stop("Please provde a fasta object and locs object with at least two samples in common")
   }
+  #check that at least two of the locs that the fasta and locs have in common appear more than once
+  if(length(which(unlist(table(locs[names(locs) %in% common_isolates]) > 1))) < 2){
+    stop("Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities")
+  }
   #if they don't have them all in common, warn that we are subsetting
   if((length(common_isolates) != length(locs)) || (length(common_isolates) != nrow(fasta))){
     warning(paste("You have provided ",
@@ -333,10 +337,6 @@ check_fasta_vs_locs <- function(fasta, locs){
   if(any(table(locs[names(locs) %in% common_isolates]) < 2)){
     warning(paste("You have provided at least one isolate that is the only one in its location. Will subset to exclude location ",
                   paste(which(unlist(table(locs) < 2)), sep = " ", collapse = " ")))
-  }
-  #check that at least two of the locs that the fasta and locs have in common appear more than once
-  if(length(which(unlist(table(locs[names(locs) %in% common_isolates]) > 1))) < 2){
-    stop("Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities")
   }
 }
 
