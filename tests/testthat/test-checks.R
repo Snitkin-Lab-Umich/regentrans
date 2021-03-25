@@ -9,6 +9,8 @@ test_locs_6 <- locs[1:4]
 test_locs_7 <- test_locs_5[1:4]
 test_locs_8 <- test_locs_5[2:6]
 test_locs_9 <- test_locs_5[1:6]
+test_locs_fsp <- test_locs
+test_locs_fsp[1:4] <- "A"
 test_pt <- pt[1:4]
 test_pt_2 <- pt[5:8]
 test_pt_3 <- pt[1:3]
@@ -30,11 +32,12 @@ ls_2 <- list(list(a = 2, b = 3), list(c = "a", d = "b"), "x")
 test_subtr <- ape::subtrees(test_tr)
 test_subtr_2 <- ape::subtrees(test_tr_2)
 
-mat <- data.frame(matrix(data = c(0, 20, 12,
-                                  20, 0, 26,
-                                  30, 26, 0), nrow = 3, ncol = 3))
-rownames(mat) <- c("A", "B", "C")
-colnames(mat) <- c("A", "B", "C")
+mat <- data.frame(matrix(data = c(0, 20, 30, 40,
+                                  20, 0, 26, 50,
+                                  30, 26, 0, 57,
+                                  40, 50, 57, 0), nrow = 4, ncol = 4))
+rownames(mat) <- c("A", "B", "C", "D")
+colnames(mat) <- c("A", "B", "C", "D")
 test_pt_trans_net <- na.omit(data.frame(as.table(as.matrix(mat))))
 #pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
 colnames(test_pt_trans_net) <- c("source_facil", "dest_facil", "n_transfers")
@@ -48,6 +51,15 @@ test_pt_trans_net_5 <- test_pt_trans_net %>% filter(source_facil == "A", dest_fa
 
 test_snv_dists_pt_trans <- get_snv_dists(test_dists, test_locs, test_pt, test_pt_trans_net)
 
+mat2 <- data.frame(matrix(data = c(0, 20, 12,
+                                  20, 0, 26,
+                                  30, 26, 0), nrow = 3, ncol = 3))
+rownames(mat2) <- c("A", "B", "C")
+colnames(mat2) <- c("A", "B", "C")
+test_pt_trans_net2 <- na.omit(data.frame(as.table(as.matrix(mat2))))
+#pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
+colnames(test_pt_trans_net2) <- c("source_facil", "dest_facil", "n_transfers")
+test_pt_trans_net2$n_transfers <- as.numeric(test_pt_trans_net2$n_transfers)
 
 
 ####################################test get_snv_dists######################################
@@ -60,47 +72,56 @@ test_that("check_get_snv_dists_input works", {
   #one input - dists
   expect_error(
     check_get_snv_dists_input(dists = test_dists, pt_trans_net=NULL),
-    'argument "locs" is missing, with no default'
+    'argument "locs" is missing, with no default',
+    fixed = TRUE
   )
   #one input - locs
   expect_error(
     check_get_snv_dists_input(locs = test_locs, pt_trans_net=NULL),
-    'argument "dists" is missing, with no default'
+    'argument "dists" is missing, with no default',
+    fixed = TRUE
   )
   #no locs input
   expect_error(
     check_get_snv_dists_input(dists = test_dists, pt = test_pt, pt_trans_net=NULL),
-    'argument "locs" is missing, with no default'
+    'argument "locs" is missing, with no default',
+    fixed = TRUE
   )
   #test_dists not a dists object
   expect_error(
     check_get_snv_dists_input(dists = "test_dists", locs = test_locs, pt_trans_net=NULL),
-    "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character"
+    "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character",
+    fixed = TRUE
   )
   #locs not a named list
   expect_error(
     check_get_snv_dists_input(dists = test_dists, locs = "test_locs", pt_trans_net=NULL),
-    "The locs object must be a a named list of locations named by sample IDs"
+    "The locs object must be a a named list of locations named by sample IDs",
+    fixed = TRUE
   )
   #pt not a named list
   expect_error(
     check_get_snv_dists_input(dists = test_dists, locs = test_locs, pt = "test_pt", pt_trans_net=NULL),
-    "The pt object must be a a named list of locations named by sample IDs"
+    "The pt object must be a a named list of locations named by sample IDs",
+    fixed = TRUE
   )
   #dist names not matching locs names
   expect_error(
     check_get_snv_dists_input(dists = test_dists, locs = test_locs_2, pt = test_pt, pt_trans_net=NULL),
-    "You have not provided locations of at least 2 isolates in your SNV distance matrix (dists). Please provide locations for at least 2 isolates in your SNV distance matrix."
+    "You have not provided locations of at least 2 isolates in your SNV distance matrix (dists). Please provide locations for at least 2 isolates in your SNV distance matrix.",
+    fixed = TRUE
   )
   #dist names not matching pt names
   expect_error(
     check_get_snv_dists_input(dists = test_dists, locs = test_locs, pt = test_pt_2, pt_trans_net=NULL),
-    "You have not provided patient IDs for at least 2 isolates in your SNV distance matrix (dists). Please provide patient IDs for at least 2 isolates in your SNV distance matrix."
+    "You have not provided patient IDs for at least 2 isolates in your SNV distance matrix (dists). Please provide patient IDs for at least 2 isolates in your SNV distance matrix.",
+    fixed = TRUE
   )
   #one with less than two in common
   expect_error(
     check_get_snv_dists_input(dists = test_dists, locs = test_locs_4, pt = test_pt, pt_trans_net=NULL),
-    "You have only supplied locations for 1 isolates. Please supply a named vector of locations for at least 2 isolates"
+    "You have only supplied locations for 1 isolates. Please supply a named vector of locations for at least 2 isolates",
+    fixed = TRUE
   )
   #warnings
   #dist names being a subset of locs names
@@ -132,32 +153,38 @@ test_that("check_get_frac_intra_input works", {
   #one that's input isn't snv_dists input at all
   expect_error(
     check_get_frac_intra_input(snv_dists = "test_snv_dists", threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
-    "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character"
+    "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character",
+    fixed = TRUE
   )
   #one that's input is similar but wrong # cols
   expect_error(
     check_get_frac_intra_input(snv_dists = test_snv_dists_2, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
-    "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  7  columns that are not the output columns needed."
+    "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  7  columns that are not the output columns needed.",
+    fixed = TRUE
   )
   #one that's input is similar but not correct rownames
   expect_error(
     check_get_frac_intra_input(snv_dists = test_snv_dists_3, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
-    "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  8  columns that are not the output columns needed."
+    "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  8  columns that are not the output columns needed.",
+    fixed = TRUE
   )
   #one that's input is similar but not numeric dist col
   expect_error(
     check_get_frac_intra_input(snv_dists = test_snv_dists_4, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
-    "Your snv_dists input does not have numeric pairwise distances, you supplied one with type character"
+    "Your snv_dists input does not have numeric pairwise distances, you supplied one with type character",
+    fixed = TRUE
   )
   #one that's input doesn't work for get_snv_dists
   expect_error(
     check_get_frac_intra_input(snv_dists = NULL, threshs = seq(1,50,1), dists = "test_dists", locs = test_locs, pt = test_pt, pt_trans_net = NULL),
-    "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character"
+    "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character",
+    fixed = TRUE
   )
   #one where threshs isn't a numeric vector
   expect_error(
     check_get_frac_intra_input(snv_dists = test_snv_dists, threshs = "seq(1,50,1)", dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
-    "threshs must be a numeric vector, you provided a  character"
+    "threshs must be a numeric vector, you provided a  character",
+    fixed = TRUE
   )
   #one with patient transfer network snv_dists
   expect_false(check_get_frac_intra_input(snv_dists = test_snv_dists_pt_trans, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL))
@@ -166,60 +193,69 @@ test_that("check_get_frac_intra_input works", {
 
 })
 
-##################################test get_clusters#####################################
+# ##################################test get_clusters#####################################
 test_that("check_get_clusters_inputs works", {
   #one that should work
   expect_true(is.null(check_get_clusters_inputs(tr = test_tr, locs = test_locs, pureness = 1, bootstrap = NULL)))
   #one where tr isn't a tree
   expect_error(
     check_get_clusters_inputs(tr = "test_tr", locs = test_locs, pureness = 1, bootstrap = NULL),
-    "The tr object must be a phylogenetic tree, read into R using the ape::read.tree() function. You have supplied a  character"
+    "The tr object must be a phylogenetic tree, read into R using the ape::read.tree() function. You have supplied a  character",
+    fixed = TRUE
   )
   #where locs isn't a named list
   expect_error(
     check_get_clusters_inputs(tr = test_tr, locs = "test_locs", pureness = 1, bootstrap = NULL),
-    "The locs object must be a a named list of locations named by sample IDs"
+    "The locs object must be a a named list of locations named by sample IDs",
+    fixed = TRUE
   )
   #where pureness isn't the right kind of value
   #not between .5 and 1
   expect_error(
     check_get_clusters_inputs(tr = test_tr, locs = test_locs, pureness = 100, bootstrap = NULL),
-    "The pureness value must be between 0.5 and 1, you supplied a value of  100"
+    "The pureness value must be between 0.5 and 1, you supplied a value of  100",
+    fixed = TRUE
   )
   #not an int
   expect_error(
     check_get_clusters_inputs(tr = test_tr, locs = test_locs, pureness = "100", bootstrap = NULL),
-    "The pureness value must be a double, you supplied type  character"
+    "The pureness value must be a double, you supplied type  character",
+    fixed = TRUE
   )
   #where bootstrap isn't the right kind of value
   expect_error(
     check_get_clusters_inputs(tr = test_tr, locs = test_locs, pureness = 1, bootstrap = "NULL"),
-    "The bootstrap value must be a double or NULL, you supplied type  character"
+    "The bootstrap value must be a double or NULL, you supplied type  character",
+    fixed = TRUE
   )
   #where bootstrap isn't in the range of values
   expect_error(
     check_get_clusters_inputs(tr = test_tr, locs = test_locs, pureness = 1, bootstrap = 105),
-    "The bootstrap value must be between 0 and 100, you supplied a value of 105"
+    "The bootstrap value must be between 0 and 100, you supplied a value of 105",
+    fixed = TRUE
   )
   #where tr is a subset of locs
   expect_warning(
     check_get_clusters_inputs(tr = test_tr_2, locs = test_locs, pureness = 1, bootstrap = NULL),
-    "You have not provided the same set of locs and tip labels on the tree. Will subset"
+    "You have not provided the same set of locs and tip labels on the tree. Will subset",
+    fixed = TRUE
   )
   #where locs is s subset of tr
   expect_warning(
     check_get_clusters_inputs(tr = test_tr, locs = test_locs_3, pureness = 1, bootstrap = NULL),
-    "You have not provided the same set of locs and tip labels on the tree. Will subset"
+    "You have not provided the same set of locs and tip labels on the tree. Will subset",
+    fixed = TRUE
   )
   #where tr and locs have no IDs in common
   expect_error(
     check_get_clusters_inputs(tr = test_tr, locs = test_locs_2, pureness = 1, bootstrap = NULL),
-    "You must supply a locs object with at least two IDs in common with your tip labels of your tr object, you have provided  0  isolates in common."
+    "You must supply a locs object with at least two IDs in common with your tip labels of your tr object, you have provided  0  isolates in common.",
+    fixed = TRUE
   )
 
 })
 
-##################################test get_facility_fsp#####################################
+# ##################################test get_facility_fsp#####################################
 test_that("check_facility_fsp_input works", {
   #one that works
   expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, form = "matrix")))
@@ -228,44 +264,52 @@ test_that("check_facility_fsp_input works", {
   #one that doesn't work because no more than one isolate/facility
   expect_error(
     check_facility_fsp_input(fasta = test_fasta, locs = test_locs, form = "matrix"),
-    "Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities"
+    "Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities",
+    fixed = TRUE
   )
   #check form input
   expect_error(
     check_facility_fsp_input(fasta = test_fasta, locs = test_locs, form = "hi"),
-    "form must be either 'long' or 'matrix' to determine output format, you have provided hi"
+    "form must be either 'long' or 'matrix' to determine output format, you have provided hi",
+    fixed = TRUE
   )
   expect_error(
     check_facility_fsp_input(fasta = test_fasta, locs = test_locs, form = 12),
-    "form must be either 'long' or 'matrix' to determine output format, you have provided 12"
+    "form must be either 'long' or 'matrix' to determine output format, you have provided 12",
+    fixed = TRUE
   )
   #check fasta
   expect_error(
     check_facility_fsp_input(fasta = "test_fasta", locs = test_locs, form = "matrix"),
-    "The fasta object must be of class DNAbin, you have supplied an object of class  character"
+    "The fasta object must be of class DNAbin, you have supplied an object of class  character",
+    fixed = TRUE
   )
   #check fasta vs. locs when they don't have 2 in common
   expect_error(
     check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_6, form = "matrix"),
-    "Please provde a fasta object and locs object with at least two samples in common"
+    "Please provde a fasta object and locs object with at least two samples in common",
+    fixed = TRUE
   )
   #when not two isolates in two facilities
   expect_error(
     check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_7, form = "matrix"),
-    "Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities"
+    "Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities",
+    fixed = TRUE
   )
   #check fasta vs. locs when you have to subset
   expect_warning(
     check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_8, form = "matrix"),
-    "You have provided  5  isolate IDs in common between locs and your fasta. Will subset."
+    "You have provided  5  isolate IDs in common between locs and your fasta. Will subset.",
+    fixed = TRUE
   )
   #one where there's only isolate from a location and will subset
   expect_warning(
     check_facility_fsp_input(fasta = test_fasta_3, locs = test_locs_9, form = "matrix"),
-    "You have provided at least one isolate that is the only one in its location. Will subset to exclude location  1"
+    "You have provided at least one isolate that is the only one in its location. Will subset to exclude location  1",
+    fixed = TRUE
   )
 })
-##################################test allele_freq#####################################
+# ##################################test allele_freq#####################################
 test_that("check_allele_freq_input works", {
   #one that works without subset
   expect_true(is.null(check_allele_freq_input(x = test_fasta, subset = NULL, allele_n = 1, alleles = c("a", "t"))))
@@ -274,72 +318,83 @@ test_that("check_allele_freq_input works", {
   #one with wrong x
   expect_error(
     check_allele_freq_input(x = "test_fasta", subset = NULL, allele_n = 1, alleles = c("a", "t")),
-    "The x you have provided is not a DNAbin, you provided a character"
+    "The x you have provided is not a DNAbin, you provided a character",
+    fixed = TRUE
   )
   #one with wrong subset
   expect_error(
     check_allele_freq_input(x = test_fasta, subset = "NULL", allele_n = 1, alleles = c("a", "t")),
-    "The subset vector you have provided is not logical, you provided a character"
+    "The subset vector you have provided is not logical, you provided a character",
+    fixed = TRUE
   )
   #one with wrong allele_n #
   expect_error(
     check_allele_freq_input(x = test_fasta, subset = NULL, allele_n = 7, alleles = c("a", "t")),
-    "The allele_n value you have provided must be 1 or 2, you have provided 7"
+    "The allele_n value you have provided must be 1 or 2, you have provided 7",
+    fixed = TRUE
   )
   #one with wrong allele_n type
   expect_error(
     check_allele_freq_input(x = test_fasta, subset = NULL, allele_n = "1", alleles = c("a", "t")),
-    "The allele_n value you have provided must be numeric 1 or 2, you have provided type character"
+    "The allele_n value you have provided must be numeric 1 or 2, you have provided type character",
+    fixed = TRUE
   )
   #one with one alleles
   expect_error(
     check_allele_freq_input(x = test_fasta, subset = NULL, allele_n = 1, alleles = "t"),
-    "The alleles vector must be a character vector of length 2, you have provided,  t"
+    "The alleles vector must be a character vector of length 2, you have provided,  t",
+    fixed = TRUE
   )
   #with 3 alleles
   expect_error(
     check_allele_freq_input(x = test_fasta, subset = NULL, allele_n = 1, alleles = c("a","t","g")),
-    "The alleles vector must be a character vector of length 2, you have provided,  a t g"
+    "The alleles vector must be a character vector of length 2, you have provided,  a t g",
+    fixed = TRUE
   )
-  expect_error(
-    check_allele_freq_input(x = test_fasta, subset = NULL, allele_n = 1, alleles = c(1, "t")),
-    "The alleles vector must be a character vector of length 2, you have provided,  1 t"
-  )
+  # expect_error(
+  #   check_allele_freq_input(x = test_fasta, subset = NULL, allele_n = 1, alleles = c(1, "t")),
+  #   "The alleles vector must be a character vector of length 2, you have provided,  1 t",
+  #   fixed = TRUE
+  # )
 })
 
-##################################test within_pop_var#####################################
+# ##################################test within_pop_var#####################################
 test_that("within_pop_var_input_checks works", {
   #one that works
   expect_true(is.null(within_pop_var_input_checks(subset_snp_mat = test_fasta, subset = c(TRUE, FALSE, FALSE))))
   #one with wrong subset_snp_mat
   expect_error(
     within_pop_var_input_checks(subset_snp_mat = test_fasta, subset = "TRUE"),
-    "The subset vector you have provided is not logical, you provided a character"
+    "The subset vector you have provided is not logical, you provided a character",
+    fixed = TRUE
   )
   #one with wrong subset
   expect_error(
     within_pop_var_input_checks(subset_snp_mat = "test_fasta", subset = c(TRUE, FALSE, FALSE)),
-    "The subset_snp_mat you have provided is not a DNAbin, you provided acharacter"
+    "The subset_snp_mat you have provided is not a DNAbin, you provided acharacter",
+    fixed = TRUE
   )
 })
 
-##################################test reverse_list_str#####################################
+# ##################################test reverse_list_str#####################################
 test_that("check_reverse_list_str_input works", {
   #one that works
   expect_true(is.null(check_reverse_list_str_input(ls)))
   #one that isn't a list
   expect_error(
     check_reverse_list_str_input("ls"),
-    "The ls object must be a list but you provided: character"
+    "The ls object must be a list but you provided: character",
+    fixed = TRUE
   )
   #one that is a list but not of lists
   expect_error(
     check_reverse_list_str_input(ls_2),
-    "The ls object must be a list of lists but you provided at lease one element that is not a list"
+    "The ls object must be a list of lists but you provided at lease one element that is not a list",
+    fixed = TRUE
   )
 })
 
-##################################test get_largest_subtree#####################################
+# ##################################test get_largest_subtree#####################################
 test_that("check_get_largest_subtree_input works", {
   #one that works
   expect_true(is.null(check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = 1)))
@@ -347,59 +402,69 @@ test_that("check_get_largest_subtree_input works", {
   #not right
   expect_error(
     check_get_largest_subtree_input(subtrs = "test_subtr", isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = 1),
-    "The subtrs object must be the result of calling ape::subtrees, the object you have provided is not a list"
+    "The subtrs object must be the result of calling ape::subtrees, the object you have provided is not a list",
+    fixed = TRUE
   )
   #list but not phylo
   expect_error(
     check_get_largest_subtree_input(subtrs = ls, isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = 1),
-    "The subtrs object must be the result of calling ape::subtrees, the contents of the list you provided are not of type phylo"
+    "The subtrs object must be the result of calling ape::subtrees, the contents of the list you provided are not of type phylo",
+    fixed = TRUE
   )
   #one where isolate labels is wrong
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = "test_pt", control_labels = NULL, bootstrap = NULL, pureness = 1),
-    "The locs object must be a a named list of locations named by sample IDs"
+    "The locs object must be a a named list of locations named by sample IDs",
+    fixed = TRUE
   )
   #one where they don't match at all
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt_2, control_labels = NULL, bootstrap = NULL, pureness = 1),
-    "The subtrs object must include all of the isolates provided in the isolate_labels object"
+    "The subtrs object must include all of the isolates provided in the isolate_labels object",
+    fixed = TRUE
   )
   #one where locs is a subset of tr
   expect_true(is.null(check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt_3, control_labels = NULL, bootstrap = NULL, pureness = 1)))
   #one where tree is a subset of locs
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr_2, isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = 1),
-    "The subtrs object must include all of the isolates provided in the,  isolate_labels object"
+    "The subtrs object must include all of the isolates provided in the isolate_labels object",
+    fixed = TRUE
   )
   #one where control labels is wrong
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = "NULL", bootstrap = NULL, pureness = 1),
-    "The subtrs object must include all of the isolates provided in the,  control_labels object"
+    "The subtrs object must include all of the isolates provided in the control_labels object",
+    fixed = TRUE
   )
   #one where pureness is wrong
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = "1"),
-    "The pureness value must be a double, you supplied type  character"
+    "The pureness value must be a double, you supplied type  character",
+    fixed = TRUE
   )
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = 100),
-    "The pureness value must be between 0.5 and 1, you supplied a value of  100"
+    "The pureness value must be between 0.5 and 1, you supplied a value of  100",
+    fixed = TRUE
   )
   #one where bootstrap is wrong
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = "NULL", pureness = 1),
-    "The bootstrap value must be a double or NULL, you supplied type  character"
+    "The bootstrap value must be a double or NULL, you supplied type  character",
+    fixed = TRUE
   )
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = 1000, pureness = 1),
-    "The bootstrap value must be between 0 and 100, you supplied a value of 1000"
+    "The bootstrap value must be between 0 and 100, you supplied a value of 1000",
+    fixed = TRUE
   )
 })
 
 
 
 
-##################################test patient_flow#####################################
+# ##################################test patient_flow#####################################
 test_that("check_pt_transfer_input works", {
   #one that works with snv_dists
   expect_false(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL))
@@ -407,38 +472,50 @@ test_that("check_pt_transfer_input works", {
   expect_true(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = NULL, thresh = 50, dists = test_dists, locs = test_locs, pt = test_pt))
   #one with wrong snv_dists input
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = "test_snv_dists", thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-               "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character")
+               "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character",
+               fixed = TRUE)
   #one with similar to snv_dists but not right ncols
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_2, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-               "The snv_dists object must be the output of the get_snv_dists() function, but you provided a data.frame with  7  columns.")
+               "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  7  columns that are not the output columns needed.",
+               fixed = TRUE)
   #one similar but not right colnames
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_3, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-               "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  8  columns that are not the output columns needed.")
+               "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  8  columns that are not the output columns needed.",
+               fixed = TRUE)
   #one similar with wrong coltype
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_4, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-               "Your snv_dists input does not have numeric pairwise distances, you supplied one with type character")
+               "Your snv_dists input does not have numeric pairwise distances, you supplied one with type character",
+               fixed = TRUE)
   #one with wrong input to get_snv_dists
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = NULL, thresh = 50, dists = "test_dists", locs = test_locs, pt = test_pt),
-              "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character")
+              "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character",
+              fixed = TRUE)
   #one where thresh is wrong
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = -1, dists = NULL, locs = NULL, pt = NULL),
-               "thresh must be a positive numeric value, you provided -1")
+               "thresh must be a positive numeric value, you provided -1",
+               fixed = TRUE)
   #one where pt_trans_net is wrong
   expect_error(check_pt_transfer_input(pt_trans_net = "test_pt_trans_net", snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-               "The pt_trans_net object must be a data.frame or matrix, you provided a  character")
+               "The pt_trans_net object must be a data.frame or matrix, you provided a  character",
+               fixed = TRUE)
   #one where pt_trans_net has wrong ncol
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_2, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-               "The pt_trans_net object must be a data.frame or matrix with 3 columns, you provided  2")
+               "The pt_trans_net object must be a data.frame or matrix with 3 columns, you provided  2",
+               fixed = TRUE)
   #one where pt_trans_net has wrong colnames
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_3, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-               "The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided  A B C")
+               "The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided  A B C",
+               fixed = TRUE)
   #one where pt_trans_net has wrong coltypes
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_4, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-               "The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided  factor factor character ")
+               "The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided  factor factor character",
+               fixed = TRUE)
   #one where there aren't at least two locations in common
   expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_5, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-               "The pt_trans_net don't have at least two locations in common with the locs object.")
+               "The pt_trans_net don't have at least two locations in common with the locs object.",
+               fixed = TRUE)
   #one where there aren't all in common
-  expect_warning(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
-                 "Not all of the locations you have provided between locs and the pt_trans_network match. Will subset. ")
+  expect_warning(check_pt_transfer_input(pt_trans_net = test_pt_trans_net2, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+                 "Not all of the locations you have provided between locs and the pt_trans_network match. Will subset.",
+                 fixed = TRUE)
 })

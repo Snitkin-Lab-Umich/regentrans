@@ -1,7 +1,7 @@
 #tests for get_snv_dists
-test_locs <- locs[1:4]
-test_pt <- as.character(pt[1:4])
-names(test_pt) <- names(pt[1:4])
+test_locs <- locs[1:3]
+test_pt <- as.character(pt[1:3])
+names(test_pt) <- names(pt[1:3])
 test_dists <- dists[names(test_locs), names(test_locs)]
 #one with pt
 test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt)
