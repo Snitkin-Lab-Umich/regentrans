@@ -1,0 +1,194 @@
+---
+title: "Regentrans Vignette"
+author: "Sophie Hoffman"
+date: "3/29/2021"
+output: 
+  html_document:
+    toc: true
+  
+---
+
+The goal of `regentrans` is to give users a framework for using genomics to study regional pathogen transmission. 
+
+```{r setup,echo=TRUE,message=FALSE}
+library(ape)
+library(dplyr)
+library(devtools)
+library(ggtree)
+library(pheatmap)
+library(ggplot2)
+library(phytools)
+library(regentrans)
+library(gridExtra)
+
+#set theme 
+theme_set(theme_bw() + theme(#axis.text.x = element_text(angle=90,vjust = 0.5, hjust = 1),
+  strip.background = element_rect(fill="white",linetype='blank'), text=element_text(size=15)))
+```
+
+# Data Prep
+
+In order to use the regentrans package, you will need your data in a certain format. It is important to ensure that you have all relevant information for all of the isolates of interest for your analysis. Each isolate should be represented in each metadata named list as well as in the fasta file and phylogenetic tree. 
+
+### Metadata
+
+Each metadata category should appear as a named list where the names correspond to the isolate IDs and the items in the list reflect the category of the isolate. Locations for each isolate are required, while patient information, collection dates and sequence types are all optional inputs. 
+
+To create named lists from a data.frame, you can do the following
+```{r, eval = FALSE}
+locs <- metadata$locations
+names(locs) <- metadata$isolate_ID
+```
+
+### Fasta file
+
+A fasta file. Can be read in to R using the following command 
+
+```{r, eval = FALSE}
+fasta <- ape::read.dna("/path/to/data.fasta",format = "fasta")
+
+```
+
+### SNV distance matrix
+
+A pairwise SNV distance matrix. Can be created using the fasta file
+
+```{r, eval = FALSE}
+dists <- ape::dist.dna(x = fasta, as.matrix = TRUE, model = "N", pairwise.deletion = TRUE)
+```
+
+### Phylogenetic tree
+
+A phylogenetic tree (.treefile). Can be read in to R using the following command
+
+```{r, eval = FALSE}
+tree <- ape::read.tree("path/to/data.treefile")
+```
+
+### Patient transfer network
+
+A patient transfer network represented by a data.frame with three columns: `source_facil`, `dest_facil` and `n_transfers`. 
+
+### Input your data
+
+If you want to use your own data as input to the functions in the vignette, format your data according to the instructions above and set the following objects equal to your data. If you will not be using any of the optional data, make sure to assign those objects to `NULL`. 
+
+```{r}
+#named list of locations
+locs <- regentrans::locs
+#named list of patient IDs
+pt <- regentrans::pt
+#named list of isolate collection dates
+dates <- NULL
+#named list of sequence types
+st <- NULL
+#fasta file 
+fasta <- regentrans::fasta
+#SNV distance matrix 
+dists <- regentrans::dists
+#phylogenetic tree
+tree <- regentrans::tr
+#patient transfer network
+pt_trans_net <- NULL
+```
+
+# Is transmission occurring? 
+
+In order to explore this question, we can leverage our WGS data in the form of the SNV distance matrix and the `get_snv_dists()` function. 
+
+
+```{r, message=FALSE}
+
+#TODO subset where I won't have to use pairwise dists < 1000, update the test data to only one ST. 
+
+snv_dists <- get_snv_dists(dists = regentrans::dists, locs = regentrans::locs, pt = regentrans::pt)
+colors <- c("Intra-facility pair" = "red", "Inter-facility pair" = "blue")
+ggplot() + 
+  geom_histogram(data = subset(snv_dists,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
+  geom_histogram(data = subset(snv_dists,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 1000), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.5) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs")
+```
+
+- Closely related pairs appear towards the left of the graph, and pairs are colored based on whether they were isolated from the same (intra) or different (inter) facilities. 
+
+
+# Is transmission occurring within and/or between locations?
+
+In order to explore this question we can leverage our WGS data in the form of the SNV distance matrix using the `get_frac_intra()` function and the phylogenetic tree using the `get_clusters()` function. 
+
+### get_frac_intra()
+
+```{r}
+frac_intra <- get_frac_intra(snv_dists = snv_dists) #or get_frac_intra(dists = regentrans::dists, locs = regentrans::locs, pt = regentrans::pt)
+
+frac_intra_plot <- ggplot(data = frac_intra, aes(x = Thresh, y = Frac_Intra)) + geom_bar(stat = "identity", fill = "blue", alpha = 0.5) + labs(x = "SNV Distance Threshold", y = "Fraction of Intra-Facility Pairs") +  ggtitle("Fraction of Isolate Pairs from the Same \nFacility at Each SNV Distance Threshold") + ylim(0, 1) + theme(plot.title = element_text(size = 10))
+
+frac_inter_plot <- ggplot(data = frac_intra, aes(x = Thresh, y = Frac_Inter)) + geom_bar(stat = "identity", fill = "red", alpha = 0.5) + labs(x = "SNV Distance Threshold", y = "Fraction of Inter-Facility Pairs") +  ggtitle("Fraction of Isolate Pairs from Different \nFacilities at Each SNV Distance Threshold") + ylim(0, 1) + theme(plot.title = element_text(size = 10))
+
+grid.arrange(frac_intra_plot, frac_inter_plot, ncol=2)
+```
+
+### get_clusters()
+
+When working with the `get_clusters()` function, it is a good idea to perform analyses with various pureness levels. The default pureness value is 1. 
+
+```{r}
+clusters <- get_clusters(regentrans::tr,regentrans::locs, pureness = 1)
+#dissect output
+pure_subtree_info <- clusters$pure_subtree_info
+subtrees <- clusters$subtrees
+
+ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Isolates in \nPhylogenetic Cluster", x = "Facility ID", title = "Pure Subtree Information")
+```
+
+### Visualize the Phylogenetic Tree Annotated by Location
+```{r}
+mpr_tree = midpoint.root(regentrans::tr)
+gheatmap(ggtree(mpr_tree, layout = "circular"),as.data.frame(regentrans::locs), color = NA)
+```
+
+# What locations is transmission occurring within/between?
+
+Choose and SNV cutoff (it is recommended to perform a sensitivity analysis by choosing several different SNV thresholds and seeing how robust the results are to these changes). Suggestions about how to choose a SNV cutoff can be found in the manuscript. 
+
+Using this cutoff, the number of closely related pairs within and between facilities can be determined and used to identify facilities and facility pairs with more putative spread. 
+
+
+```{r, message=FALSE}
+cutoff <- 20 #adjust according to your own analysis!
+snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Pair_Type) %>% summarize(n = n()) %>% ggplot(aes(x = Loc1, y = n, color = Pair_Type)) + geom_point(alpha = .5) + labs(y = "Number of Closely Related Isolate Pairs", x = "Facility ID", title = "Number of Closely Related Isolate Pairs \nby Facility")
+
+```
+
+
+# Have transmission dynamics changed over time?
+
+- wrapper function for get_snv_dists by time
+
+# Is transmission occurring along paths of higher patient flow? 
+
+In order to explore this question, we can leverage our WGS data in the form of the SNV distance matrix along with the patient flow network using the `patient_transfer()` function.
+
+```{r}
+#for now 
+mat <- data.frame(matrix(data = c(0, 20, 30, 40,
+                                  20, 0, 26, 50,
+                                  30, 26, 0, 57,
+                                  40, 50, 57, 0), nrow = 4, ncol = 4))
+rownames(mat) <- c("A", "B", "C", "D")
+colnames(mat) <- c("A", "B", "C", "D")
+test_pt_trans_net <- na.omit(data.frame(as.table(as.matrix(mat))))
+#pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
+colnames(test_pt_trans_net) <- c("source_facil", "dest_facil", "n_transfers")
+test_pt_trans_net$n_transfers <- as.numeric(test_pt_trans_net$n_transfers)
+
+pt_trans <- patient_transfer(pt_trans_net = test_pt_trans_net, snv_dists = snv_dists)
+
+ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pairs)) + geom_point(color = "blue", alpha = 0.5) + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers from Facility \nvs. Number of Closely Related Isolate Pairs at Facility") 
+
+```
+
+# Are there any observable geographic trends in prevalence/transmission? 
+
+```{r}
+#make up coordinates, plot them with size based on number of isolates
+```
