@@ -18,9 +18,8 @@ library(ggtree)
 library(pheatmap)
 library(ggplot2)
 library(phytools)
-#library(regentrans)
 library(gridExtra)
-load_all()
+library(regentrans)
 
 #set theme 
 theme_set(theme_bw() + theme(#axis.text.x = element_text(angle=90,vjust = 0.5, hjust = 1),
@@ -99,11 +98,17 @@ In order to explore this question, we can leverage our WGS data in the form of t
 
 
 ```{r, message=FALSE}
-snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
+snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt) 
+```
+
+In order to subset to one representation of each isolate-isolate pair (undirected), use the `subset_pairs()` function with the `snv_dists` object as input. 
+
+```{r}
+snv_dists_sub <- subset_pairs(snv_dists)
 colors <- c("Intra-facility pair" = "red", "Inter-facility pair" = "blue")
 ggplot() + 
-  geom_histogram(data = subset(snv_dists,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs")
+  geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
+  geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs")
 ```
 
 - Closely related pairs appear towards the left of the graph, and pairs are colored based on whether they were isolated from the same (intra) or different (inter) facilities. 
@@ -112,8 +117,8 @@ We can also take a closer look at the closely related pairs
 
 ```{r}
 ggplot() + 
-  geom_histogram(data = subset(snv_dists,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
-  geom_histogram(data = subset(snv_dists,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \n< 20 SNV Distance")
+  geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
+  geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \n< 20 SNV Distance")
 ```
 
 # Is transmission occurring within and/or between locations?
@@ -167,14 +172,19 @@ snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Pair_Type) %>%
 
 # Have transmission dynamics changed over time?
 
-- wrapper function for get_snv_dists by time
+**work in progress**
+```{r, echo = FALSE}
+#wrapper function for get_snv_dists by time
+```
 
 # Is transmission occurring along paths of higher patient flow? 
 
 In order to explore this question, we can leverage our WGS data in the form of the SNV distance matrix along with the patient flow network using the `patient_transfer()` function.
 
+**Choosing a pairwise SNV distance threshold based on your dataset is very important, avoid using the default value**
+
 ```{r}
-pt_trans <- patient_transfer(pt_trans_net = pt_flow, snv_dists = snv_dists)
+pt_trans <- patient_transfer(pt_trans_net = pt_flow, snv_dists = snv_dists, thresh = 10)
 
 ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pairs)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers from Facility \nvs. Number of Closely Related Isolate Pairs at Facility") 
 
@@ -185,6 +195,7 @@ ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pai
 
 # Are there any observable geographic trends in prevalence/transmission? 
 
-```{r}
+**work in progress**
+```{r, echo = FALSE}
 #make up coordinates, plot them with size based on number of isolates
 ```
