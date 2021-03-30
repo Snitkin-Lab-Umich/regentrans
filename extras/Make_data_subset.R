@@ -75,3 +75,79 @@ save(dists, file="/Users/sophiehoffman/Desktop/regentrans/data/dists.RData")
 save(tr, file="/Users/sophiehoffman/Desktop/regentrans/data/tr.RData")
 
 
+##################3/30/21 full data subset##################
+library(dplyr)
+
+#metadata path Penn
+#/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv
+metadata <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv")
+
+#alignment path Penn
+#/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta
+fasta <- ape::read.dna("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta",
+                       format = "fasta")
+
+#tree path Penn
+#/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile
+tr <- ape::read.tree("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile")
+
+#st info
+st <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/Reports/kleborate/penn_kleborate_results.txt", sep = "\t")
+
+#join st and metadata
+metadata$isolate_no <- paste0("PCMP_H", metadata$isolate_no)
+metadata <- metadata %>% left_join(st, by = c("isolate_no" = "strain")) %>% filter(ST == "ST258") %>% select(isolate_no, patient_id, ltach, cx_date)
+#subset date to year
+metadata$cx_date <- substr(metadata$cx_date, 1, 4)
+
+#make locs
+locs <- metadata$ltach
+names(locs) <- metadata$isolate_no
+#make pt
+pt <- metadata$patient_id
+names(pt) <- metadata$isolate_no
+#make date
+dates <- as.factor(metadata$cx_date)
+names(dates) <- metadata$isolate_no
+
+#find common
+common <- intersect(intersect(names(locs), rownames(fasta)), tr$tip.label)
+locs_sub <- locs[names(locs) %in% common]
+pt_sub <- pt[names(pt) %in% common]
+dates_sub <- dates[names(dates) %in% common]
+#subset fasta
+fasta_sub<-fasta[common,]
+#subset the tree using keep.tip
+tr_sub <- keep.tip(tr,common)
+#make dists
+dists <- dist.dna(x = fasta_sub, as.matrix = TRUE, model = "N", pairwise.deletion = TRUE)
+
+#rename them all
+locs <- locs_sub
+pt <- pt_sub
+dates <- dates_sub
+fasta <- fasta_sub
+tr <- tr_sub
+
+#save all as .RData
+save(locs, file="/Users/sophiehoffman/Desktop/regentrans/data/locs.RData")
+save(pt, file="/Users/sophiehoffman/Desktop/regentrans/data/pt.RData")
+save(dates, file="/Users/sophiehoffman/Desktop/regentrans/data/dates.RData")
+save(fasta, file="/Users/sophiehoffman/Desktop/regentrans/data/fasta.RData")
+save(dists, file="/Users/sophiehoffman/Desktop/regentrans/data/dists.RData")
+save(tr, file="/Users/sophiehoffman/Desktop/regentrans/data/tr.RData")
+
+#make a pt flow function
+library(Matrix)
+x<-Matrix(sample(20:100, length(unique(locs))^2, replace=TRUE),length(unique(locs)))
+diag(x) <- 0
+rownames(x) <- unique(locs)
+colnames(x) <- unique(locs)
+pat_flow <- na.omit(data.frame(as.table(as.matrix(x))))
+#pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
+colnames(pat_flow) <- c("source_facil", "dest_facil", "n_transfers")
+pat_flow$n_transfers <- as.numeric(pat_flow$n_transfers)
+pt_flow <- pat_flow
+save(pt_flow, file="/Users/sophiehoffman/Desktop/regentrans/data/pt_flow.RData")
+
+
