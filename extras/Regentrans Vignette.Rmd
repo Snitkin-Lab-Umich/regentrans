@@ -10,6 +10,14 @@ output:
 
 The goal of `regentrans` is to give users a framework for using genomics to study regional pathogen transmission. 
 
+To install the package from github, use the command
+
+```{r, eval=FALSE}
+devtools::install_github('Snitkin-Lab-Umich/regentrans')
+```
+
+Other packages you'll need to load to run this tutorial include:
+
 ```{r setup,echo=TRUE,message=FALSE}
 library(ape)
 library(dplyr)
