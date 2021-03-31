@@ -17,4 +17,6 @@ Imports:
     dplyr,
     ape,
     phytools, 
-    tidyr
+    tidyr, 
+    igraph, 
+    future.apply
