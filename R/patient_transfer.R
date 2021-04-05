@@ -7,7 +7,7 @@
 #' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
 #' @param pt a named vector of patient that isolate was taken from with the name being sample ID (optional)
 #'
-#' @return fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data
+#' @return a summary of number of closely related isolate pairs and number of patient transfers between each facility pair
 #' @export
 #'
 #' @examples a patient transfer network and either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
