@@ -12,7 +12,7 @@ The goal of `regentrans` is to give users a framework for using genomics to stud
 
 To install the package from github, use the command
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, message = FALSE}
 devtools::install_github('Snitkin-Lab-Umich/regentrans')
 library(regentrans)
 ```
@@ -223,7 +223,7 @@ ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pai
 
 ```
 
-*Note:* This data is simulated, so there is no trend present
+*Note:* This data is simulated
 
 ```{r, message=FALSE}
 Fsp_long <- na.omit(data.frame(as.table(as.matrix(Fsp)))) %>% filter(Freq != 0) %>% `colnames<-`(c("facil_1", "facil_2", "Fsp_val")) %>% subset_pairs() %>% left_join(pt_trans)
@@ -231,6 +231,7 @@ Fsp_long <- na.omit(data.frame(as.table(as.matrix(Fsp)))) %>% filter(Freq != 0) 
 ggplot(data = Fsp_long, mapping = aes(x = n_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers from Facility \nvs. Fsp (population-level similarity)") + geom_smooth(method = "lm")
 
 ```
+
 Fsp values closer to 0 indicate more closely related populations.
 
 # Are there any observable geographic trends in prevalence/transmission? 
@@ -265,6 +266,7 @@ facil_geo %>% ggplot(aes(x=long, y=lat)) +
 
 
 ```
+
 *Note:* This location data is simulated
 
 We can also combine this data with our `locs` data and the `pt_trans` data to create a geographic map where point size represents number of isolates collected from a facility and line width represents a normalized number of patients transferred between facilities.
@@ -284,4 +286,5 @@ facil_geo %>% ggplot(aes(x=long, y=lat)) +
 
 
 ```
+
 *Note:* This location data is simulated

@@ -244,7 +244,7 @@ cities_sub <- cities[1:length(facilities),4:5]
 facil_coord <- as.data.frame(cbind(facilities, cities_sub))
 head(facil_coord)
 ```
-We can combine this data with our `locs` data and the `Fsp` data to create a geographic map where point size represents number of isolates collected from a facility and line width represents Fsp value (population similarity between facilities).
+We can combine this data with our `locs` data and the Fsp data to creat a geographic map where dot size represents number of isolates collected from a facility and line width represents Fsp value (population similarity between facilities).
 
 ```{r, message=FALSE}
 loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facilities", "n"))
@@ -266,8 +266,6 @@ facil_geo %>% ggplot(aes(x=long, y=lat)) +
 
 ```
 *Note:* This location data is simulated
-
-We can also combine this data with our `locs` data and the `pt_trans` data to create a geographic map where point size represents number of isolates collected from a facility and line width represents a normalized number of patients transferred between facilities.
 
 ```{r, message=FALSE}
 trans_geo <- pt_trans %>% left_join(facil_geo, by = c("facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)

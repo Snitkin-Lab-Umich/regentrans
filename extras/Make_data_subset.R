@@ -151,3 +151,8 @@ pt_flow <- pat_flow
 save(pt_flow, file="/Users/sophiehoffman/Desktop/regentrans/data/pt_flow.RData")
 
 
+####4/5/21
+Fsp <- read.csv("Penn_Fsp_output.csv")
+rownames(Fsp) <- Fsp[,1]
+Fsp <- Fsp[,-1]
+save(Fsp, file="/Users/sophiehoffman/Desktop/regentrans/data/Fsp.RData")
