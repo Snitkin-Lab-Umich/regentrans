@@ -1,5 +1,6 @@
 #indirect_flow functions 
 indirect_flow <- function(pt_trans_net){
+  #don't want to subset before getting here, need whole network for indirect
   #checks
   check_pt_trans_net(pt_trans_net, unique(c(pt_trans_net$source_facil, pt_trans_net$dest_facil)))
   
@@ -13,6 +14,18 @@ indirect_flow <- function(pt_trans_net){
   
   
   #do some magic??
+  
+  #name nodes in network that we have data for 
+  
+  #find shortest path function 
+  
+  #modify edge weights from n facilities -> normalize/invert 
+  
+  #find shortest path between all nodes of interest 
+  
+  #square matrix of facilities of interest
+  #metric of patient flow between them 
+  
   
   #will this include direct, overwrite the other one or have to be added to the other one? 
   
