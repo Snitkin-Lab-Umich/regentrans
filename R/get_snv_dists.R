@@ -69,6 +69,3 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
   #return snp matrix
   return(snp_facility_pairs)
 }
-
-#how to plot this?
-#tests both with and without pt

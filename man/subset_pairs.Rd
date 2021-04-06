@@ -2,7 +2,7 @@
 % Please edit documentation in R/subset_pairs.R
 \name{subset_pairs}
 \alias{subset_pairs}
-\title{subset_pairs}
+\title{Subset to unique isolate pairs from a directed list}
 \usage{
 subset_pairs(snv_dists)
 }
@@ -13,7 +13,7 @@ subset_pairs(snv_dists)
 a data.frame of isolate pairs subsetted to one row representing each pair
 }
 \description{
-subset_pairs
+Subset to unique isolate pairs from a directed list
 }
 \examples{
 subset_pairs(snv_dists)

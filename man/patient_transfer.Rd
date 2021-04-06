@@ -27,7 +27,7 @@ patient_transfer(
 \item{threshs}{SNV thresholds to use}
 }
 \value{
-fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data
+a summary of number of closely related isolate pairs and number of patient transfers between each facility pair
 }
 \description{
 Get summary of patient transfer network and closely-related isolates

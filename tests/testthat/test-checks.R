@@ -61,6 +61,8 @@ test_pt_trans_net2 <- na.omit(data.frame(as.table(as.matrix(mat2))))
 colnames(test_pt_trans_net2) <- c("source_facil", "dest_facil", "n_transfers")
 test_pt_trans_net2$n_transfers <- as.numeric(test_pt_trans_net2$n_transfers)
 
+mat3 <- mat
+rownames(mat3) <- c(1, 2, 3, 4)
 
 ####################################test get_snv_dists######################################
 test_that("check_get_snv_dists_input works", {
@@ -144,6 +146,15 @@ test_that("check_get_snv_dists_input works", {
 
 })
 
+#test check_subset_pairs_input works
+test_that("check_subset_pairs_input works", {
+  #one that works
+  expect_true(is.null(check_subset_pairs_input(test_dists)))
+  #one that isn't a df
+  expect_error(check_subset_pairs_input("test_dists"),
+               "The dists object must be a data.frame, but you provided: character",
+               fixed = TRUE)
+})
 ##################################test get_frac_intra#####################################
 test_that("check_get_frac_intra_input works", {
   #normal one that works with snv_dists input
@@ -309,6 +320,24 @@ test_that("check_facility_fsp_input works", {
     fixed = TRUE
   )
 })
+
+test_that("check_long_form_input works", {
+  #a good one
+  expect_true(is.null(check_long_form_input(mat)))
+  #one that is wrong type
+  expect_error(is.null(check_long_form_input("mat")),
+               "The fsp matrix object must be a data.frame or matrix but you provided: character",
+               fixed = TRUE)
+  #one not symmetric
+  expect_error(is.null(check_long_form_input(mat[-1,])),
+               "The fsp matrix object must be symmetric, same number of columns as rows",
+               fixed = TRUE)
+  #one with wrong colnames to rownames
+  expect_error(is.null(check_long_form_input(mat3)),
+               "The fsp matrix object must be symmetric, same number of columns as rows and columns and rows must have the same names",
+               fixed = TRUE)
+})
+
 # ##################################test allele_freq#####################################
 test_that("check_allele_freq_input works", {
   #one that works without subset

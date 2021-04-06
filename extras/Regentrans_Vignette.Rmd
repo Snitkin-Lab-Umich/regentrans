@@ -227,9 +227,7 @@ ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pai
 *Note:* This data is simulated
 
 ```{r, message=FALSE}
-Fsp_long <- na.omit(data.frame(as.table(as.matrix(Fsp)))) %>% filter(Freq != 0) %>% `colnames<-`(c("facil_1", "facil_2", "Fsp_val")) %>% subset_pairs() %>% left_join(pt_trans)
-
-ggplot(data = Fsp_long, mapping = aes(x = n_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers from Facility \nvs. Fsp (population-level similarity)") + geom_smooth(method = "lm")
+Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "facil_1", "Facil_2" = "facil_2")) %>% ggplot(mapping = aes(x = n_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers from Facility \nvs. Fsp (population-level similarity)") + geom_smooth(method = "lm")
 
 ```
 
@@ -253,7 +251,7 @@ loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facilities", "
 
 facil_geo <- facil_coord %>% left_join(loc_n)
 
-Fsp_geo <- Fsp_long %>% left_join(facil_geo, by = c("facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+Fsp_geo <- Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "facil_1", "Facil_2" = "facil_2")) %>% left_join(facil_geo, by = c("Facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 facil_geo %>% ggplot(aes(x=long, y=lat)) +
   geom_point(aes(size=n), alpha=0.5, color = "blue") + 

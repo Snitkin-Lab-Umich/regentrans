@@ -1,8 +1,3 @@
-# get fraction of intra-facility pairs for different snv thresholds
-# dists - output of get_snv_dists - will want to change either the name of this argument or the other one so the arguments always mean the same input
-# threshs - what snv thresholds to use #some vector of numbers, max number isn't > max snv distance or negative
-# what if we call it snv_dists? because the other one is getting snv_dists?
-
 #' Get fraction of intra-facility pairs for different snv thresholds
 #'
 #' @param snv_dists the output object of the get_snv_dists function
@@ -41,7 +36,3 @@ get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NUL
 
   return(data.frame(intra_cts))
 }
-
-#might want to change the name/call the get_snv_dists
-#within it just so we don't have to run them in order,
-#could write a wrapper function that calls both - get_frac_intra_from_snv_dists
