@@ -17,7 +17,7 @@ devtools::install_github('Snitkin-Lab-Umich/regentrans')
 library(regentrans)
 ```
 
-```{r,echo=FALSE}
+```{r,echo=FALSE, message=FALSE}
 devtools::load_all()
 ```
 
@@ -46,7 +46,7 @@ In order to use the regentrans package, you will need your data in a certain for
 Each metadata category should appear as a named list where the names correspond to the isolate IDs and the items in the list reflect the category of the isolate. Locations for each isolate are required, while patient information, collection dates and sequence types are all optional inputs. 
 
 To create named lists from a data.frame, you can do the following
-```{r, eval = FALSE}
+```{r, eval = FALSE, message=FALSE}
 locs <- metadata$locations
 names(locs) <- metadata$isolate_ID
 ```
@@ -55,7 +55,7 @@ names(locs) <- metadata$isolate_ID
 
 A fasta file. Can be read in to R using the following command 
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, message=FALSE}
 fasta <- ape::read.dna("/path/to/data.fasta",format = "fasta")
 
 ```
@@ -64,7 +64,7 @@ fasta <- ape::read.dna("/path/to/data.fasta",format = "fasta")
 
 A pairwise SNV distance matrix. Can be created using the fasta file
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, message=FALSE}
 dists <- ape::dist.dna(x = fasta, as.matrix = TRUE, model = "N", pairwise.deletion = TRUE)
 ```
 
@@ -72,7 +72,7 @@ dists <- ape::dist.dna(x = fasta, as.matrix = TRUE, model = "N", pairwise.deleti
 
 A phylogenetic tree (.treefile). Can be read in to R using the following command
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, message=FALSE}
 tree <- ape::read.tree("path/to/data.treefile")
 ```
 
@@ -84,7 +84,7 @@ A patient transfer network represented by a data.frame with three columns: `sour
 
 If you want to use your own data as input to the functions in the vignette, format your data according to the instructions above and set the following objects equal to your data. If you will not be using any of the optional data, make sure to assign those objects to `NULL`. 
 
-```{r}
+```{r, message=FALSE}
 #named list of locations
 locs <- regentrans::locs
 #named list of patient IDs
@@ -114,7 +114,7 @@ snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
 
 In order to subset to one representation of each isolate-isolate pair (undirected), use the `subset_pairs()` function with the `snv_dists` object as input. 
 
-```{r}
+```{r, message=FALSE}
 snv_dists_sub <- subset_pairs(snv_dists)
 ggplot() + 
   geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
@@ -125,7 +125,7 @@ ggplot() +
 
 We can also take a closer look at the closely related pairs which can give us information about how transmission is occurring in the population.
 
-```{r}
+```{r, message=FALSE}
 ggplot() + 
   geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
   geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \n< 20 SNV Distance")
@@ -137,7 +137,7 @@ In order to explore this question we can leverage our WGS data in the form of th
 
 ### get_frac_intra()
 
-```{r}
+```{r, message=FALSE}
 frac_intra <- get_frac_intra(snv_dists = snv_dists) #or get_frac_intra(dists = dists, locs = locs, pt = pt)
 
 ggplot(data = frac_intra, aes(x = Thresh, y = Frac_Intra)) + geom_bar(stat = "identity", fill = "blue", alpha = 0.5) + labs(x = "SNV Distance Threshold", y = "Fraction of Intra-Facility Pairs") +  ggtitle("Fraction of Isolate Pairs from the Same \nFacility at Each SNV Distance Threshold") + ylim(0, 1) 
@@ -147,7 +147,7 @@ ggplot(data = frac_intra, aes(x = Thresh, y = Frac_Intra)) + geom_bar(stat = "id
 
 When working with the `get_clusters()` function, it is a good idea to perform analyses with various pureness levels. The default pureness value is 1. 
 
-```{r}
+```{r, message=FALSE}
 clusters <- get_clusters(tr,locs, pureness = 1)
 #dissect output
 pure_subtree_info <- clusters$pure_subtree_info
@@ -157,7 +157,7 @@ ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size)) + geom_jitter(po
 ```
 
 ### Visualize the Phylogenetic Tree Annotated by Location
-```{r}
+```{r, message=FALSE}
 mpr_tree = midpoint.root(tr)
 gheatmap(ggtree(mpr_tree, layout = "circular"),as.data.frame(locs), color = NA)
 ```
@@ -191,20 +191,21 @@ snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Loc2) %>% summ
 
 Fsp is a measure of similarity between populations at different facilities. Value of 0 indicates that the populations are identical, while value of 1 indicates that the populations are completely different. 
 
-```{r, echo=FALSE}
-Fsp <- regentrans::Fsp
-pheatmap(Fsp)
-```
-
-```{r, eval=FALSE}
+```{r, eval=FALSE, message=FALSE}
 Fsp <- get_facility_fsp(fasta, locs)
 pheatmap(Fsp)
 ```
 
+```{r, echo=FALSE, message=FALSE}
+Fsp <- regentrans::Fsp
+pheatmap(Fsp)
+```
+
+
 # Have transmission dynamics changed over time?
 
 **work in progress**
-```{r, echo = FALSE}
+```{r, echo = FALSE, message=FALSE}
 #wrapper function for get_snv_dists by time
 ```
 
@@ -216,7 +217,7 @@ In order to explore this question, we can leverage our WGS data in the form of t
 
 **Choosing a pairwise SNV distance threshold based on your dataset is very important, avoid using the default value**
 
-```{r}
+```{r, message=FALSE}
 pt_trans <- patient_transfer(pt_trans_net = pt_flow, snv_dists = snv_dists, thresh = 10)
     
 ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pairs)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers from Facility \nvs. Number of Closely Related Isolate Pairs at Facility") + geom_smooth(method = "lm")
@@ -238,7 +239,7 @@ Fsp values closer to 0 indicate more closely related populations.
 
 In order to evaluate whether there are any observable geographic trends in prevalence or transmission, we will need geographic information (latitude and longitude) for each facility. The data.frame should look like this, and be called `facil_coord`
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, message=FALSE}
 cities <- force(us.cities) %>% filter(!country.etc %in% c("HI", "AK"))
 facilities <- unique(locs)
 cities_sub <- cities[1:length(facilities),4:5]
