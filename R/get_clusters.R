@@ -1,11 +1,3 @@
-# get clusters
-# tr - tree
-# locs - locations #named vector #could be body site, infection vs. colinization, etc. maybe change the name to be groups?
-# pureness - how pure the cluster is (<= 0.5)
-#bootstrap value should be an argument here
-
-
-
 #' Get facility clusters on phylogeny
 #'
 #' @param tr a tree object returned by the read.tree function from the ape package
