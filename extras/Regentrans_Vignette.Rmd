@@ -220,14 +220,14 @@ In order to explore this question, we can leverage our WGS data in the form of t
 ```{r, message=FALSE}
 pt_trans <- patient_transfer(pt_trans_net = pt_flow, snv_dists = snv_dists, thresh = 10)
     
-ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pairs)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers from Facility \nvs. Number of Closely Related Isolate Pairs at Facility") + geom_smooth(method = "lm")
+ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pairs)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related Isolate Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
 
 *Note:* This data is simulated
 
 ```{r, message=FALSE}
-Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "facil_1", "Facil_2" = "facil_2")) %>% ggplot(mapping = aes(x = n_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers from Facility \nvs. Fsp (population-level similarity)") + geom_smooth(method = "lm")
+Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "facil_1", "Facil_2" = "facil_2")) %>% ggplot(mapping = aes(x = n_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
 
