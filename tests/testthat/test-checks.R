@@ -400,7 +400,7 @@ test_that("within_pop_var_input_checks works", {
   #one with wrong subset
   expect_error(
     within_pop_var_input_checks(subset_snp_mat = "test_fasta", subset = c(TRUE, FALSE, FALSE)),
-    "The subset_snp_mat you have provided is not a DNAbin, you provided acharacter",
+    "The subset_snp_mat you have provided is not a DNAbin, you provided a character",
     fixed = TRUE
   )
 })

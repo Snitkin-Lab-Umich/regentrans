@@ -440,8 +440,15 @@ within_pop_var_input_checks <- function(subset_snp_mat, subset){
                class(subset)))
   }
   #check subset_snp_mat is DNAbin
-  if(!((any(class(subset_snp_mat)) == "DNAbin" || any(class(subset_snp_mat)) == "raw") || any(class(subset_snp_mat)) == "matrixarray")){
-    stop(paste("The subset_snp_mat you have provided is not a DNAbin, you provided a"),
+  # if(!((any(class(subset_snp_mat)) == "DNAbin" || any(class(subset_snp_mat)) == "raw") || any(class(subset_snp_mat)) == "matrixarray")){
+  #   stop(paste("The subset_snp_mat you have provided is not a DNAbin, you provided a "),
+  #        class(subset_snp_mat))
+  # }
+  #check subset_snp_mat is a matrix, DNAbin, or raw
+  if(!((any(class(subset_snp_mat) == "DNAbin") ||
+     any(class(subset_snp_mat) == "raw")) ||
+     any(class(subset_snp_mat) == "matrixarray"))){
+    stop(paste("The subset_snp_mat you have provided is not a DNAbin, you provided a "),
          class(subset_snp_mat))
   }
 
