@@ -6,6 +6,8 @@ It can be installed using the command `devtools::install_github('Snitkin-Lab-Umi
 
 An introductory vignette can be found [here](https://htmlpreview.github.io/?https://github.com/Snitkin-Lab-Umich/regentrans/blob/master/extras/Regentrans_Vignette.html)
 
+Questions regentrans can help investigate:
+
 | Question | Method | regentrans function(s) | Required Data | Optional Data
 |---|---|---|---|---|
 | Is transmission occurring in the region of interest? | Pairwise SNV distances | `get_snv_dists()` | A pairwise SNV distance matrix (can be created using `ape::dist.dna()` on fasta file), isolate location information | Isolate patient information, patient transfer network |
