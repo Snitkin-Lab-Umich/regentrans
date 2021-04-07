@@ -218,8 +218,8 @@ In order to explore this question, we can leverage our WGS data in the form of t
 **Choosing a pairwise SNV distance threshold based on your dataset is very important, avoid using the default value**
 
 ```{r, message=FALSE}
-pt_trans <- patient_transfer(pt_trans_net = pt_flow, snv_dists = snv_dists, thresh = 10)
-    
+pt_trans <- patient_transfer(pt_trans_net = pt_flow, snv_dists = snv_dists, thresh = 10) %>% dplyr::mutate(n_transfers = rowMeans(select(., dplyr::ends_with("transfers")), na.rm = TRUE)) 
+
 ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pairs)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related Isolate Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
@@ -227,7 +227,9 @@ ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pai
 *Note:* This data is simulated
 
 ```{r, message=FALSE}
-Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "facil_1", "Facil_2" = "facil_2")) %>% ggplot(mapping = aes(x = n_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+pt_flow_undirected <- pt_flow %>% dplyr::left_join(pt_flow, by = c("source_facil" = "dest_facil", "dest_facil" = "source_facil")) %>% dplyr::mutate(n_transfers = rowMeans(select(., dplyr::starts_with("n_transfers")), na.rm = TRUE)) 
+
+Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_flow_undirected, by = c("Facil_1" = "source_facil", "Facil_2" = "dest_facil")) %>% ggplot(mapping = aes(x = n_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
 
@@ -251,7 +253,7 @@ loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facilities", "
 
 facil_geo <- facil_coord %>% left_join(loc_n)
 
-Fsp_geo <- Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "facil_1", "Facil_2" = "facil_2")) %>% left_join(facil_geo, by = c("Facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+Fsp_geo <- Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "Loc1", "Facil_2" = "Loc2")) %>% left_join(facil_geo, by = c("Facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 facil_geo %>% ggplot(aes(x=long, y=lat)) +
   geom_point(aes(size=n), alpha=0.5, color = "blue") + 
@@ -271,7 +273,7 @@ facil_geo %>% ggplot(aes(x=long, y=lat)) +
 We can also combine this data with our `locs` data and the `pt_trans` data to create a geographic map where point size represents number of isolates collected from a facility and line width represents a normalized number of patients transferred between facilities.
 
 ```{r, message=FALSE}
-trans_geo <- pt_trans %>% left_join(facil_geo, by = c("facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+trans_geo <- pt_trans %>% left_join(facil_geo, by = c("Loc1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 facil_geo %>% ggplot(aes(x=long, y=lat)) +
   geom_point(aes(size=n), alpha=0.5, color = "blue") +

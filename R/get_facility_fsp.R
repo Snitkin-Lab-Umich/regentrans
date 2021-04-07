@@ -32,7 +32,6 @@ get_facility_fsp <- function(fasta, locs, form = "matrix"){
   sample_locs <- rownames(fasta_sub)
   #unique list of locations
   locs_unique <- unique(unname(locs_subset))
-
   #CALCULATE INTRA- AND INTER-FACILITY DISTANCE
   facil_dist <- data.frame(sapply(locs_unique, function(f1){
     sapply(locs_unique, function(f2){

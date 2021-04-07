@@ -177,17 +177,17 @@ check_snv_dists <- function(snv_dists){
                class(snv_dists)))
   }
   #check the number of columns
-  if(!(ncol(snv_dists) %in% 6:9)){
+  if(!(ncol(snv_dists) %in% 6:10)){
     stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but you provided a data.frame with ",
                ncol(snv_dists), " columns."))
   }
   #check the colnames
   if(!((ncol(snv_dists) == 8 &&
         all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1",  "Patient2", "Pair_Type"))) ||
-       (ncol(snv_dists) == 9 &&
-        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1",  "Patient2", "Pair_Type", "n_transfers"))) ||
-       (ncol(snv_dists) == 7 &&
-        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type", "n_transfers"))) ||
+       (ncol(snv_dists) == 10 &&
+        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1",  "Patient2", "Pair_Type", "n_1_to_2_transfers", "n_2_to_1_transfers"))) ||
+       (ncol(snv_dists) == 8 &&
+        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type", "n_1_to_2_transfers", "n_2_to_1_transfers"))) ||
        (ncol(snv_dists) == 6 &&
         all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type"))))){
     stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has ",
