@@ -20,11 +20,11 @@ test_pt_trans <- patient_transfer(pat_flow, test_snv_dists, thresh = 50)
 
 test_that("patient_transfer works", {
   #check ncols
-  expect_true(ncol(test_pt_trans) == 4)
+  expect_true(ncol(test_pt_trans) == 5)
   #check colnames
-  expect_true(all(colnames(test_pt_trans) == c("facil_1", "facil_2", "n_closely_related_pairs", "n_transfers")))
+  expect_true(all(colnames(test_pt_trans) == c("Loc1", "Loc2", "n_closely_related_pairs", "n_1_to_2_transfers", "n_2_to_1_transfers")))
   #check coltypes
-  expect_true(all(sapply(test_pt_trans, class) == c("character", "character", "numeric", "numeric")))
+  expect_true(all(sapply(test_pt_trans, class) == c("character", "character", "integer", "numeric", "numeric")))
   #check that there are <= nrow pat_dlow
   expect_true(nrow(test_pt_trans) <= nrow(pat_flow))
 })

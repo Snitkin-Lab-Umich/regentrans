@@ -1,5 +1,4 @@
-#tests for regentrans - to be made when the public facing dataset is available
-####################################test data######################################
+###################################test data######################################
 test_locs <- locs[1:4]
 test_locs_2 <- locs[5:8]
 test_locs_3 <- locs[1:3]
@@ -22,8 +21,8 @@ test_snv_dists_3 <- test_snv_dists
 colnames(test_snv_dists_3) <- c("A", "B", "C", "D", "E", "F", "G", "H")
 test_snv_dists_4 <- test_snv_dists
 test_snv_dists_4$Pairwise_Dists <- as.character(test_snv_dists_4$Pairwise_Dists)
-test_tr <- keep.tip(tr,names(test_pt))
-test_tr_2 <- keep.tip(tr,names(test_pt_3))
+test_tr <- ape::keep.tip(tr,names(test_pt))
+test_tr_2 <- ape::keep.tip(tr,names(test_pt_3))
 test_fasta <- fasta[names(test_locs),]
 test_fasta_2 <- fasta[names(test_locs_5),]
 test_fasta_3 <- fasta[names(test_locs_9),]
@@ -47,9 +46,9 @@ test_pt_trans_net_3 <- test_pt_trans_net
 colnames(test_pt_trans_net_3) <- c("A", "B", "C")
 test_pt_trans_net_4 <- test_pt_trans_net
 test_pt_trans_net_4$n_transfers <- as.character(test_pt_trans_net_4$n_transfers)
-test_pt_trans_net_5 <- test_pt_trans_net %>% filter(source_facil == "A", dest_facil == "A")
+test_pt_trans_net_5 <- test_pt_trans_net %>% dplyr::filter(source_facil == "A", dest_facil == "A")
 
-test_snv_dists_pt_trans <- get_snv_dists(test_dists, test_locs, test_pt, test_pt_trans_net)
+test_snv_dists_pt_trans <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt, pt_trans = test_pt_trans_net)
 
 mat2 <- data.frame(matrix(data = c(0, 20, 12,
                                   20, 0, 26,
@@ -204,7 +203,7 @@ test_that("check_get_frac_intra_input works", {
 
 })
 
-# ##################################test get_clusters#####################################
+##################################test get_clusters#####################################
 test_that("check_get_clusters_inputs works", {
   #one that should work
   expect_true(is.null(check_get_clusters_inputs(tr = test_tr, locs = test_locs, pureness = 1, bootstrap = NULL)))
@@ -266,7 +265,7 @@ test_that("check_get_clusters_inputs works", {
 
 })
 
-# ##################################test get_facility_fsp#####################################
+##################################test get_facility_fsp#####################################
 test_that("check_facility_fsp_input works", {
   #one that works
   expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, form = "matrix")))
@@ -338,7 +337,7 @@ test_that("check_long_form_input works", {
                fixed = TRUE)
 })
 
-# ##################################test allele_freq#####################################
+##################################test allele_freq#####################################
 test_that("check_allele_freq_input works", {
   #one that works without subset
   expect_true(is.null(check_allele_freq_input(x = test_fasta, subset = NULL, allele_n = 1, alleles = c("a", "t"))))
@@ -387,7 +386,7 @@ test_that("check_allele_freq_input works", {
   # )
 })
 
-# ##################################test within_pop_var#####################################
+##################################test within_pop_var#####################################
 test_that("within_pop_var_input_checks works", {
   #one that works
   expect_true(is.null(within_pop_var_input_checks(subset_snp_mat = test_fasta, subset = c(TRUE, FALSE, FALSE))))
@@ -405,7 +404,7 @@ test_that("within_pop_var_input_checks works", {
   )
 })
 
-# ##################################test reverse_list_str#####################################
+##################################test reverse_list_str#####################################
 test_that("check_reverse_list_str_input works", {
   #one that works
   expect_true(is.null(check_reverse_list_str_input(ls)))
@@ -423,7 +422,7 @@ test_that("check_reverse_list_str_input works", {
   )
 })
 
-# ##################################test get_largest_subtree#####################################
+##################################test get_largest_subtree#####################################
 test_that("check_get_largest_subtree_input works", {
   #one that works
   expect_true(is.null(check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = NULL, bootstrap = NULL, pureness = 1)))
@@ -492,8 +491,7 @@ test_that("check_get_largest_subtree_input works", {
 
 
 
-
-# ##################################test patient_flow#####################################
+##################################test patient_flow#####################################
 test_that("check_pt_transfer_input works", {
   #one that works with snv_dists
   expect_false(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL))
