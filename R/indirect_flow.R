@@ -24,7 +24,7 @@ indirect_flow <- function(pt_trans_net){
 
   #name nodes in network that we have data for
 
-  #find shortest path function
+  #find shortest path function -> igraph::shortest.paths()
 
   #modify edge weights from n facilities -> normalize/invert
 
