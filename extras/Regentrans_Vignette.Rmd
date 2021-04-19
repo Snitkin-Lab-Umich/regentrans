@@ -171,7 +171,8 @@ ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size)) + geom_jitter(po
 
 ### Visualize the Phylogenetic Tree Annotated by Location
 ```{r, message=FALSE}
-mpr_tree = midpoint.root(tr)
+tr_sub <- ape::keep.tip(tr, names(locs))
+mpr_tree = midpoint.root(tr_sub)
 gheatmap(ggtree(mpr_tree, layout = "circular"),as.data.frame(locs), color = NA)
 ```
 
@@ -220,7 +221,7 @@ One way to determine whether Fsp values are significant is to use permutation (D
 
 In order to investigate whether transmission dynamics have changed over time or differ across groups (such as sequence type or species) we can "facet" on those variables. Here is an example of faceting on date:
 
-```{r, echo = FALSE, message=FALSE}
+```{r, message=FALSE}
 snv_dists_sub_dates <- snv_dists_sub %>% left_join(bind_cols(names(dates), dates), by = c("Isolate1" = "...1")) %>% rename("date" = "...2") 
 
 ggplot() + 
