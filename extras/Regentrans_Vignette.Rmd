@@ -39,7 +39,7 @@ theme_set(theme_bw() + theme(strip.background = element_rect(fill="white",linety
 
 # Data Prep
 
-In order to use the regentrans package, you will need your data in a certain format. It is important to ensure that you have all relevant information for all of the isolates of interest for your analysis. Each isolate should be represented in each metadata named list as well as in the fasta file and phylogenetic tree. 
+In order to use the regentrans package, you will need your data in a certain format. It is important to ensure that you have all relevant information for all of the isolates of interest for your analysis. Each isolate should be represented in each metadata named list as well as in the fasta file of variants and phylogenetic tree. 
 
 ### Metadata
 
@@ -51,9 +51,9 @@ locs <- metadata$locations
 names(locs) <- metadata$isolate_ID
 ```
 
-### Fasta file
+### Fasta file of variants
 
-A fasta file. Can be read in to R using the following command 
+A fasta file of variants. Can be read in to R using the following command 
 
 ```{r, eval = FALSE, message=FALSE}
 fasta <- ape::read.dna("/path/to/data.fasta",format = "fasta")
@@ -78,7 +78,7 @@ tree <- ape::read.tree("path/to/data.treefile")
 
 ### Patient transfer network
 
-A patient transfer network represented by a data.frame with three columns: `source_facil`, `dest_facil` and `n_transfers`. 
+A patient transfer network representing facilities that isolates came from represented by a data.frame with three columns: `source_facil`, `dest_facil` and `n_transfers`. 
 
 ### Input your data
 
@@ -102,6 +102,19 @@ tree <- regentrans::tr
 #patient transfer network
 pt_flow <- regentrans::pt_flow
 ```
+
+### Subsetting to one isolate per patient per facility
+
+If you have patient data for your isolates, it is a good idea to subset to one isolate from each patient per facility to avoid overestimating transmission. 
+
+```{r}
+isolate_subset <- cbind(locs, pt) %>% unique() %>% rownames()
+locs <- locs[isolate_subset]
+pt <- pt[isolate_subset]
+dates <- dates[isolate_subset]
+st <- st[isolate_subset]
+```
+
 
 # Is transmission occurring? 
 
@@ -201,12 +214,18 @@ Fsp <- regentrans::Fsp
 pheatmap(Fsp)
 ```
 
+One way to determine whether Fsp values are significant is to use permutation (Donker et al. 2017)
 
-# Have transmission dynamics changed over time?
+# Have transmission dynamics changed over time or across species?
 
-**work in progress**
+In order to investigate whether transmission dynamics have changed over time or differ across groups (such as sequence type or species) we can "facet" on those variables. Here is an example of faceting on date:
+
 ```{r, echo = FALSE, message=FALSE}
-#wrapper function for get_snv_dists by time
+snv_dists_sub_dates <- snv_dists_sub %>% left_join(bind_cols(names(dates), dates), by = c("Isolate1" = "...1")) %>% rename("date" = "...2") 
+
+ggplot() + 
+  geom_histogram(data = subset(snv_dists_sub_dates,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
+  geom_histogram(data = subset(snv_dists_sub_dates,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \nby Date of Isolate Collection") + facet_wrap(~date)
 ```
 
 # Is transmission occurring along paths of higher patient flow? 
@@ -235,7 +254,7 @@ Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_flow_undirected, by = c(
 
 Fsp values closer to 0 indicate more closely related populations.
 
-# Are there any observable geographic trends in prevalence/transmission? 
+# Are there any observable geographic trends in prevalence/transmission?
 
 In order to evaluate whether there are any observable geographic trends in prevalence or transmission, we will need geographic information (latitude and longitude) for each facility. The data.frame should look like this, and be called `facil_coord`
 
@@ -246,23 +265,24 @@ cities_sub <- cities[1:length(facilities),4:5]
 facil_coord <- as.data.frame(cbind(facilities, cities_sub))
 head(facil_coord)
 ```
-We can combine this data with our `locs` data and the `Fsp` data to create a geographic map where point size represents number of isolates collected from a facility and line width represents Fsp value (population similarity between facilities).
+Previous studies have found that there is a strong relationship between extent of patient transfer and geographic distance (Wang J et al. 2020). Thus, geographic distance can be used as a proxy for patient transfer if it is not available. 
+
+We can combine this data with our `locs` data, `Fsp` data and `pt_trans` network to create a geographic map where point size represents number of isolates collected from a facility and line width represents Fsp value (population similarity between facilities).
 
 ```{r, message=FALSE}
 loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facilities", "n"))
 
 facil_geo <- facil_coord %>% left_join(loc_n)
 
-Fsp_geo <- Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "Loc1", "Facil_2" = "Loc2")) %>% left_join(facil_geo, by = c("Facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+Fsp_geo <- Fsp %>% long_form() %>% subset_pairs() %>% left_join(facil_geo, by = c("Facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 facil_geo %>% ggplot(aes(x=long, y=lat)) +
   geom_point(aes(size=n), alpha=0.5, color = "blue") + 
   borders("state") +
   coord_quickmap() +
   geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
-                 size = Fsp_val),
-             data = Fsp_geo, curvature = 0.33,
-             alpha = 0.2) +
+                 alpha = (1/Fsp_val)),
+             data = Fsp_geo, curvature = 0.33) +
   theme_void() + theme(legend.position = "none") 
 
 
@@ -270,22 +290,29 @@ facil_geo %>% ggplot(aes(x=long, y=lat)) +
 
 *Note:* This location data is simulated
 
-We can also combine this data with our `locs` data and the `pt_trans` data to create a geographic map where point size represents number of isolates collected from a facility and line width represents a normalized number of patients transferred between facilities.
+Another way to quantify closely related populations is by the number of isolate pairs between them that are below a SNV distance threshold. 
+
+**Choosing a pairwise SNV distance threshold based on your dataset is very important, avoid using the default value**
 
 ```{r, message=FALSE}
-trans_geo <- pt_trans %>% left_join(facil_geo, by = c("Loc1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+thresh = 10
+
+snv_dist_summary <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>% dplyr::filter(Loc1 != Loc2)
+
+snv_geo <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>% dplyr::filter(Loc1 != Loc2) %>% left_join(facil_geo, by = c("Loc1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 facil_geo %>% ggplot(aes(x=long, y=lat)) +
-  geom_point(aes(size=n), alpha=0.5, color = "blue") +
+  geom_point(aes(size=n), alpha=0.5, color = "blue") + 
   borders("state") +
   coord_quickmap() +
   geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
-                 size = n_transfers/max(n_transfers)),
-             data = trans_geo, curvature = 0.33,
-             alpha = 0.2) +
+                 alpha = n_closely_related_pairs),
+             data = snv_geo, curvature = 0.33) +
   theme_void() + theme(legend.position = "none") 
-
 
 ```
 
 *Note:* This location data is simulated
+
+These are just two examples of how to plot the geographic, but there may be other proxies for patient transfer that work better for your analysis. 
+

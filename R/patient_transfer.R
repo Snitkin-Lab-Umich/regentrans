@@ -34,12 +34,11 @@ patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs 
 
   #instead of all of that we will just left join
   pt_trans_summary <- snv_dists %>%
-    #filter to pairs under the threshold
-    dplyr::filter(as.numeric(Pairwise_Dists) <= thresh) %>%
+    mutate(Pairwise_Dists = as.numeric(Pairwise_Dists)) %>%
     #group by locations (directed)
     dplyr::group_by(Loc1, Loc2) %>%
     #summarize how many closely related isolates are in each location pair
-    dplyr::summarize(n_closely_related_pairs = n()) %>%
+    dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>%
     #remove locations that are the same
     dplyr::filter(Loc1 != Loc2) %>%
     #add in patient transfers from 1 to 2
