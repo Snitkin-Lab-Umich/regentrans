@@ -17,24 +17,25 @@ indirect_flow <- function(pt_trans_net){
   rownames(trans_mat) <- colnames(trans_mat)
 
   #make graph
-  g <- graph_from_adjacency_matrix(as.matrix(trans_mat),mode='directed',weighted = TRUE)
-
-
-  #do some magic??
+  g <- igraph::graph_from_adjacency_matrix(as.matrix(trans_mat),mode='directed',weighted = TRUE)
 
   #name nodes in network that we have data for
 
-  #find shortest path function -> igraph::shortest.paths()
-
   #modify edge weights from n facilities -> normalize/invert
+  out_strength = strength(g,mode='out') # get number of outgoing patient transfers for each vertex
+  tail_vert = tail_of(g,E(g)) # get tail (source) vertex for each edge
+  edwt_sum = sapply(names(tail_vert), function(x) out_strength[names(out_strength) == x]) # get number of outgoing patient transfers of tail vertex for each edge
+  E(g)$weight = -log10(E(g)$weight/edwt_sum) # normalize edge weight by number of outgoing patient transfers of source vertex and take negative log (to use to calculate shortest paths)
 
-  #find shortest path between all nodes of interest
-
+  #find shortest path function -> igraph::shortest.paths()
+  sp <- igraph::shortest.paths(g)
   #square matrix of facilities of interest
   #metric of patient flow between them
 
-
-  #will this include direct, overwrite the other one or have to be added to the other one?
+  #make long form
+  sp %>% as.data.frame(sp)
+  sp$source <- rownames(sp)
+  trans_net_i <- sp %>% as_tibble() %>% mutate(source_facil = colnames(sp)) %>% tidyr::pivot_longer(!source_facil, names_to = "dest_facil", values_to = "pt_trans_metric")
 
 }
 
