@@ -23,6 +23,12 @@ patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs 
     cat("Running get_snv_dists...")
     snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
   }
+  #this is where I'll do if else based on direct or indirect flow...
+  if(trans_type = "indirect"){
+    #run indirect_flow function, overwrite pt_trans_net
+    #will have to adjust join, too
+  }
+
   #subset to only facilities in the locs object
   common_locs <- intersect(unique(c(snv_dists$Loc1, snv_dists$Loc2)), unique(c(pt_trans_net$source_facil, pt_trans_net$dest_facil)))
   pt_trans_net <- pt_trans_net %>% dplyr::filter(source_facil %in% common_locs,
