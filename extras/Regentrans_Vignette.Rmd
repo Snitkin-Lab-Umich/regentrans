@@ -195,6 +195,41 @@ snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Pair_Type) %>%
 
 ```
 
+### Permutation
+
+Permutation can be used as a method to check whether your data is enriched for transmission within/between certain facilities. For example, if we permute the locaiton labels on the `snv_dists` output before calculating the number of isolates below a certain threshold at each facility, we can interrogate whether the enrichments in our data are significant. Permutation can also be used to address significance of other regentrans methods. 
+
+```{r}
+snv_dists %>% mutate(Loc1_mut = sample(Loc1)) %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1_mut, Pair_Type) %>% summarize(n = n()) #%>% ggplot(aes(x = Loc1_mut, y = n, fill = Pair_Type)) + geom_bar(position = "dodge", stat = "identity") + labs(y = "Number of Closely Related Isolate Pairs", x = "Facility ID", title = "Number of Closely Related Isolate Pairs \nby Facility")
+
+permut <- setNames(data.frame(matrix(ncol = 2*length(unique(locs)), nrow = 100)), paste(rep(c("Inter-", "Intra-"), each = length(unique(locs))), unique(locs)))
+
+apply(permut, MARGIN = 1, FUN = function(row){
+  summary <- snv_dists %>% mutate(Loc1_mut = sample(Loc1)) %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1_mut, Pair_Type) %>% summarize(n = n()) %>% mutate(shortcode = paste(substr(Pair_Type, 1, 6), Loc1_mut))
+  for(i in 1:nrow())
+})
+```
+```{r, message=FALSE}
+snv_dists %>% mutate(Loc1_mut = sample(Loc1)) %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1_mut, Pair_Type) %>% summarize(n = n()) #%>% ggplot(aes(x = Loc1_mut, y = n, fill = Pair_Type)) + geom_bar(position = "dodge", stat = "identity") + labs(y = "Number of Closely Related Isolate Pairs", x = "Facility ID", title = "Number of Closely Related Isolate Pairs \nby Facility")
+
+#column 1 = repeated A, B, C,etc. 
+rep(unique(locs), each = length(unique(locs)))
+permut <- setNames(as.data.frame(cbind(rep(unique(locs), each = 2), c("Inter-facility pair", "Intra-facility pair"))), c("Loc1_mut", "Pair_Type"))
+
+
+for(i in 1:100){
+  summary  <- snv_dists %>% mutate(Loc1_mut = sample(Loc1)) %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1_mut, Pair_Type) %>% summarize(n = n())
+  permut <- left_join(permut, summary, by = c("Loc1_mut" = "Loc1_mut", "Pair_Type" = "Pair_Type"))
+}
+colnames(permut) = c("Loc1", "Pair_Type", 1:100)
+
+test <- as.data.frame(t(permut))
+colnames(test) <- paste(test[1,], test[2,])
+test <- test[-c(1:2),]
+
+ggplot(test) + geom_boxplot(x = )
+```
+
 
 ```{r, message=FALSE}
 snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Loc2) %>% summarize(n = n()) %>% filter(Loc1 != Loc2) %>% subset_pairs() %>% mutate(Facil_Pair = paste(Loc1, Loc2)) %>% filter(n >=  mean(n)) %>% ggplot(aes(x = Facil_Pair, y = n)) + geom_bar(position = "dodge", stat = "identity", fill = "salmon") + labs(y = "Number of Closely Related Isolate Pairs", x = "Facility Pair", title = "Number of Closely Related Isolate Pairs \nby Facility Pair") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
