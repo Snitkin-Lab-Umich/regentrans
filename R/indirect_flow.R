@@ -1,15 +1,16 @@
 #' Calculate indirect patient flow from patient transfer network
 #'
 #' @param pt_trans_net a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'
+#' @param paths boolean value, TRUE if you want the shortest paths returned, FALSE if you don't
 #'
 #' @return facility x facility matrix of metric of patient flow between each facility pair
 #' @export
 #'
 #' @examples indirect_flow(pt_trans_net)
-indirect_flow <- function(pt_trans_net){
+indirect_flow <- function(pt_trans_net, paths = FALSE){
   #don't want to subset before getting here, need whole network for indirect
   #checks
-  check_pt_trans_net(pt_trans_net, unique(c(pt_trans_net$source_facil, pt_trans_net$dest_facil)))
+  check_pt_trans_net(pt_trans_net, unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))))
 
   #make matrix format
   trans_mat <- tidyr::pivot_wider(pt_trans_net, names_from = source_facil, values_from = n_transfers)
@@ -22,21 +23,31 @@ indirect_flow <- function(pt_trans_net){
   #name nodes in network that we have data for
 
   #modify edge weights from n facilities -> normalize/invert
-  out_strength = strength(g,mode='out') # get number of outgoing patient transfers for each vertex
-  tail_vert = tail_of(g,E(g)) # get tail (source) vertex for each edge
+  out_strength = igraph::strength(g,mode='out') # get number of outgoing patient transfers for each vertex
+  tail_vert = igraph::tail_of(g,igraph::E(g)) # get tail (source) vertex for each edge
   edwt_sum = sapply(names(tail_vert), function(x) out_strength[names(out_strength) == x]) # get number of outgoing patient transfers of tail vertex for each edge
-  E(g)$weight = -log10(E(g)$weight/edwt_sum) # normalize edge weight by number of outgoing patient transfers of source vertex and take negative log (to use to calculate shortest paths)
+  igraph::E(g)$weight = -log10(igraph::E(g)$weight/edwt_sum) # normalize edge weight by number of outgoing patient transfers of source vertex and take negative log (to use to calculate shortest paths)
+
+  #maybe subset to nodes that have info in our dataset
 
   #find shortest path function -> igraph::shortest.paths()
-  sp <- igraph::shortest.paths(g)
-  #square matrix of facilities of interest
-  #metric of patient flow between them
+  sp <- g %>% igraph::shortest.paths(mode="out") %>% as.data.frame()
 
   #make long form
-  sp %>% as.data.frame(sp)
-  sp$source <- rownames(sp)
   trans_net_i <- sp %>% as_tibble() %>% mutate(source_facil = colnames(sp)) %>% tidyr::pivot_longer(!source_facil, names_to = "dest_facil", values_to = "pt_trans_metric")
 
+  #make them each -(10^x)
+  trans_net_i$pt_trans_metric <- 10^(-trans_net_i$pt_trans_metric)
+
+  #if they asked for the paths, find them and make/return list
+  if(paths == TRUE){
+    paths <- igraph::get.shortest.paths(g, 1, mode = "out")
+    returns <- list("transfer_network" = trans_net_i, "paths" = paths)
+    return(returns)
+  }
+  else{
+    return(trans_net_i)
+  }
 }
 
 ##########################code from zena########################
