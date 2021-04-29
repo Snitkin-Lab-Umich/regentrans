@@ -16,6 +16,7 @@ indirect_flow <- function(pt_trans_net, paths = FALSE){
   trans_mat <- tidyr::pivot_wider(pt_trans_net, names_from = source_facil, values_from = n_transfers)
   trans_mat <- as.data.frame(trans_mat[,2:ncol(trans_mat)])
   rownames(trans_mat) <- colnames(trans_mat)
+  trans_mat = t(trans_mat)
 
   #make graph
   g <- igraph::graph_from_adjacency_matrix(as.matrix(trans_mat),mode='directed',weighted = TRUE)
