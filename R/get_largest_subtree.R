@@ -13,11 +13,13 @@ get_largest_subtree <- function(subtrs, isolate_labels, control_labels=NULL, boo
   #checks
   check_get_largest_subtree_input(subtrs, isolate_labels, control_labels, bootstrap, pureness)
 
-  largest_st_info = future.apply::future_lapply(names(isolate_labels), function(i){
+  #largest_st_info = future.apply::future_lapply(names(isolate_labels), function(i){
+  largest_st_info = lapply(names(isolate_labels), function(i){
     #DETERMINE THE LARGEST CLUSTER WHICH EACH ISOLATE BELONGS TO.
     #CLUSTERS ARE DEFINED AS:
     # 1) HAVE ONLY A SINGLE EPI LABEL, 2) HAVE BOOTSTRAP SUPPORT GREATER THAN 90, 3) INCLUDE MORE THAN ONE CONTROL LABEL
-    sts = future.apply::future_sapply(subtrs, FUN = function(st){
+    #sts = future.apply::future_sapply(subtrs, FUN = function(st){
+    sts = sapply(subtrs, FUN = function(st){
       i_in_subtree = i %in% st$tip.label # isolate is in subtree
       st_labs <- isolate_labels[intersect(st$tip.label, names(isolate_labels))]
       one_label = length(unique(st_labs)) == 1 # only one label in subtree
