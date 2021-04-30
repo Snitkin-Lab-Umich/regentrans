@@ -215,7 +215,7 @@ for(i in 1:100){
   permut <- left_join(permut, summary, by = c("Loc1_mut" = "Loc1_mut", "Pair_Type" = "Pair_Type"))
 }
 
-permut %>% `colnames<-`(c("Loc1", "Pair_Type", 1:100)) %>% tidyr::pivot_longer(!c(Loc1, Pair_Type), names_to = "run", values_to = "value") %>% ggplot() + geom_boxplot(mapping = aes(x = Loc1, y = value, fill = Pair_Type)) + geom_point(data = (snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Pair_Type) %>% summarize(n = n())), mapping = aes(x = Loc1, y = n, color = Pair_Type)) + scale_color_manual(values=c("red", "blue")) + labs(y = "Number of Closely Related \nIsolate Pairs (permuted)", x = "Facility ID", title = "Permuted Number of Closely Related Isolate Pairs \nby Facility with real-value points")
+permut %>% `colnames<-`(c("Loc1", "Pair_Type", 1:100)) %>% tidyr::pivot_longer(!c(Loc1, Pair_Type), names_to = "run", values_to = "value") %>% ggplot() + geom_boxplot(mapping = aes(x = Loc1, y = value, fill = Pair_Type)) + geom_point(data = (snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Pair_Type) %>% summarize(n = n())), mapping = aes(x = Loc1, y = n, color = Pair_Type), shape = 15) + scale_color_manual(values=c("red", "blue")) + labs(y = "Number of Closely Related \nIsolate Pairs (permuted)", x = "Facility ID", title = "Permuted Number of Closely Related Isolate Pairs \nby Facility with real-value points")
 ```
 
 This plot suggests that facility D is enriched for intra-facility transmission. 
