@@ -15,16 +15,29 @@ test_pt <- as.character(pt[1:3])
 names(test_pt) <- names(pt[1:3])
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt)
-
-test_pt_trans <- patient_transfer(pat_flow, test_snv_dists, thresh = 50)
+#one without paths returned
+test_pt_trans <- patient_transfer(pt_trans_net = pat_flow, snv_dists = test_snv_dists, thresh = 50)
+#one with paths returned
+test_pt_trans_paths <- patient_transfer(pat_flow, test_snv_dists, thresh = 50, paths = TRUE)
 
 test_that("patient_transfer works", {
+  #for without paths return
   #check ncols
-  expect_true(ncol(test_pt_trans) == 5)
+  expect_true(ncol(test_pt_trans) == 7)
   #check colnames
-  expect_true(all(colnames(test_pt_trans) == c("Loc1", "Loc2", "n_closely_related_pairs", "n_1_to_2_transfers", "n_2_to_1_transfers")))
+  expect_true(all(colnames(test_pt_trans) == c("Loc1", "Loc2", "n_closely_related_pairs", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1")))
   #check coltypes
-  expect_true(all(sapply(test_pt_trans, class) == c("character", "character", "integer", "numeric", "numeric")))
+  expect_true(all(sapply(test_pt_trans, class) == c("character", "character", "integer", "numeric", "numeric", "numeric", "numeric")))
   #check that there are <= nrow pat_dlow
   expect_true(nrow(test_pt_trans) <= nrow(pat_flow))
+
+  #check paths return
+  #check that it is a list
+  expect_true(class(test_pt_trans_paths) == "list")
+  #length 2
+  expect_true(length(test_pt_trans_paths) == 2)
+  #list names
+  expect_true(all(names(test_pt_trans_paths) == c("pt_trans_summary", "paths")))
+  #list types
+  expect_true(all(sapply(test_pt_trans_paths, class) == c("data.frame", "list")))
 })

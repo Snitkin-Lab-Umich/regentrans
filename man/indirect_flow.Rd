@@ -7,7 +7,9 @@
 indirect_flow(pt_trans_net)
 }
 \arguments{
-\item{pt_trans_net}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'}
+\item{pt_trans_net}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)}
+
+\item{paths}{boolean value, TRUE if you want the shortest paths returned, FALSE if you don't}
 }
 \value{
 facility x facility matrix of metric of patient flow between each facility pair

@@ -56,13 +56,11 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
   }
   #if there is a patient transfer network, add it
   if(!is.null(pt_trans_net)){
+    #calculate pt_transfer summaries
+    pt_flow <- patient_transfer(pt_trans_net = pt_trans_net, snv_dists = snp_facility_pairs, paths = FALSE)
     snp_facility_pairs <- snp_facility_pairs %>%
       #add in patient transfers from 1 to 2
-      dplyr::left_join(pt_trans_net, by = c("Loc1" = "source_facil", "Loc2" = "dest_facil")) %>%
-      dplyr::rename("n_1_to_2_transfers" = "n_transfers") %>%
-      #add in patient transfers from 2 to 1
-      dplyr::left_join(pt_trans_net, by = c("Loc2" = "source_facil", "Loc1" = "dest_facil")) %>%
-      dplyr::rename("n_2_to_1_transfers" = "n_transfers")
+      dplyr::left_join(pt_flow, by = c("Loc1" = "Loc1", "Loc2" = "Loc2")) %>% dplyr::select(-n_closely_related_pairs)
   }
   #return snp matrix
   return(snp_facility_pairs)

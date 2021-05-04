@@ -1,6 +1,6 @@
 #test get_clusters output
-test_locs <- locs[1:10]
-test_tr <- ape::keep.tip(tr,names(test_locs))
+test_locs <- regentrans::locs[1:10]
+test_tr <- ape::keep.tip(regentrans::tr,names(test_locs))
 test_clusters <- get_clusters(tr = test_tr,locs = test_locs)
 test_pure_subtree_info <- test_clusters$pure_subtree_info
 test_subtrees <- test_clusters$subtrees
