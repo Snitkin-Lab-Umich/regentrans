@@ -494,55 +494,60 @@ test_that("check_get_largest_subtree_input works", {
 ##################################test patient_flow#####################################
 test_that("check_pt_transfer_input works", {
   #one that works with snv_dists
-  expect_false(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL))
+  expect_false(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE))
   #one where we make snv_dists
-  expect_true(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = NULL, thresh = 50, dists = test_dists, locs = test_locs, pt = test_pt))
+  expect_true(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = NULL, thresh = 50, dists = test_dists, locs = test_locs, pt = test_pt, paths = FALSE))
   #one with wrong snv_dists input
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = "test_snv_dists", thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = "test_snv_dists", thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character",
                fixed = TRUE)
   #one with similar to snv_dists but not right ncols
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_2, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_2, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  7  columns that are not the output columns needed.",
                fixed = TRUE)
   #one similar but not right colnames
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_3, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_3, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  8  columns that are not the output columns needed.",
                fixed = TRUE)
   #one similar with wrong coltype
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_4, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_4, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "Your snv_dists input does not have numeric pairwise distances, you supplied one with type character",
                fixed = TRUE)
   #one with wrong input to get_snv_dists
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = NULL, thresh = 50, dists = "test_dists", locs = test_locs, pt = test_pt),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = NULL, thresh = 50, dists = "test_dists", locs = test_locs, pt = test_pt, paths = FALSE),
               "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character",
               fixed = TRUE)
   #one where thresh is wrong
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = -1, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = -1, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "thresh must be a positive numeric value, you provided -1",
                fixed = TRUE)
   #one where pt_trans_net is wrong
-  expect_error(check_pt_transfer_input(pt_trans_net = "test_pt_trans_net", snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = "test_pt_trans_net", snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "The pt_trans_net object must be a data.frame or matrix, you provided a  character",
                fixed = TRUE)
   #one where pt_trans_net has wrong ncol
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_2, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_2, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "The pt_trans_net object must be a data.frame or matrix with 3 columns, you provided  2",
                fixed = TRUE)
   #one where pt_trans_net has wrong colnames
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_3, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_3, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided  A B C",
                fixed = TRUE)
   #one where pt_trans_net has wrong coltypes
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_4, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_4, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided  factor factor character",
                fixed = TRUE)
   #one where there aren't at least two locations in common
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_5, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_5, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                "The pt_trans_net don't have at least two locations in common with the locs object.",
                fixed = TRUE)
   #one where there aren't all in common
-  expect_warning(check_pt_transfer_input(pt_trans_net = test_pt_trans_net2, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL),
+  expect_warning(check_pt_transfer_input(pt_trans_net = test_pt_trans_net2, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = FALSE),
                  "Not all of the locations you have provided between locs and the pt_trans_network match. Will subset.",
                  fixed = TRUE)
+  #one where paths is wrong
+  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_5, snv_dists = test_snv_dists, thresh = 50, dists = NULL, locs = NULL, pt = NULL, paths = 12),
+               "The pt_trans_net don't have at least two locations in common with the locs object.",
+               fixed = TRUE)
+
 })

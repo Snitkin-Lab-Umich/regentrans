@@ -13,10 +13,10 @@ get_snv_dists(dists, locs, pt = NULL, pt_trans_net = NULL)
 
 \item{pt}{a named vector of patient that isolate was taken from with the name being sample ID (optional)}
 
-\item{pt_trans_net}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'}
+\item{pt_trans_net}{a data.frame representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'}
 }
 \value{
-snp_facility_paris, a matrix of inter- and intra-facility pariwise snv distances
+a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs
 }
 \description{
 Get matrix of inter- and intra-facility pariwise snv distances

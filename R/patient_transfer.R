@@ -1,6 +1,6 @@
 #' Get summary of patient transfer network and closely-related isolates
 #'
-#' @param pt_trans_net a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'
+#' @param pt_trans_net a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
 #' @param snv_dists the output object of the get_snv_dists function
 #' @param threshs SNV thresholds to use
 #' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
@@ -8,31 +8,29 @@
 #' @param pt a named vector of patient that isolate was taken from with the name being sample ID (optional)
 #' @param paths boolean value, TRUE if you want the shortest paths returned, FALSE if you don't
 #'
-#' @return a summary of number of closely related isolate pairs and number of patient transfers between each facility pair
+#' @return a summary of number of closely related isolate pairs and number of patient transfers between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
 #' @export
 #'
 #' @examples a patient transfer network and either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
 patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, thresh = 10, paths = FALSE){
   #run checks
   run_snv_dists <- check_pt_transfer_input(pt_trans_net = pt_trans_net, snv_dists = snv_dists,
-                                           dists = dists, locs = locs, pt = pt, thresh = thresh)
+                                           dists = dists, locs = locs, pt = pt, thresh = thresh, paths = paths)
+
   #make pt_trans_net not factors
   pt_trans_net$source_facil <- as.character(pt_trans_net$source_facil)
   pt_trans_net$dest_facil <- as.character(pt_trans_net$dest_facil)
+
   #run get_snv_dists if necessary
   if(run_snv_dists){
     cat("Running get_snv_dists...")
     snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
   }
-  #this is where I'll do if else based on direct or indirect flow...
-  if(paths == TRUE){
-    ind_flow_output <- indirect_flow(pt_trans_net, paths=TRUE)
-    pt_trans_net_i <- ind_flow_output$transfer_network
-    paths <- ind_flow_output$paths
-  }
-  else{
-    pt_trans_net_i <- indirect_flow(pt_trans_net, paths=FALSE)
-  }
+
+  #run indirect flow
+  ind_flow_output <- indirect_flow(pt_trans_net)
+  pt_trans_net_i <- ind_flow_output$transfer_network
+  paths_list <- ind_flow_output$paths
 
   #subset to only facilities in the locs object
   common_locs <- intersect(unique(c(snv_dists$Loc1, snv_dists$Loc2)), unique(c(pt_trans_net$source_facil, pt_trans_net$dest_facil)))
@@ -40,6 +38,7 @@ patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs 
                           dest_facil %in% common_locs)
   snv_dists <- snv_dists %>% dplyr::filter(Loc1 %in% common_locs,
                                         Loc2 %in% common_locs)
+
   #remove any same-facility pairs
   pat_flow <- dplyr::bind_cols(pt_trans_net %>% filter(source_facil != dest_facil))
 
@@ -70,7 +69,8 @@ patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs 
 
   if(paths == TRUE){
     #return paths and summary as a list
-    returns <- list("pt_trans_summary" = pt_trans_summary, "paths" = paths)
+    returns <- list("pt_trans_summary" = pt_trans_summary, "paths" = paths_list)
+
     return(returns)
   }
   else{

@@ -10,11 +10,12 @@ patient_transfer(
   dists = NULL,
   locs = NULL,
   pt = NULL,
-  thresh = 10
+  thresh = 10,
+  paths = FALSE
 )
 }
 \arguments{
-\item{pt_trans_net}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'}
+\item{pt_trans_net}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)}
 
 \item{snv_dists}{the output object of the get_snv_dists function}
 
@@ -24,10 +25,12 @@ patient_transfer(
 
 \item{pt}{a named vector of patient that isolate was taken from with the name being sample ID (optional)}
 
+\item{paths}{boolean value, TRUE if you want the shortest paths returned, FALSE if you don't}
+
 \item{threshs}{SNV thresholds to use}
 }
 \value{
-a summary of number of closely related isolate pairs and number of patient transfers between each facility pair
+a summary of number of closely related isolate pairs and number of patient transfers between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
 }
 \description{
 Get summary of patient transfer network and closely-related isolates

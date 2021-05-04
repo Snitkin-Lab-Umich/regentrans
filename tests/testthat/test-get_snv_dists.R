@@ -54,13 +54,13 @@ test_that("get_snv_dists works", {
   expect_true(all(setequal(unique(test_snv_dists$Loc1), unique(test_snv_dists$Loc2)) & setequal(unique(test_snv_dists$Loc2), unique(test_locs))))
 
   #one with pt_trans net and pt
-  expect_true(ncol(test_snv_dists_pt_trans) == 10)
+  expect_true(ncol(test_snv_dists_pt_trans) == 12)
   #check colnames
-  expect_true(all(colnames(test_snv_dists_pt_trans) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1", "Patient2", "Pair_Type", "n_1_to_2_transfers", "n_2_to_1_transfers")))
+  expect_true(all(colnames(test_snv_dists_pt_trans) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1", "Patient2", "Pair_Type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1")))
   #check coltypes
   expect_true(class(test_snv_dists_pt_trans[,9]) == "numeric")
   expect_true(class(test_snv_dists_pt_trans[,10]) == "numeric")
   #one with pt_trans_net and no pt
-  expect_true(ncol(test_snv_dists_pt_trans_no_pt) == 8)
+  expect_true(ncol(test_snv_dists_pt_trans_no_pt) == 10)
 
 })
