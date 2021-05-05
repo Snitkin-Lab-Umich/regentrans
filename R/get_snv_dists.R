@@ -5,7 +5,7 @@
 #' @param pt a named vector of patient that isolate was taken from with the name being sample ID (optional)
 #' @param pt_trans_net a data.frame representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'
 #'
-#' @return a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs
+#' @return a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs. If pt_trans_net provided will return both direct transfer and indirect flow metric for each facility pair.
 #' @export
 #'
 #' @examples to reduce this dataframe to include only one row that represents each pair, use the subset_pairs() function on the output of this function
