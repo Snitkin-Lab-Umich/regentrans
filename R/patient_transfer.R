@@ -2,13 +2,13 @@
 #'
 #' @param pt_trans_net a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
 #' @param snv_dists the output object of the get_snv_dists function
-#' @param threshs SNV thresholds to use
+#' @param thresh SNV thresholds to use
 #' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
 #' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
 #' @param pt a named vector of patient that isolate was taken from with the name being sample ID (optional)
 #' @param paths boolean value, TRUE if you want the shortest paths returned, FALSE if you don't
 #'
-#' @return a summary of number of closely related isolate pairs and number of patient transfers between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
+#' @return a summary of number of closely related isolate pairs and number of direct patient transfers and indirect flow metrics between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
 #' @export
 #'
 #' @examples a patient transfer network and either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.

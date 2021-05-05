@@ -1,7 +1,6 @@
 #' Calculate indirect patient flow from patient transfer network
 #'
 #' @param pt_trans_net a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
-#' @param paths boolean value, TRUE if you want the shortest paths returned, FALSE if you don't
 #'
 #' @return facility x facility matrix of metric of patient flow between each facility pair
 #' @export
@@ -35,7 +34,7 @@ indirect_flow <- function(pt_trans_net){
   sp <- g %>% igraph::shortest.paths(mode="out") %>% as.data.frame()
 
   #make long form
-  trans_net_i <- sp %>% as_tibble() %>% mutate(source_facil = colnames(sp)) %>% tidyr::pivot_longer(!source_facil, names_to = "dest_facil", values_to = "pt_trans_metric")
+  trans_net_i <- sp %>% as_tibble() %>% dplyr::mutate(source_facil = colnames(sp)) %>% tidyr::pivot_longer(!source_facil, names_to = "dest_facil", values_to = "pt_trans_metric")
 
   #make them each -(10^x)
   trans_net_i$pt_trans_metric <- 10^(-trans_net_i$pt_trans_metric)

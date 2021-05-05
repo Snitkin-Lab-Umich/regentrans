@@ -30,7 +30,7 @@ patient_transfer(
 \item{threshs}{SNV thresholds to use}
 }
 \value{
-a summary of number of closely related isolate pairs and number of patient transfers between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
+a summary of number of closely related isolate pairs and number of direct patient transfers and indirect flow metrics between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
 }
 \description{
 Get summary of patient transfer network and closely-related isolates

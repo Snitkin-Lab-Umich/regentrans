@@ -1,6 +1,6 @@
 #' Make facility x facility matrix with Fsp values. Calculates fst as described in Donker et al. 2017
 #'
-#' @param snp_dist ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
+#' @param fasta ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
 #' @param locs locations names for pairwise comparison
 #' @param form can be "long" or "matrix", default is matrix. Determines output format
 #'

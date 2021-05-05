@@ -273,18 +273,16 @@ In order to explore this question, we can leverage our WGS data in the form of t
 **Choosing a pairwise SNV distance threshold based on your dataset is very important, avoid using the default value**
 
 ```{r, message=FALSE}
-pt_trans <- patient_transfer(pt_trans_net = pt_flow, snv_dists = snv_dists, thresh = 10) %>% dplyr::mutate(n_transfers = rowMeans(select(., dplyr::ends_with("transfers")), na.rm = TRUE)) 
+pt_trans <- patient_transfer(pt_trans_net = pt_flow, snv_dists = snv_dists, thresh = 10) %>% dplyr::mutate(avg_direct_transfers = rowMeans(select(., dplyr::ends_with("transfers")), na.rm = TRUE), avg_indirect_flow = rowMeans(select(., dplyr::starts_with("indirect")), na.rm = TRUE)) 
 
-ggplot(data = pt_trans, mapping = aes(x = n_transfers, y = n_closely_related_pairs)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related Isolate Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+ggplot(data = pt_trans, mapping = aes(x = avg_direct_transfers, y = n_closely_related_pairs)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related Isolate Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
 
 *Note:* This data is simulated
 
 ```{r, message=FALSE}
-pt_flow_undirected <- pt_flow %>% dplyr::left_join(pt_flow, by = c("source_facil" = "dest_facil", "dest_facil" = "source_facil")) %>% dplyr::mutate(n_transfers = rowMeans(select(., dplyr::starts_with("n_transfers")), na.rm = TRUE)) 
-
-Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_flow_undirected, by = c("Facil_1" = "source_facil", "Facil_2" = "dest_facil")) %>% ggplot(mapping = aes(x = n_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "Loc1", "Facil_2" = "Loc2")) %>% ggplot(mapping = aes(x = avg_direct_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
 

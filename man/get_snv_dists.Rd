@@ -16,7 +16,7 @@ get_snv_dists(dists, locs, pt = NULL, pt_trans_net = NULL)
 \item{pt_trans_net}{a data.frame representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'}
 }
 \value{
-a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs
+a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs. If pt_trans_net provided will return both direct transfer and indirect flow metric for each facility pair.
 }
 \description{
 Get matrix of inter- and intra-facility pariwise snv distances
