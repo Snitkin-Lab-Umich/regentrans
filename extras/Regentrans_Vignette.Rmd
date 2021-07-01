@@ -201,25 +201,6 @@ snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Loc2) %>% summ
 
 ```
 
-### Permutation
-
-Permutation can be used as a method to check whether your data is enriched for transmission within/between certain facilities. For example, if we permute the location labels on the `snv_dists` output before calculating the number of isolates below a certain threshold at each facility, we can interrogate whether the enrichment in our data are significant. Permutation can also be used to address significance of other regentrans methods. 
-
-```{r, message=FALSE, warning=FALSE}
-permut <- setNames(as.data.frame(cbind(rep(unique(locs), each = 2), c("Inter-facility pair", "Intra-facility pair"))), c("Loc1_mut", "Pair_Type"))
-
-for(i in 1:100){
-  #for reproducibility
-  set.seed(i)
-  summary  <- snv_dists %>% mutate(Loc1_mut = sample(Loc1)) %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1_mut, Pair_Type) %>% summarize(n = n())
-  permut <- left_join(permut, summary, by = c("Loc1_mut" = "Loc1_mut", "Pair_Type" = "Pair_Type"))
-}
-
-permut %>% `colnames<-`(c("Loc1", "Pair_Type", 1:100)) %>% tidyr::pivot_longer(!c(Loc1, Pair_Type), names_to = "run", values_to = "value") %>% ggplot() + geom_boxplot(mapping = aes(x = Loc1, y = value, fill = Pair_Type)) + geom_point(data = (snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Pair_Type) %>% summarize(n = n())), mapping = aes(x = Loc1, y = n, color = Pair_Type), shape = 15) + scale_color_manual(values=c("red", "blue")) + labs(y = "Number of Closely Related \nIsolate Pairs (permuted)", x = "Facility ID", title = "Permuted Number of Closely Related Isolate Pairs \nby Facility with real-value points")
-```
-
-This plot suggests that facility D is enriched for intra-facility transmission. 
-
 ### Fsp
 
 Fsp is a measure of similarity between populations at different facilities. Value of 0 indicates that the populations are identical, while value of 1 indicates that the populations are completely different. 
@@ -234,7 +215,7 @@ Fsp <- regentrans::Fsp
 pheatmap(Fsp)
 ```
 
-One way to determine whether Fsp values are significant is to use permutation (Donker et al. 2017)
+One way to determine whether Fsp values are significant is to use permutation (Donker et al. 2017). 
 
 ### Is transmission occurring between different sample sources?
 
