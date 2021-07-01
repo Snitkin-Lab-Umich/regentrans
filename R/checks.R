@@ -208,7 +208,7 @@ check_snv_dists <- function(snv_dists){
 #some vector of numbers, max number isn't > max snv distance or negative
 check_threshs <- function(threshs, snv_dists){
   #check numeric vector
-  if(!(is.vector(threshs) && class(threshs) == "numeric")){
+  if(!(is.vector(threshs) && (class(threshs) == "numeric" | class(threshs) == "integer"))){
     stop(paste("threshs must be a numeric vector, you provided a ", typeof(threshs)))
   }
   #check that max number isn't > max snv distance or negative
@@ -222,7 +222,7 @@ check_threshs <- function(threshs, snv_dists){
   }
 }
 
-check_get_frac_intra_input <- function(snv_dists, threshs, dists, locs, pt, pt_trans_net){
+check_get_frac_intra_input <- function(snv_dists, dists, locs, pt, pt_trans_net){
   #if SNV_dists doesnt exist and they didn't input locs and dists
   if(is.null(snv_dists) & is.null(dists) & is.null(locs)){
     stop("Please provide either an SNV dists matrix or dists and locs objecst so we can generate one for you.")
@@ -239,7 +239,7 @@ check_get_frac_intra_input <- function(snv_dists, threshs, dists, locs, pt, pt_t
   #checks snv_dists input
   check_snv_dists(snv_dists)
   #check threshs input
-  check_threshs(threshs, snv_dists)
+  # check_threshs(threshs, snv_dists)
   #return the snv_dists made
   return(run_snv_dists)
 }
