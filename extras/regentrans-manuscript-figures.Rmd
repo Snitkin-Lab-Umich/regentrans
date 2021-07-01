@@ -1,0 +1,370 @@
+---
+title: "Regentrans Vignette"
+author: "Sophie Hoffman"
+date: "3/29/2021"
+output: 
+  html_document:
+    toc: true
+  
+---
+
+```{r,echo=FALSE, message=FALSE}
+devtools::load_all()
+```
+
+```{r setup,echo=TRUE,message=FALSE}
+library(ape)
+library(dplyr)
+library(devtools)
+library(ggtree)
+library(pheatmap)
+library(ggplot2)
+library(phytools)
+library(gridExtra)
+library(cowplot)
+
+#set theme 
+theme_set(theme_bw() + theme(strip.background = element_rect(fill="white",linetype='blank'), text=element_text(size=15)))
+```
+
+
+### Input data
+
+```{r, message=FALSE}
+#named list of locations
+locs <- regentrans::locs
+#named list of patient IDs
+pt <- regentrans::pt
+#named list of isolate collection dates
+dates <- regentrans::dates
+#named list of sequence types
+st <- NULL
+#fasta file 
+fasta <- regentrans::fasta
+#SNV distance matrix 
+dists <- regentrans::dists
+#phylogenetic tree
+tree <- regentrans::tr
+#patient transfer network
+pt_flow <- regentrans::pt_flow
+#fsp
+fsp <- regentrans::Fsp
+```
+
+### Subsetting to one isolate per patient per facility
+
+```{r}
+isolate_subset <- cbind(locs, pt) %>% unique() %>% rownames()
+locs <- locs[isolate_subset]
+pt <- pt[isolate_subset]
+dates <- dates[isolate_subset]
+st <- st[isolate_subset]
+dists <- dists[isolate_subset,isolate_subset]
+
+```
+
+# Choosing a pairwise SNV distance thresholds
+
+## Method 1: Use reference genome length and mutation rate
+
+```{r}
+ref_genome_length <- 5394056
+mutation_rate <- 1.03e-6
+round(2*ref_genome_length*mutation_rate)
+```
+
+## Method 2: Intra-facility pair fraction distribution
+
+```{r}
+dists <- dist.dna(fasta, model = 'N', pairwise.deletion = TRUE, as.matrix = TRUE)
+snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt) %>% subset_pairs()
+
+frac_intra <- get_frac_intra(snv_dists = snv_dists) #or get_frac_intra(dists = dists, locs = locs, pt = pt)
+
+frac_intra %>% 
+  mutate(under = ifelse(Pairwise_Dists < 11, '< 11 SNVs','Over threshold'), under = ifelse(Pairwise_Dists < 7, '< 7 SNVs',under),
+         under = factor(under, levels = c('< 7 SNVs', '< 11 SNVs','Over threshold'))) %>% 
+  ggplot(aes(x = Pairwise_Dists, y = Frac_Intra, fill = under)) + 
+  geom_bar(stat = "identity", alpha = 0.5) + 
+  scale_fill_grey() + 
+  labs(x = "Pairwise SNV distance", y = "Fraction of intra-facility pairs", fill = 'Possible SNV\nthresholds') + 
+  ylim(0, 1) + xlim(-1,51) #+
+  #theme(legend.position = 'none')
+```
+
+
+# Is transmission occurring within and/or between locations? 
+
+In order to explore this question, we can leverage our WGS data in the form of the SNV distance matrix and the `get_snv_dists()` function. 
+
+
+```{r, message=FALSE}
+pw_snv_plot <- snv_dists %>% 
+  ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
+  geom_vline(xintercept = 11, col = 'darkgrey', size = 1) +
+  theme(legend.justification = "top", 
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank())
+
+pw_snv_plot_zoom <- snv_dists %>% 
+  filter(Pairwise_Dists <= 11) %>% 
+  ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
+  labs(x = "Pairwise SNV\ndistance", y = "Count", fill = "") +
+  theme(legend.position = 'none')
+
+pw_snv_plot + annotation_custom(ggplotGrob(pw_snv_plot_zoom), xmin = 250, xmax = 450, 
+                       ymin = 200, ymax = 2800) 
+```
+
+# Is transmission occurring within and/or between locations?
+
+### Visualize the Phylogenetic Tree Annotated by Location
+
+```{r, message=FALSE}
+cols <- c('#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#000000')
+names(cols) <- unique(locs)
+
+tr_sub <- midpoint.root(ape::keep.tip(tr, names(locs)))
+locs_tip <- c(locs[tr_sub$tip.label], rep(NA, Nnode(tr_sub)))
+tr_facil <- ggtree(tr_sub) + geom_tippoint(aes(col = locs_tip)) + 
+  scale_color_manual(values = cols) +
+  labs(col = 'Facility') +
+  theme(legend.position = 'none')
+tr_facil
+```
+
+### get_clusters()
+
+```{r, message=FALSE}
+clusters <- get_clusters(tr,locs, pureness = 1)
+#dissect output
+pure_subtree_info <- clusters$pure_subtree_info
+subtrees <- clusters$subtrees
+
+cluster_plot <- ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size, color = f_id)) + 
+  geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.5) + 
+  scale_color_manual(values = cols) +
+  labs(y = "Number of Isolates in \nPhylogenetic Cluster", x = "", color = 'Facility') +
+  ylim(c(0,12.5)) +
+  coord_flip()
+cluster_plot 
+```
+
+```{r}
+tr_clust <- plot_grid(tr_facil, cluster_plot, labels = 'AUTO') #, rel_widths = c(0.4,0.6))
+tr_clust
+```
+
+
+# What locations is transmission occurring within/between?
+
+### SNV distances 
+
+```{r, message=FALSE, warning=FALSE}
+coldat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', snv_dists %>% filter(Pairwise_Dists < 7) %>%
+                     mutate(Loc1=factor(Loc1), Pair_Type=factor(Pair_Type)) %>%
+                     group_by(Loc1, Pair_Type) %>% summarize(n = n())
+                     %>% tidyr::complete(Loc1, Pair_Type)),
+                    bind_cols(snvthresh = '< 11 SNVs', snv_dists %>% filter(Pairwise_Dists < 11) %>%
+                     mutate(Loc1=factor(Loc1), Pair_Type=factor(Pair_Type)) %>%
+                     group_by(Loc1, Pair_Type) %>% summarize(n = n())
+                     %>% tidyr::complete(Loc1, Pair_Type)))
+
+facil_close <- coldat %>% mutate(Pair_Type = factor(Pair_Type, levels = c('Intra-facility pair', 'Inter-facility pair'))) %>%
+  ggplot(aes(x = reorder(Loc1, -n, median), y = n, fill = Pair_Type)) +
+  geom_col(position = 'dodge') +
+       scale_fill_manual(values=c("cadetblue", "salmon")) + 
+         labs(y = "Number of closely related \nisolate pairs", x = "Facility", fill = '', color = '') + facet_grid(factor(snvthresh, levels = c('< 7 SNVs','< 11 SNVs'))~.)
+facil_close
+```
+
+```{r, message=FALSE}
+coldat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', snv_dists %>% 
+                                filter(Pairwise_Dists < 7 & Loc1 != Loc2) %>%
+                     mutate(Facil_Pair=(paste(Loc1, Loc2))) %>%
+                     group_by(Facil_Pair) %>% summarize(n = n())),
+                    bind_cols(snvthresh = '< 11 SNVs', snv_dists %>% 
+                                filter(Pairwise_Dists < 11 & Loc1 != Loc2) %>%
+                     mutate(Facil_Pair = (paste(Loc1, Loc2))) %>%
+                     group_by(Facil_Pair) %>% summarize(n = n())))
+
+inter_close <- coldat %>% mutate(Facil_Pair = ifelse(n >= 5, Facil_Pair, 'Other')#,
+                                 #Facil_Pair = factor(Facil_Pair, )
+                                 ) %>% 
+  ggplot(aes(x = Facil_Pair, y = n)) + geom_col(fill = "salmon") + 
+  scale_fill_manual(values=c("red")) + 
+  labs(y = "Number of closely related \nisolate pairs", x = "Facility Pair") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+  facet_grid(factor(snvthresh, levels = c('SNV threshold = 8','SNV threshold = 11'))~.)
+# inter_close
+
+
+snv_dists_7 <- snv_dists %>% filter(Pairwise_Dists < 7)
+
+cts_7 <- sapply(unique(c(snv_dists$Loc1, snv_dists$Loc2)), function(x){
+  sapply(unique(c(snv_dists$Loc1, snv_dists$Loc2)), function(y){
+    sum(snv_dists_7$Loc1 == x & snv_dists_7$Loc2 == y)
+  })
+})
+diag(cts_7) <- NA
+# pheatmap(cts_7)
+
+snv_dists_11 <- snv_dists %>% filter(Pairwise_Dists < 11)
+
+cts_11 <- sapply(unique(c(snv_dists$Loc1, snv_dists$Loc2)), function(x){
+  sapply(unique(c(snv_dists$Loc1, snv_dists$Loc2)), function(y){
+    sum(snv_dists_11$Loc1 == x & snv_dists_11$Loc2 == y)
+  })
+})
+diag(cts_11) <- NA
+# pheatmap(cts_11)
+```
+
+### Fsp
+
+Fsp is a measure of similarity between populations at different facilities. Value of 0 indicates that the populations are identical, while value of 1 indicates that the populations are completely different. 
+
+```{r, eval=FALSE, message=FALSE}
+# fsp <- get_facility_fsp(fasta, locs)
+fsp <- regentrans::Fsp
+pheatmap(fsp, border_color = 'white',
+         legend_breaks = c(0, 0.2, 0.4, 0.6, 0.8, max(fsp)), 
+         legend_labels = c(0, 0.2, 0.4, 0.6, 0.8, 'fsp'))
+```
+
+
+One way to determine whether fsp values are significant is to use permutation (Donker et al. 2017)
+
+```{r}
+pt_flow <- structure(c(1, 1.71122994652408e-05, 1.40967224149537e-05, 0.000474074074074073, 
+0.000181771667856037, 5.96955526813254e-05, 6.25341182920926e-05, 
+0.000329896907216494, 1.79559003088417e-05, 0.00424361990053091, 
+3.76915038187176e-05, 0.000260310849248276, 1, 2.11840865735182e-05, 
+0.00049223929181057, 0.00264038021475091, 2.78373043591672e-05, 
+0.00195723974827721, 6.31601199268895e-05, 2.71526055905228e-05, 
+0.000254772320540862, 0.000117836481565193, 5.06444506343215e-06, 
+1.02719860784377e-05, 1, 2.16590859865714e-05, 4.2735042735043e-05, 
+0.000935486692948707, 0.00139281644367536, 7.57161860420929e-05, 
+0.00537240537240539, 1.84891380716003e-05, 0.00203488372093025, 
+0.00266006237387636, 0.000655364660370925, 0.000188781104829633, 
+1, 6.54568436258582e-05, 0.000831758034026462, 0.00270305876961852, 
+0.00163163643144462, 2.37908450468836e-05, 0.0106382978723404, 
+0.00105009489561482, 8.28622018387643e-06, 0.00279720279720279, 
+2.82027726589947e-06, 8.98957209636826e-05, 1, 2.04140231967224e-05, 
+0.000378469301934397, 3.00762475842331e-06, 2.1399518254864e-06, 
+5.4190701474378e-06, 5.16956162117448e-05, 4.58631443771784e-05, 
+3.26601235133297e-05, 0.00218315188915409, 0.000562962962962956, 
+4.35085276714237e-05, 1, 9.54505264850083e-05, 0.00705090540035253, 
+0.00098948670377241, 4.48873327946856e-05, 0.000102291325695581, 
+1.24081794719078e-05, 0.000768716577540108, 0.000142391135504582, 
+0.00320593942461823, 0.00243902439024388, 0.000596273291925468, 
+1, 1.96367206676486e-05, 1.82868846463318e-05, 3.41057385597683e-05, 
+0.0005686517783292, 0.000504494588148968, 0.0001241002730206, 
+0.00143820224719103, 0.00171765968867417, 4.43880103948647e-05, 
+0.0111304347826088, 0.000190901052970016, 1, 0.000115440115440116, 
+0.000493760660741536, 0.000234603040455405, 7.93788907105321e-06, 
+7.61436816906775e-06, 0.0104238932104101, 7.76601454985673e-06, 
+2.59839246119733e-05, 0.000405496733498536, 0.000333235091855784, 
+3.00854426571462e-05, 1, 0.000172047944027069, 0.00287122366962305, 
+0.00329188929123093, 0.000318606627017839, 4.48996627051994e-05, 
+0.00104341827275471, 4.35085276714237e-05, 9.83671060397392e-06, 
+9.75191137462946e-06, 7.67266994963933e-05, 3.97355203763749e-05, 
+1, 0.000249754373797667, 6.22642852060063e-06, 7.51936235807199e-06, 
+0.000125335456663423, 6.12688784731793e-06, 3.18126868995355e-05, 
+6.00541032875977e-05, 1.09443806574985e-05, 1.83618814685465e-05, 
+0.00108745087419629, 3.94496051301495e-06, 1), .Dim = c(11L, 
+11L), .Dimnames = list(c(`584` = "D", `587` = "H", `589` = "G", 
+`590` = "C", `591` = "T", `592` = "F", `593` = "I", `596` = "E", 
+`600` = "P", `601` = "M", `603` = "O"), c(`584` = "D", `587` = "H", 
+`589` = "G", `590` = "C", `591` = "T", `592` = "F", `593` = "I", 
+`596` = "E", `600` = "P", `601` = "M", `603` = "O")))
+diag(pt_flow) <- NA
+
+fsp_sub <- fsp[rownames(pt_flow), colnames(pt_flow)]
+
+fsp_flow <- full_join(reshape2::melt(as.matrix(pt_flow)) %>% rename(pt_flow = value),
+          reshape2::melt(as.matrix(fsp_sub)) %>% rename(fsp = value)) %>% rename(Loc1 = Var1, Loc2 = Var2)
+
+thresh = 7
+
+snv_dist_summary <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>% dplyr::filter(Loc1 != Loc2)
+
+pair_info <- full_join(fsp_flow, snv_dist_summary)
+
+flow_fsp_plot <- pair_info %>% 
+  ggplot(aes(x=pt_flow,y=fsp)) +
+  geom_point() + geom_smooth(method='lm') + scale_x_log10() +
+  labs(x = 'log10(patient flow)', y = 'Fsp')
+
+```
+
+```{r}
+flow_snv_plot <- pair_info %>% 
+  ggplot(aes(x=pt_flow,y=n_closely_related_pairs)) +
+  geom_point() + geom_smooth(method='lm') + scale_x_log10() +
+  labs(x = 'log10(patient flow)', y = '# closely related\npairs (< 7 SNVs)')
+```
+
+```{r}
+plot_grid(flow_fsp_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
+```
+
+
+```{r}
+# these are deidentified
+longs <- c(A = NA, B = NA, C = -930605.082601, D = -930605.009738, E = -930604.936812, 
+F = -930604.912683, G = -930604.930899, H = -930605.236274, I = -930605.065595, 
+J = NA, K = NA, L = NA, M = -930605.109771, N = NA, O = -930605.187588, 
+P = -930604.896185, Q = NA, R = NA, S = NA, T = -930605.237532, 
+U = NA)
+lats <- c(A = NA, B = NA, C = -740730.013261, D = -740730.378523, E = -740729.967478, 
+F = -740729.917235, G = -740729.643727, H = -740729.995281, I = -740729.894068, 
+J = NA, K = NA, L = NA, M = -740730.297362, N = NA, O = -740729.22271, 
+P = -740729.566327, Q = NA, R = NA, S = NA, T = -740729.891502, 
+U = NA)
+
+facil_coord <- bind_cols(facil=names(longs), long=longs, lat=lats)
+
+loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facil", "n"))
+
+facil_geo <- facil_coord %>% left_join(loc_n)
+
+# bind_cols(facil=names(longs), long=longs, lat=lats) %>% ggplot(aes(x = lats, y = longs)) + geom_point() + theme_map()
+
+snv_geo <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists < 7)) %>% dplyr::filter(Loc1 != Loc2, n_closely_related_pairs > 0) %>%
+  left_join(facil_geo, by = c("Loc1" = "facil")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facil")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+
+geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +
+  geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
+                 alpha = n_closely_related_pairs),
+             data = snv_geo, curvature = 0.33) +
+  geom_point(aes(size=n), alpha=1, color = "lightblue") + 
+  theme_map() + #theme(legend.position = "none") 
+  labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (<=8 SNVs)')
+```
+
+```{r}
+geo_fsp <- left_join(pair_info, facil_geo, by = c('Loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
+  select(-n) %>% left_join(., facil_geo, by = c('Loc2' = 'facil')) %>% rename(facil_2_long = long, facil_2_lat = lat) %>% 
+  select(-n) %>% 
+  mutate(geo_dist = sqrt((facil_1_long-facil_2_long)^2+(facil_1_lat-facil_2_lat)^2)) %>% 
+  ggplot(aes(x = geo_dist, y = fsp)) +
+  geom_point() + geom_smooth(method = 'lm') +
+  labs(x = 'Physical distance between facilities', y = 'Fsp')
+
+geo_snv <- left_join(pair_info, facil_geo, by = c('Loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
+  select(-n) %>% left_join(., facil_geo, by = c('Loc2' = 'facil')) %>% rename(facil_2_long = long, facil_2_lat = lat) %>% 
+  select(-n) %>% 
+  mutate(geo_dist = sqrt((facil_1_long-facil_2_long)^2+(facil_1_lat-facil_2_lat)^2)) %>% 
+  ggplot(aes(x = geo_dist, y = n_closely_related_pairs)) + geom_point() + geom_smooth(method = 'lm') +
+  labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(< 7 SNVs)')
+
+plot_grid(plot_grid(NULL, geo_map, NULL, nrow = 1, rel_widths = c(0.1,0.9,0), labels = c('','A','')), plot_grid(geo_fsp, geo_snv, labels = c('B','C')), ncol = 1)
+```
+
+
+
+
