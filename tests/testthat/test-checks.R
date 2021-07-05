@@ -25,7 +25,7 @@ test_tr <- ape::keep.tip(tr,names(test_pt))
 test_tr_2 <- ape::keep.tip(tr,names(test_pt_3))
 test_fasta <- fasta[names(test_locs),]
 test_fasta_2 <- fasta[names(test_locs_5),]
-test_fasta_3 <- fasta[names(test_locs_9),]
+test_fasta_3 <- fasta[names(test_locs_8),]
 ls <- list(list(a = 2, b = 3), list(c = "a", d = "b"))
 ls_2 <- list(list(a = 2, b = 3), list(c = "a", d = "b"), "x")
 test_subtr <- ape::subtrees(test_tr)
@@ -157,49 +157,43 @@ test_that("check_subset_pairs_input works", {
 ##################################test get_frac_intra#####################################
 test_that("check_get_frac_intra_input works", {
   #normal one that works with snv_dists input
-  expect_false(check_get_frac_intra_input(snv_dists = test_snv_dists, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL))
+  expect_false(check_get_frac_intra_input(snv_dists = test_snv_dists, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL))
   #normal one that works without snv_dists input
-  expect_true(check_get_frac_intra_input(snv_dists = NULL, threshs = seq(1,50,1), dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = NULL))
+  expect_true(check_get_frac_intra_input(snv_dists = NULL, dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = NULL))
   #one that's input isn't snv_dists input at all
   expect_error(
-    check_get_frac_intra_input(snv_dists = "test_snv_dists", threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
+    check_get_frac_intra_input(snv_dists = "test_snv_dists", dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
     "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character",
     fixed = TRUE
   )
   #one that's input is similar but wrong # cols
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists_2, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
+    check_get_frac_intra_input(snv_dists = test_snv_dists_2, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
     "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  7  columns that are not the output columns needed.",
     fixed = TRUE
   )
   #one that's input is similar but not correct rownames
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists_3, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
+    check_get_frac_intra_input(snv_dists = test_snv_dists_3, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
     "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  8  columns that are not the output columns needed.",
     fixed = TRUE
   )
   #one that's input is similar but not numeric dist col
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists_4, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
+    check_get_frac_intra_input(snv_dists = test_snv_dists_4, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
     "Your snv_dists input does not have numeric pairwise distances, you supplied one with type character",
     fixed = TRUE
   )
   #one that's input doesn't work for get_snv_dists
   expect_error(
-    check_get_frac_intra_input(snv_dists = NULL, threshs = seq(1,50,1), dists = "test_dists", locs = test_locs, pt = test_pt, pt_trans_net = NULL),
+    check_get_frac_intra_input(snv_dists = NULL, dists = "test_dists", locs = test_locs, pt = test_pt, pt_trans_net = NULL),
     "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character",
     fixed = TRUE
   )
-  #one where threshs isn't a numeric vector
-  expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists, threshs = "seq(1,50,1)", dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL),
-    "threshs must be a numeric vector, you provided a  character",
-    fixed = TRUE
-  )
   #one with patient transfer network snv_dists
-  expect_false(check_get_frac_intra_input(snv_dists = test_snv_dists_pt_trans, threshs = seq(1,50,1), dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL))
+  expect_false(check_get_frac_intra_input(snv_dists = test_snv_dists_pt_trans, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL))
   #one with patient transfer network no snv_dists
-  expect_true(check_get_frac_intra_input(snv_dists = NULL, threshs = seq(1,50,1), dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = test_pt_trans_net))
+  expect_true(check_get_frac_intra_input(snv_dists = NULL, dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = test_pt_trans_net))
 
 })
 
@@ -308,13 +302,13 @@ test_that("check_facility_fsp_input works", {
   )
   #check fasta vs. locs when you have to subset
   expect_warning(
-    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_8, form = "matrix"),
-    "You have provided  5  isolate IDs in common between locs and your fasta. Will subset.",
+    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_9, form = "matrix"),
+    "You have provided  6  isolate IDs in common between locs and your fasta. Will subset.",
     fixed = TRUE
   )
   #one where there's only isolate from a location and will subset
   expect_warning(
-    check_facility_fsp_input(fasta = test_fasta_3, locs = test_locs_9, form = "matrix"),
+    check_facility_fsp_input(fasta = test_fasta_3, locs = test_locs_8, form = "matrix"),
     "You have provided at least one isolate that is the only one in its location. Will subset to exclude location  1",
     fixed = TRUE
   )

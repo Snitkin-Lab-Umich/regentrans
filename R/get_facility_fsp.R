@@ -7,7 +7,7 @@
 #' @return matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp values bween 0 (HP=HS) and 1 (Hp = 0)
 #' @export
 #'
-#' @examples get_facility_fsp(fasta, locs, form = "matrix")
+#' @examples \dontrun{get_facility_fsp(fasta, locs, form = "matrix")}
 
 
 #######################try to make sapply########
