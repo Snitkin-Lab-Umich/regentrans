@@ -40,11 +40,11 @@ patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs 
                                         Loc2 %in% common_locs)
 
   #remove any same-facility pairs
-  pat_flow <- dplyr::bind_cols(pt_trans_net %>% filter(source_facil != dest_facil))
+  pat_flow <- dplyr::bind_cols(pt_trans_net %>% dplyr::filter(source_facil != dest_facil))
 
   #instead of all of that we will just left join
   pt_trans_summary <- snv_dists %>%
-    mutate(Pairwise_Dists = as.numeric(Pairwise_Dists)) %>%
+    dplyr::mutate(Pairwise_Dists = as.numeric(Pairwise_Dists)) %>%
     #group by locations (directed)
     dplyr::group_by(Loc1, Loc2) %>%
     #summarize how many closely related isolates are in each location pair

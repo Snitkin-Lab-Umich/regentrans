@@ -34,7 +34,7 @@ indirect_flow <- function(pt_trans_net){
   sp <- g %>% igraph::shortest.paths(mode="out") %>% as.data.frame()
 
   #make long form
-  trans_net_i <- sp %>% as_tibble() %>% dplyr::mutate(source_facil = colnames(sp)) %>% tidyr::pivot_longer(!source_facil, names_to = "dest_facil", values_to = "pt_trans_metric")
+  trans_net_i <- sp %>% tibble::as_tibble() %>% dplyr::mutate(source_facil = colnames(sp)) %>% tidyr::pivot_longer(!source_facil, names_to = "dest_facil", values_to = "pt_trans_metric")
 
   #make them each -(10^x)
   trans_net_i$pt_trans_metric <- 10^(-trans_net_i$pt_trans_metric)

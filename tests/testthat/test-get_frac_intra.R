@@ -4,7 +4,10 @@ test_pt <- as.character(pt[1:3])
 names(test_pt) <- names(pt[1:3])
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt)
+test_snv_df <- structure(list(Isolate1 = "MN_CRE202", Isolate2 = "MN_CRE17",
+               Pairwise_Dists = 10, Loc1 = "M0211", Loc2 = "M0211", Pair_Type = "Intra-facility pair"), row.names = 1958L, class = "data.frame")
 test_frac_intra <- get_frac_intra(snv_dists = test_snv_dists)
+test_frac_intra_df <- get_frac_intra(snv_dists = test_snv_df)
 mat <- data.frame(matrix(data = c(0, 20, 12,
                                   20, 0, 26,
                                   30, 26, 0), nrow = 3, ncol = 3))

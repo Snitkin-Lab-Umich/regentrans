@@ -25,12 +25,15 @@ get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NUL
     dplyr::mutate(Pair_Type = factor(Pair_Type, levels = c('Intra-facility pair','Inter-facility pair'))) %>%
     dplyr::count(.drop = FALSE) %>%
     tidyr::pivot_wider(names_from = Pair_Type, values_from = n) %>%
-    dplyr::mutate(Frac_Intra = ifelse('Intra-facility pair' %in% colnames(.),
+    dplyr::mutate(`Intra-facility pair` = ifelse('Intra-facility pair' %in% colnames(.),
+                                                 as.numeric(`Intra-facility pair`), 0.0),
+                  `Inter-facility pair` = ifelse('Inter-facility pair' %in% colnames(.),
+                                                 as.numeric(`Inter-facility pair`), 0.0),
+                  Frac_Intra = ifelse(`Intra-facility pair` != 0,
                                         `Intra-facility pair`/(`Intra-facility pair`+`Inter-facility pair`),
                                       0),
-                  Frac_Inter = 1 - Frac_Intra,
-                  `Intra-facility pair` = ifelse('Intra-facility pair' %in% colnames(.), as.numeric(`Intra-facility pair`), 0.0),
-                  `Inter-facility pair` = ifelse('Inter-facility pair' %in% colnames(.), as.numeric(`Inter-facility pair`), 0.0)) %>%
+                  Frac_Inter = 1 - Frac_Intra
+                  ) %>%
     dplyr::select(Pairwise_Dists, `Intra-facility pair`, `Inter-facility pair`, Frac_Intra, Frac_Inter) %>%
     dplyr::rename(n_Intra = `Intra-facility pair`, n_Inter = `Inter-facility pair`)
   # intra_cts
