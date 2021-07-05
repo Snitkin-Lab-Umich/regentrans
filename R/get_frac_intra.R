@@ -22,7 +22,7 @@ get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NUL
 
   intra_cts <- snv_dists %>%
     dplyr::group_by(Pair_Type, Pairwise_Dists) %>%
-    mutate(Pair_Type = factor(Pair_Type, levels = c('Intra-facility pair','Inter-facility pair'))) %>%
+    dplyr::mutate(Pair_Type = factor(Pair_Type, levels = c('Intra-facility pair','Inter-facility pair'))) %>%
     dplyr::count(.drop = FALSE) %>%
     tidyr::pivot_wider(names_from = Pair_Type, values_from = n) %>%
     dplyr::mutate(Frac_Intra = ifelse('Intra-facility pair' %in% colnames(.),
@@ -32,7 +32,7 @@ get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NUL
                   `Intra-facility pair` = ifelse('Intra-facility pair' %in% colnames(.), as.numeric(`Intra-facility pair`), 0.0),
                   `Inter-facility pair` = ifelse('Inter-facility pair' %in% colnames(.), as.numeric(`Inter-facility pair`), 0.0)) %>%
     dplyr::select(Pairwise_Dists, `Intra-facility pair`, `Inter-facility pair`, Frac_Intra, Frac_Inter) %>%
-    rename(n_Intra = `Intra-facility pair`, n_Inter = `Inter-facility pair`)
+    dplyr::rename(n_Intra = `Intra-facility pair`, n_Inter = `Inter-facility pair`)
   # intra_cts
 
   #remove all of the rows that have NaN as the fraction

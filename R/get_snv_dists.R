@@ -48,11 +48,12 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
     snps$Patient1 <- pt_sub[snps$Isolate1]
     snps$Patient2 <- pt_sub[snps$Isolate2]
     #add labels
-    snp_facility_pairs <- dplyr::bind_cols(snps %>% filter(Patient1 != Patient2) %>% dplyr::mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
+    snp_facility_pairs <- dplyr::bind_cols(snps %>% dplyr::filter(Patient1 != Patient2) %>% dplyr::mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
+
   }
   else{
     #add labels
-    snp_facility_pairs <- dplyr::bind_cols(snps %>% filter(Isolate1 != Isolate2) %>% dplyr::mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
+    snp_facility_pairs <- dplyr::bind_cols(snps %>% dplyr::filter(Isolate1 != Isolate2) %>% dplyr::mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
   }
   #if there is a patient transfer network, add it
   if(!is.null(pt_trans_net)){
