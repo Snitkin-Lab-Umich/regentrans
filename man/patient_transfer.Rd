@@ -25,9 +25,9 @@ patient_transfer(
 
 \item{pt}{a named vector of patient that isolate was taken from with the name being sample ID (optional)}
 
-\item{paths}{boolean value, TRUE if you want the shortest paths returned, FALSE if you don't}
+\item{thresh}{SNV thresholds to use}
 
-\item{threshs}{SNV thresholds to use}
+\item{paths}{boolean value, TRUE if you want the shortest paths returned, FALSE if you don't}
 }
 \value{
 a summary of number of closely related isolate pairs and number of direct patient transfers and indirect flow metrics between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).

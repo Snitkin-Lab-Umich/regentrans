@@ -41,11 +41,14 @@ theme_set(theme_bw() + theme(strip.background = element_rect(fill="white",linety
 
 In order to use the regentrans package, you will need your data in a certain format. It is important to ensure that you have all relevant information for all of the isolates of interest for your analysis. Each isolate should be represented in each metadata named list as well as in the fasta file of variants and phylogenetic tree. 
 
+Below are examples of how you can read in your data. 
+
 ### Metadata
 
 Each metadata category should appear as a named list where the names correspond to the isolate IDs and the items in the list reflect the category of the isolate. Locations for each isolate are required, while patient information, collection dates and sequence types are all optional inputs. 
 
-To create named lists from a data.frame, you can do the following
+To create named vectors from a data.frame, you can do the following:
+
 ```{r, eval = FALSE, message=FALSE}
 locs <- metadata$locations
 names(locs) <- metadata$isolate_ID
@@ -53,7 +56,7 @@ names(locs) <- metadata$isolate_ID
 
 ### Fasta file of variants
 
-A fasta file of variants. Can be read in to R using the following command 
+A fasta file of variants. Can be read in to R using the following command:
 
 ```{r, eval = FALSE, message=FALSE}
 fasta <- ape::read.dna("/path/to/data.fasta",format = "fasta")
@@ -62,7 +65,7 @@ fasta <- ape::read.dna("/path/to/data.fasta",format = "fasta")
 
 ### SNV distance matrix
 
-A pairwise SNV distance matrix. Can be created using the fasta file
+A pairwise SNV distance matrix. Can be created using the fasta file:
 
 ```{r, eval = FALSE, message=FALSE}
 dists <- ape::dist.dna(x = fasta, as.matrix = TRUE, model = "N", pairwise.deletion = TRUE)
@@ -70,7 +73,7 @@ dists <- ape::dist.dna(x = fasta, as.matrix = TRUE, model = "N", pairwise.deleti
 
 ### Phylogenetic tree
 
-A phylogenetic tree (.treefile). Can be read in to R using the following command
+A phylogenetic tree in Newick format. Can be read in to R using the following command:
 
 ```{r, eval = FALSE, message=FALSE}
 tree <- ape::read.tree("path/to/data.treefile")
@@ -85,21 +88,21 @@ A patient transfer network representing facilities that isolates came from repre
 If you want to use your own data as input to the functions in the vignette, format your data according to the instructions above and set the following objects equal to your data. If you will not be using any of the optional data, make sure to assign those objects to `NULL`. 
 
 ```{r, message=FALSE}
-#named list of locations
+# named list of locations
 locs <- regentrans::locs
-#named list of patient IDs
+# named list of patient IDs
 pt <- regentrans::pt
-#named list of isolate collection dates
+# named list of isolate collection dates
 dates <- regentrans::dates
-#named list of sequence types
+# named list of sequence types
 st <- NULL
-#fasta file 
+# fasta file 
 fasta <- regentrans::fasta
-#SNV distance matrix 
+# SNV distance matrix 
 dists <- regentrans::dists
-#phylogenetic tree
+# phylogenetic tree
 tree <- regentrans::tr
-#patient transfer network
+# patient transfer network
 pt_flow <- regentrans::pt_flow
 ```
 
@@ -113,19 +116,53 @@ locs <- locs[isolate_subset]
 pt <- pt[isolate_subset]
 dates <- dates[isolate_subset]
 st <- st[isolate_subset]
+fasta <- fasta[isolate_subset, ]
+dists <- dists[isolate_subset, isolate_subset]
+tree <- keep.tip(tree, isolate_subset)
 ```
 
+# How do you choose pairwise SNV distance thresholds?
 
-# Is transmission occurring? 
+`get_frac_intra()` TODO add more here!
 
-In order to explore this question, we can leverage our WGS data in the form of the SNV distance matrix and the `get_snv_dists()` function. 
+# Is transmission occurring within and/or between locations?
 
+To explore this question we can leverage our WGS data in the form of the phylogenetic tree using the `get_clusters()` function and the SNV distance matrix using the `get_snv_dists()`. 
+
+## Threshold-free phylogenetic approach
+
+### Visualize the Phylogenetic Tree Annotated by Location
+
+It is useful to first visualize the extent of clustering on the phylogeny. To do this, you can plot the tree using ggtree:
+
+```{r, message=FALSE}
+tr_sub <- ape::keep.tip(tr, names(locs))
+mpr_tree = midpoint.root(tr_sub)
+gheatmap(ggtree(mpr_tree, layout = "circular"),as.data.frame(locs), color = NA)
+```
+
+### get_clusters()
+
+It is also useful to quantify the size of phylogenetic clusters from the same facility. Larger clusters indicate more within-facility transmission while smaller clusters or singletons indicate more importation. When working with the `get_clusters()` function, you may perform analyses with various cluster pureness levels. The default pureness value is 1. Lower values will allow clusters to be identified that have some "contamination" with other facilities.
+
+```{r, message=FALSE}
+clusters <- get_clusters(tr,locs, pureness = 1)
+#dissect output
+pure_subtree_info <- clusters$pure_subtree_info
+subtrees <- clusters$subtrees
+
+ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Isolates in \nPhylogenetic Cluster", x = "Facility ID", title = "Pure Subtree Information")
+```
+
+## SNV threshold approach
+
+Another way to explore this question is to leverage our WGS data in the form of the SNV distance matrix and the `get_snv_dists()` function. 
 
 ```{r, message=FALSE}
 snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt) 
 ```
 
-In order to subset to one representation of each isolate-isolate pair (undirected), use the `subset_pairs()` function with the `snv_dists` object as input. 
+To subset to one representation of each isolate-isolate pair (undirected), use the `subset_pairs()` function with the `snv_dists` object as input. 
 
 ```{r, message=FALSE}
 snv_dists_sub <- subset_pairs(snv_dists)
@@ -144,9 +181,6 @@ ggplot() +
   geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \n< 20 SNV Distance")
 ```
 
-# Is transmission occurring within and/or between locations?
-
-In order to explore this question we can leverage our WGS data in the form of the SNV distance matrix using the `get_frac_intra()` function and the phylogenetic tree using the `get_clusters()` function. 
 
 ### get_frac_intra()
 
@@ -156,25 +190,6 @@ frac_intra <- get_frac_intra(snv_dists = snv_dists) #or get_frac_intra(dists = d
 ggplot(data = frac_intra, aes(x = Thresh, y = Frac_Intra)) + geom_bar(stat = "identity", fill = "blue", alpha = 0.5) + labs(x = "SNV Distance Threshold", y = "Fraction of Intra-Facility Pairs") +  ggtitle("Fraction of Isolate Pairs from the Same \nFacility at Each SNV Distance Threshold") + ylim(0, 1) 
 ```
 
-### get_clusters()
-
-When working with the `get_clusters()` function, it is a good idea to perform analyses with various pureness levels. The default pureness value is 1. 
-
-```{r, message=FALSE}
-clusters <- get_clusters(tr,locs, pureness = 1)
-#dissect output
-pure_subtree_info <- clusters$pure_subtree_info
-subtrees <- clusters$subtrees
-
-ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Isolates in \nPhylogenetic Cluster", x = "Facility ID", title = "Pure Subtree Information")
-```
-
-### Visualize the Phylogenetic Tree Annotated by Location
-```{r, message=FALSE}
-tr_sub <- ape::keep.tip(tr, names(locs))
-mpr_tree = midpoint.root(tr_sub)
-gheatmap(ggtree(mpr_tree, layout = "circular"),as.data.frame(locs), color = NA)
-```
 
 # What locations is transmission occurring within/between?
 

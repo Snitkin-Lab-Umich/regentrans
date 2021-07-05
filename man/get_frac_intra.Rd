@@ -9,8 +9,7 @@ get_frac_intra(
   dists = NULL,
   locs = NULL,
   pt = NULL,
-  pt_trans_net = NULL,
-  threshs = seq(1, 50, 1)
+  pt_trans_net = NULL
 )
 }
 \arguments{
@@ -22,7 +21,7 @@ get_frac_intra(
 
 \item{pt}{a named vector of patient that isolate was taken from with the name being sample ID (optional)}
 
-\item{threshs}{SNV thresholds to use}
+\item{pt_trans_net}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)}
 }
 \value{
 fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data

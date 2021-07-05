@@ -4,8 +4,7 @@ test_pt <- as.character(pt[1:3])
 names(test_pt) <- names(pt[1:3])
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt)
-test_threshs <- seq(1,50,1)
-test_frac_intra <- get_frac_intra(snv_dists = test_snv_dists, threshs = test_threshs)
+test_frac_intra <- get_frac_intra(snv_dists = test_snv_dists)
 mat <- data.frame(matrix(data = c(0, 20, 12,
                                   20, 0, 26,
                                   30, 26, 0), nrow = 3, ncol = 3))
@@ -17,36 +16,28 @@ colnames(test_pt_trans_net) <- c("source_facil", "dest_facil", "n_transfers")
 test_pt_trans_net$n_transfers <- as.numeric(test_pt_trans_net$n_transfers)
 test_snv_dists_pt_trans_net <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = test_pt_trans_net)
 
-test_frac_intra_pt_trans_net <- get_frac_intra(snv_dists = test_snv_dists_pt_trans_net, threshs = test_threshs)
+test_frac_intra_pt_trans_net <- get_frac_intra(snv_dists = test_snv_dists_pt_trans_net)
 
 test_that("get_frac_intra works", {
   #check n cols
   expect_true(ncol(test_frac_intra) == 5)
-  #check that n rows matches threshs
-  expect_true(nrow(test_frac_intra) <= length(test_threshs))
   #check colnames
-  expect_true(all(colnames(test_frac_intra) == c('Thresh','n_Intra','n_Inter','Frac_Intra','Frac_Inter')))
+  expect_true(all(colnames(test_frac_intra) == c('Pairwise_Dists','n_Intra','n_Inter','Frac_Intra','Frac_Inter')))
   #check types of all cols
   expect_true(all(sapply(test_frac_intra, class) == c("numeric", "numeric", "numeric", "numeric", "numeric")))
   #check that rows are the divisions of other rows...
   expect_true(all((test_frac_intra$Frac_Intra == test_frac_intra$n_Intra/(test_frac_intra$n_Intra + test_frac_intra$n_Inter)) | test_frac_intra$Frac_Intra == 0))
-  expect_true(all((test_frac_intra$Frac_inter == test_frac_intra$n_Inter/(test_frac_intra$n_Intra + test_frac_intra$n_Inter)) | test_frac_intra$Frac_inter == 0))
-  #check that the length of the overlap between threshs and the column is less than or equal nrow
-  expect_true(length(intersect(test_frac_intra$Thresh, test_threshs)) == nrow(test_frac_intra))
+  expect_true(all((test_frac_intra$Frac_Inter == test_frac_intra$n_Inter/(test_frac_intra$n_Intra + test_frac_intra$n_Inter)) | test_frac_intra$Frac_Inter == 0))
 
   #check it works with the input with pt trans net
   #check n cols
   expect_true(ncol(test_frac_intra_pt_trans_net) == 5)
-  #check that n rows matches threshs
-  expect_true(nrow(test_frac_intra_pt_trans_net) <= length(test_threshs))
   #check colnames
-  expect_true(all(colnames(test_frac_intra_pt_trans_net) == c('Thresh','n_Intra','n_Inter','Frac_Intra','Frac_Inter')))
+  expect_true(all(colnames(test_frac_intra_pt_trans_net) == c('Pairwise_Dists','n_Intra','n_Inter','Frac_Intra','Frac_Inter')))
   #check types of all cols
   expect_true(all(sapply(test_frac_intra_pt_trans_net, class) == c("numeric", "numeric", "numeric", "numeric", "numeric")))
   #check that rows are the divisions of other rows...
   expect_true(all((test_frac_intra_pt_trans_net$Frac_Intra == test_frac_intra_pt_trans_net$n_Intra/(test_frac_intra_pt_trans_net$n_Intra + test_frac_intra_pt_trans_net$n_Inter)) | test_frac_intra_pt_trans_net$Frac_Intra == 0))
-  expect_true(all((test_frac_intra_pt_trans_net$Frac_inter == test_frac_intra_pt_trans_net$n_Inter/(test_frac_intra_pt_trans_net$n_Intra + test_frac_intra_pt_trans_net$n_Inter)) | test_frac_intra_pt_trans_net$Frac_inter == 0))
-  #check that the length of the overlap between threshs and the column is less than or equal nrow
-  expect_true(length(intersect(test_frac_intra_pt_trans_net$Thresh, test_threshs)) == nrow(test_frac_intra_pt_trans_net))
+  expect_true(all((test_frac_intra_pt_trans_net$Frac_Inter == test_frac_intra_pt_trans_net$n_Inter/(test_frac_intra_pt_trans_net$n_Intra + test_frac_intra_pt_trans_net$n_Inter)) | test_frac_intra_pt_trans_net$Frac_Inter == 0))
 
 })

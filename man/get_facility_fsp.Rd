@@ -7,11 +7,11 @@
 get_facility_fsp(fasta, locs, form = "matrix")
 }
 \arguments{
+\item{fasta}{ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta}
+
 \item{locs}{locations names for pairwise comparison}
 
 \item{form}{can be "long" or "matrix", default is matrix. Determines output format}
-
-\item{snp_dist}{ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta}
 }
 \value{
 matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp values bween 0 (HP=HS) and 1 (Hp = 0)
@@ -20,5 +20,5 @@ matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp
 Make facility x facility matrix with Fsp values. Calculates fst as described in Donker et al. 2017
 }
 \examples{
-get_facility_fsp(fasta, locs, form = "matrix")
+\dontrun{get_facility_fsp(fasta, locs, form = "matrix")}
 }
