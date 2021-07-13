@@ -3,18 +3,20 @@ library(ape)
 
 #load big data files ###############
 
+#data is located in regentrans/extras/data_raw in a gzipped (.gz) format
+#to use the raw data, first unzip the file(s) you will use using the command line
+#to unzip a single file use the command: gunzip /regentrans/extras/data_raw/[desired file name].gz
+#to unzip all files in the directory use the command: gunzup regentrans/extras/data_raw/*.gz
+
 #metadata path Penn
-#/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv
-metadata <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv")
+metadata <- read.csv("/regentrans/extras/data_raw/ltach-metadata.csv")
 
 #alignment path Penn
-#/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta
-fasta <- ape::read.dna("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta",
+fasta <- ape::read.dna("/regentrans/extras/data_raw/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta",
                        format = "fasta")
 
 #tree path Penn
-#/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile
-tr <- ape::read.tree("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile")
+tr <- ape::read.tree("/regentrans/extras/data_raw/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile")
 
 #locs - locations of isolates (e.g. facility of isolation)
 #named vector, where names are same as names of dist.dna output
@@ -42,11 +44,11 @@ dists <- dist.dna(x = fasta_sub, as.matrix = TRUE, model = "N")
 Penn_test_input <- list("locs" = locs, "pt" = pt, "fasta" = fasta, "dists" = dists, "tr" = tr)
 
 getwd()
-setwd("/Users/sophiehoffman/Desktop/regentrans/data")
+setwd("/regentrans/data")
 saveRDS(Penn_test_input, file = "Penn_test_input_3.rds")
 
 #test read back in
-Penn_test_input2 <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/data/Penn_test_input_3.rds")
+Penn_test_input2 <- readRDS(file = "/regentrans/data/Penn_test_input_3.rds")
 locs2 <- Penn_test_input$locs
 pt2 <- Penn_test_input$pt
 fasta2 <- Penn_test_input$fasta
@@ -57,10 +59,10 @@ tr2 <- Penn_test_input$tr
 Penn_all_input <- list("locs" = locs_Penn, "pt" = pt_Penn, "fasta" = fasta_Penn, "dists" = dists_Penn, "tr" = tr_Penn)
 
 getwd()
-setwd("/Users/sophiehoffman/Desktop/regentrans/extras")
+setwd("/regentrans/extras")
 saveRDS(Penn_all_input, file = "Penn_test_input_all.rds")
 
-Penn_all_input <- readRDS(file = "/Users/sophiehoffman/Desktop/regentrans/extras/Penn_test_input_all.rds")
+Penn_all_input <- readRDS(file = "/regentrans/extras/Penn_test_input_all.rds")
 locs_Penn <- Penn_all_input$locs
 pt_Penn <- Penn_all_input$pt
 fasta_Penn <- Penn_all_input$fasta
@@ -68,31 +70,18 @@ dists_Penn <- Penn_all_input$dists
 tr_Penn <- Penn_all_input$tr
 
 ####save in RData file format
-save(locs, file="/Users/sophiehoffman/Desktop/regentrans/data/locs.RData")
-save(pt, file="/Users/sophiehoffman/Desktop/regentrans/data/pt.RData")
-save(fasta, file="/Users/sophiehoffman/Desktop/regentrans/data/fasta.RData")
-save(dists, file="/Users/sophiehoffman/Desktop/regentrans/data/dists.RData")
-save(tr, file="/Users/sophiehoffman/Desktop/regentrans/data/tr.RData")
+save(locs, file="/regentrans/data/locs.RData")
+save(pt, file="/regentrans/data/pt.RData")
+save(fasta, file="/regentrans/data/fasta.RData")
+save(dists, file="/regentrans/data/dists.RData")
+save(tr, file="/regentrans/data/tr.RData")
 
 
 ##################3/30/21 full data subset##################
 library(dplyr)
 
-#metadata path Penn
-#/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv
-metadata <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Analysis/regentrans_data/2021-02-16_subset-data/data/ltach-metadata.csv")
-
-#alignment path Penn
-#/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta
-fasta <- ape::read.dna("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.filtered_polymorphic_sites.fasta",
-                       format = "fasta")
-
-#tree path Penn
-#/nfs/turbo/umms-esnitkin/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile
-tr <- ape::read.tree("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/2021_02_10_Penn_All_variant_calling/2021_02_12_08_34_28_core_results/gubbins/iqtree_masked_wga/2021_02_12_08_34_28_KPNIH1_genome_aln_w_alt_allele_unmapped.treefile")
-
 #st info
-st <- read.csv("/Users/sophiehoffman/Desktop/gl_mount/Project_Penn_KPC/Sequence_data/Reports/kleborate/penn_kleborate_results.txt", sep = "\t")
+st <- read.csv("regentrans/extras/data_raw/penn_kleborate_results.txt", sep = "\t")
 
 #join st and metadata
 metadata$isolate_no <- paste0("PCMP_H", metadata$isolate_no)
@@ -130,12 +119,12 @@ fasta <- fasta_sub
 tr <- tr_sub
 
 #save all as .RData
-save(locs, file="/Users/sophiehoffman/Desktop/regentrans/data/locs.RData")
-save(pt, file="/Users/sophiehoffman/Desktop/regentrans/data/pt.RData")
-save(dates, file="/Users/sophiehoffman/Desktop/regentrans/data/dates.RData")
-save(fasta, file="/Users/sophiehoffman/Desktop/regentrans/data/fasta.RData")
-save(dists, file="/Users/sophiehoffman/Desktop/regentrans/data/dists.RData")
-save(tr, file="/Users/sophiehoffman/Desktop/regentrans/data/tr.RData")
+save(locs, file="/regentrans/data/locs.RData")
+save(pt, file="/regentrans/data/pt.RData")
+save(dates, file="/regentrans/data/dates.RData")
+save(fasta, file="/regentrans/data/fasta.RData")
+save(dists, file="/regentrans/data/dists.RData")
+save(tr, file="/regentrans/data/tr.RData")
 
 #make a pt flow function
 library(Matrix)
@@ -148,11 +137,11 @@ pat_flow <- na.omit(data.frame(as.table(as.matrix(x))))
 colnames(pat_flow) <- c("source_facil", "dest_facil", "n_transfers")
 pat_flow$n_transfers <- as.numeric(pat_flow$n_transfers)
 pt_flow <- pat_flow
-save(pt_flow, file="/Users/sophiehoffman/Desktop/regentrans/data/pt_flow.RData")
+save(pt_flow, file="/regentrans/data/pt_flow.RData")
 
 
 ####4/5/21
 Fsp <- read.csv("Penn_Fsp_output.csv")
 rownames(Fsp) <- Fsp[,1]
 Fsp <- Fsp[,-1]
-save(Fsp, file="/Users/sophiehoffman/Desktop/regentrans/data/Fsp.RData")
+save(Fsp, file="/regentrans/data/Fsp.RData")
