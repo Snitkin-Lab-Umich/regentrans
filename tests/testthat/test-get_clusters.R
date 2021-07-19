@@ -54,10 +54,16 @@ test_that("get_snv_dists works", {
 
 
 #tests for get_largest_subtree
-test_locs <- locs[1:10]
+test_locs <- locs[1:12]
 test_tr <- ape::keep.tip(tr,names(test_locs))
 test_subtr <- ape::subtrees(test_tr)
 test_pure_subtrees <- get_largest_subtree(subtrs = test_subtr, isolate_labels = test_locs, bootstrap = NULL, pureness = 1)
+test_pure_subtrees_2 <- get_largest_subtree(subtrs = test_subtr, isolate_labels = test_locs, bootstrap = NULL, pureness = 0.6)
+test_pure_subtrees_3 <- get_largest_subtree(subtrs = test_subtr, isolate_labels = test_locs, bootstrap = 100, pureness = 1)
+p1_i <- unlist(test_pure_subtrees$largest_st_i)
+p2_i <- unlist(test_pure_subtrees_2$largest_st_i)
+p3_i <- unlist(test_pure_subtrees_3$largest_st_i)
+
 
 test_that("get_largest_subtree works", {
   #test that it is a list of length three
@@ -73,5 +79,8 @@ test_that("get_largest_subtree works", {
   expect_true(all(sapply(test_pure_subtrees, length) == length(test_locs)))
   #test for isolates we largest subtree != 0 that their index != 1
   expect_true(all((test_pure_subtrees[[1]] != 0) == (test_pure_subtrees[[2]] != 1)))
+  expect_equal(p1_i, c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 3L, 3L, 1L, 1L, 1L))
+  expect_equal(p2_i, c(1L, 1L, 7L, 1L, 1L, 1L, 1L, 3L, 3L, 1L, 1L, 7L))
+  expect_equal(p3_i, c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L))
 })
 
