@@ -44,4 +44,7 @@ test_that("patient_transfer works", {
   expect_message(patient_transfer(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt, thresh = 50),'Running get_snv_dists...')
   expect_equal(patient_transfer(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt, thresh = 50),
                test_pt_trans)
-})
+  # duplicate source/destination facility rows returns error
+  expect_error(patient_transfer(dplyr::bind_rows(pt_flow,pt_flow),NULL, dists, locs),
+               "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.")
+  })

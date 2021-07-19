@@ -129,6 +129,9 @@ check_pt_trans_net <- function(pt_trans_net, locs){
     if(!setequal(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs))){
       warning(paste("Not all of the locations you have provided between locs and the pt_trans_network match. Will subset. "))
     }
+    if(length(paste(pt_trans_net$source_facil, pt_trans_net$dest_facil)) != length(unique(paste(pt_trans_net$source_facil, pt_trans_net$dest_facil)))){
+      stop(paste("Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs."))
+    }
   }
 }
 
