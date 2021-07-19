@@ -27,31 +27,34 @@ test_that("get_snv_dists works", {
   #check col #s
   expect_true(ncol(test_snv_dists) == 8)
   #check row #s
-  expect_true(nrow(test_snv_dists) == (length(test_locs)^2)-length(test_locs))
+  expect_true(nrow(test_snv_dists) == (length(test_locs)^2-length(test_locs))/2)
   #check colnames
   expect_true(all(colnames(test_snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1", "Patient2", "Pair_Type")))
   #check col types
   expect_true(all(sapply(test_snv_dists, class) == c("factor", "factor", "numeric", "character", "character", "character", "character", "character")))
+  # these no longer true when remove duplicate rows (keep only one of s1-s2 s2-s1)
   #check isolates in both lists are in the locs names
-  expect_true(all(setequal(unique(test_snv_dists$Isolate1), unique(test_snv_dists$Isolate2)) & setequal(unique(test_snv_dists$Isolate2), unique(names(test_locs)))))
+  # expect_true(all(setequal(unique(test_snv_dists$Isolate1), unique(test_snv_dists$Isolate2)) & setequal(unique(test_snv_dists$Isolate2), unique(names(test_locs)))))
   #same with patients
-  expect_true(all(setequal(unique(test_snv_dists$Patient1), unique(test_snv_dists$Patient2)) & setequal(unique(test_snv_dists$Patient2), unique(test_pt))))
+  # expect_true(all(setequal(unique(test_snv_dists$Patient1), unique(test_snv_dists$Patient2)) & setequal(unique(test_snv_dists$Patient2), unique(test_pt))))
   #same with locs
-  expect_true(all(setequal(unique(test_snv_dists$Loc1), unique(test_snv_dists$Loc2)) & setequal(unique(test_snv_dists$Loc2), unique(test_locs))))
+  # expect_true(all(setequal(unique(test_snv_dists$Loc1), unique(test_snv_dists$Loc2)) & setequal(unique(test_snv_dists$Loc2), unique(test_locs))))
 
   #for without pt
   expect_true(ncol(test_snv_dist_no_pt) == 6)
   #check row #s
-  expect_true(nrow(test_snv_dist_no_pt) == (length(test_locs)^2)-length(test_locs))
+  expect_true(nrow(test_snv_dist_no_pt) == (length(test_locs)^2-length(test_locs))/2)
   #check colnames
   expect_true(all(colnames(test_snv_dist_no_pt) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type")))
   #check col types
   #this won't be true when all of the patients IDs aren't numeric
   expect_true(all(sapply(test_snv_dist_no_pt, class) == c("factor", "factor", "numeric", "character", "character", "character")))
   #check isolates in both lists are in the locs names
-  expect_true(all(setequal(unique(test_snv_dists$Isolate1), unique(test_snv_dists$Isolate2)) & setequal(unique(test_snv_dists$Isolate2), unique(names(test_locs)))))
+  expect_true(all(unique(c(as.character(test_snv_dists$Isolate1), as.character(test_snv_dists$Isolate2))) %in% names(test_locs)))
+  # expect_true(all(setequal(unique(test_snv_dists$Isolate1), unique(test_snv_dists$Isolate2)) & setequal(unique(test_snv_dists$Isolate2), unique(names(test_locs)))))
   #same with locs
-  expect_true(all(setequal(unique(test_snv_dists$Loc1), unique(test_snv_dists$Loc2)) & setequal(unique(test_snv_dists$Loc2), unique(test_locs))))
+  expect_true(all(unique(c(as.character(test_snv_dists$Loc1), as.character(test_snv_dists$Loc2))) %in% test_locs))
+  # expect_true(all(setequal(unique(test_snv_dists$Loc1), unique(test_snv_dists$Loc2)) & setequal(unique(test_snv_dists$Loc2), unique(test_locs))))
 
   #one with pt_trans net and pt
   expect_true(ncol(test_snv_dists_pt_trans) == 12)
