@@ -14,7 +14,7 @@ mat <- data.frame(matrix(data = c(0, 20, 12,
 rownames(mat) <- c("A", "B", "C")
 colnames(mat) <- c("A", "B", "C")
 test_pt_trans_net <- na.omit(data.frame(as.table(as.matrix(mat))))
-#pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
+#pat_flow <- dplyr::bind_cols(pat_flow %>% dplyr::filter(Var1 != Var2))
 colnames(test_pt_trans_net) <- c("source_facil", "dest_facil", "n_transfers")
 test_pt_trans_net$n_transfers <- as.numeric(test_pt_trans_net$n_transfers)
 

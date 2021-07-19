@@ -6,7 +6,7 @@ mat <- data.frame(matrix(data = c(0, 20, 12,
 rownames(mat) <- c("A", "B", "C")
 colnames(mat) <- c("A", "B", "C")
 pat_flow <- na.omit(data.frame(as.table(as.matrix(mat))))
-#pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
+#pat_flow <- dplyr::bind_cols(pat_flow %>% dplyr::filter(Var1 != Var2))
 colnames(pat_flow) <- c("source_facil", "dest_facil", "n_transfers")
 pat_flow$n_transfers <- as.numeric(pat_flow$n_transfers)
 
@@ -40,4 +40,8 @@ test_that("patient_transfer works", {
   expect_true(all(names(test_pt_trans_paths) == c("pt_trans_summary", "paths")))
   #list types
   expect_true(all(sapply(test_pt_trans_paths, class) == c("data.frame", "list")))
+  # check that get_snv_dists part works
+  expect_message(patient_transfer(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt, thresh = 50),'Running get_snv_dists...')
+  expect_equal(patient_transfer(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt),
+               test_pt_trans)
 })

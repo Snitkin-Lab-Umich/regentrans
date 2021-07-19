@@ -13,14 +13,14 @@ test_that("get_facility_fsp works", {
   expect_true(ncol(fsp_long) == 3)
   #colnames
   expect_true(all(colnames(fsp_long) == c("Facil_1","Facil_2","Fsp_val")))
-  #nrow = 
+  #nrow =
   expect_true(nrow(fsp_long) == (length(unique(test_locs_5))^2)-length(unique(test_locs_5)))
-  #col types 
+  #col types
   expect_true(all(sapply(fsp_long, class) == c("factor","factor","numeric")))
   #make sure all vals between 0, 1
   expect_true(all(fsp_long$Fsp_val <= 1) & all(fsp_long$Fsp_val > 0))
-  
-  
+
+
   #for mat
   expect_true(class(fsp_mat) == "data.frame")
   #nrow = ncol
@@ -29,11 +29,12 @@ test_that("get_facility_fsp works", {
   expect_true(all(rownames(fsp_mat) == colnames(fsp_mat)))
   #nrow <= length(locs)
   expect_true(nrow(fsp_mat) <= length(test_locs_5) & nrow(fsp_mat) >= 2)
-  #intersect of rownames and locs names is the same group as colnames 
+  #intersect of rownames and locs names is the same group as colnames
   expect_true(length(intersect(rownames(fsp_mat), test_locs_5)) == length(rownames(fsp_mat)))
   #numeric inside
   expect_true(all(fsp_mat <= 1) & all(fsp_mat >= 0))
-  #make sure all of the ones on the diagonal are 0 
+  #make sure all of the ones on the diagonal are 0
   expect_true(all(diag(as.matrix(fsp_mat)) == 0))
-  
+
 })
+
