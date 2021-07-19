@@ -64,5 +64,6 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
       dplyr::left_join(pt_flow, by = c("Loc1" = "Loc1", "Loc2" = "Loc2")) %>% dplyr::select(-n_closely_related_pairs)
   }
   #return snp matrix
+  snp_facility_pairs <- subset_pairs(snp_facility_pairs)
   return(snp_facility_pairs)
 }
