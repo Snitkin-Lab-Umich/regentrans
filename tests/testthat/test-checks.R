@@ -15,12 +15,17 @@ test_pt_2 <- pt[5:8]
 test_pt_3 <- pt[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_dists_2 <- dists[names(test_locs_3), names(test_locs_3)]
+test_dists_3 <- test_dists_2
+test_dists_3[2] <- -1
+test_dists_4 <- test_dists_2
+test_dists_4[,1] <- as.character(test_dists_4[,1])
 test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt)
 test_snv_dists_2 <- test_snv_dists[,2:ncol(test_snv_dists)]
 test_snv_dists_3 <- test_snv_dists
 colnames(test_snv_dists_3) <- c("A", "B", "C", "D", "E", "F", "G", "H")
 test_snv_dists_4 <- test_snv_dists
 test_snv_dists_4$Pairwise_Dists <- as.character(test_snv_dists_4$Pairwise_Dists)
+test_snv_dists_5 <- test_snv_dists %>% tibble::tibble() %>% dplyr::filter(Isolate1 == 'a') %>% data.frame()
 test_tr <- ape::keep.tip(tr,names(test_pt))
 test_tr_2 <- ape::keep.tip(tr,names(test_pt_3))
 test_fasta <- fasta[names(test_locs),]
@@ -142,7 +147,38 @@ test_that("check_get_snv_dists_input works", {
   warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists_2, locs = test_locs, pt = test_pt, pt_trans_net=NULL))
   expect_true(warnings[1] == "You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset")
   expect_true(warnings[2] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
+})
 
+# check_dists
+
+test_that("check_dists works", {
+  expect_error(check_dists(dists = test_dists_2[,1:2]),
+               "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but the dimensions of your matrix are not equal. The matrix you provided is 3 x 2")
+  expect_error(check_dists(
+    dists = data.frame(test_dists_2[1,1])),
+    "Your SNV matrix only has  1  samples. Please use a SNV distance matrix that includes 2 or more samples")
+  expect_error(check_dists(
+    dists = (test_dists_2[1,1])),
+    "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: numeric")
+  expect_error(check_dists(
+    dists = test_dists_3),
+    "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided an object with values < 0")
+  expect_error(check_dists(test_dists_4),
+               "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided an object that does not contain only numeric data, it includes type: character")
+})
+
+# check_pt
+test_that("check_pt works", {
+  expect_error(check_pt(pt[1], dists),
+               "You have only supplied patient IDs for 1 isolate. Please supply a named vector of patient IDs for at least 2 isolates")
+})
+
+# check_snv_dists
+test_that("check_snv_dists works", {
+  expect_error(check_snv_dists(data.frame(x = 1)),
+               "The snv_dists object")
+  expect_error(check_snv_dists(test_snv_dists_5),
+               "Your snv_dists input has  ")
 })
 
 #test check_subset_pairs_input works
@@ -194,6 +230,11 @@ test_that("check_get_frac_intra_input works", {
   expect_false(check_get_frac_intra_input(snv_dists = test_snv_dists_pt_trans, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL))
   #one with patient transfer network no snv_dists
   expect_true(check_get_frac_intra_input(snv_dists = NULL, dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = test_pt_trans_net))
+  # all null
+  expect_error(check_get_frac_intra_input(snv_dists = NULL, dists = NULL, locs = NULL),
+               "Please provide either an SNV dists matrix or dists and locs objecst so we can generate one for you.")
+  expect_error(check_pt_transfer_input(snv_dists = NULL, dists = NULL, locs = NULL),
+               "Please provide either an SNV dists matrix or dists and locs objecst so we can generate one for you.")
 
 })
 
@@ -257,6 +298,14 @@ test_that("check_get_clusters_inputs works", {
     fixed = TRUE
   )
 
+})
+
+# check_control_labels
+
+test_that("check_control_labels works", {
+  expect_null(check_control_labels(NULL))
+  expect_error(check_control_labels(c('a','b')),
+               "control_labels must be either ")
 })
 
 ##################################test get_facility_fsp#####################################
@@ -455,7 +504,7 @@ test_that("check_get_largest_subtree_input works", {
   )
   #one where control labels is wrong
   expect_error(
-    check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = "NULL", bootstrap = NULL, pureness = 1),
+    check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = test_pt, control_labels = c('A'='A'), bootstrap = NULL, pureness = 1),
     "The subtrs object must include all of the isolates provided in the control_labels object",
     fixed = TRUE
   )
@@ -544,4 +593,24 @@ test_that("check_pt_transfer_input works", {
                "The pt_trans_net don't have at least two locations in common with the locs object.",
                fixed = TRUE)
 
+})
+
+# check_thresh
+
+test_that("check_thresh works", {
+  expect_null(check_thresh(1))
+  expect_error(check_thresh(c(1,2)),
+               "thresh must be a single value, you provided")
+  expect_error(check_thresh('a'),
+               "thresh must be a numeric value, you provided character")
+  expect_error(check_thresh(-1),
+               "thresh must be a positive numeric value, you provided")
+})
+
+# check_paths
+
+test_that("check_paths works", {
+  expect_null(check_paths(TRUE))
+  expect_error(check_paths(1),
+               "paths argument must be a logical/logical value representing whether you want to return the shortest paths used to generate the indirect flow metric. You have provided numeric")
 })
