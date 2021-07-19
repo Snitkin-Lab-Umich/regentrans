@@ -20,3 +20,6 @@ Imports:
     tidyr, 
     igraph, 
     future.apply
+Suggests:
+    testthat,
+    tibble

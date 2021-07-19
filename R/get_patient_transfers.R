@@ -11,7 +11,7 @@
 #' @return a summary of number of closely related isolate pairs and number of direct patient transfers and indirect flow metrics between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
 #' @export
 #'
-#' @examples a patient transfer network and either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
+#' @examples get_patient_transfers(pt_trans_net = pt_flow, dists = dists, locs = locs)
 get_patient_transfers <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, thresh = 10, paths = FALSE){
   #run checks
   run_snv_dists <- check_pt_transfer_input(pt_trans_net = pt_trans_net, snv_dists = snv_dists,

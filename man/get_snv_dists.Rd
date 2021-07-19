@@ -22,5 +22,5 @@ a data.frame of isolate pairs, their SNV distance, and labeled as either inter- 
 Get matrix of inter- and intra-facility pariwise snv distances
 }
 \examples{
-to reduce this dataframe to include only one row that represents each pair, use the subset_pairs() function on the output of this function
+get_snv_dists(dists, locs)
 }

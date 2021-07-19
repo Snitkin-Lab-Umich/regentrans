@@ -30,5 +30,5 @@ fraction of intra-facility pairs for different snv thresholds, lowest threshold 
 Get fraction of intra-facility pairs for different snv thresholds
 }
 \examples{
-either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
+get_frac_intra(dists = dists, locs = locs)
 }
