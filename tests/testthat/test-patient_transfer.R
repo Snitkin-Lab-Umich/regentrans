@@ -9,6 +9,7 @@ pat_flow <- na.omit(data.frame(as.table(as.matrix(mat))))
 #pat_flow <- dplyr::bind_cols(pat_flow %>% dplyr::filter(Var1 != Var2))
 colnames(pat_flow) <- c("source_facil", "dest_facil", "n_transfers")
 pat_flow$n_transfers <- as.numeric(pat_flow$n_transfers)
+pt_flow_sub <- pat_flow[1:3,]
 
 test_locs <- locs[1:3]
 test_pt <- as.character(pt[1:3])
@@ -45,6 +46,14 @@ test_that("patient_transfer works", {
   expect_equal(patient_transfer(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt, thresh = 50),
                test_pt_trans)
   # duplicate source/destination facility rows returns error
-  expect_error(patient_transfer(dplyr::bind_rows(pt_flow,pt_flow),NULL, dists, locs),
+  expect_error(patient_transfer(dplyr::bind_rows(pat_flow,pat_flow),test_snv_dists),
                "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.")
+  # missing patient transfers for some facilities
+  expect_equal(patient_transfer(pt_flow_sub, test_snv_dists, thresh = 50),
+               structure(list(Loc1 = c("B", "C", "C"),
+                              Loc2 = c("A", "A", "B"),
+               n_closely_related_pairs = c(1L, 0L, 1L),
+               n_1_to_2_transfers = c(20, 12, NA), n_2_to_1_transfers = c(NA_real_, NA_real_, NA_real_),
+               indirect_flow_metric_1_to_2 = c(0, 0, 0),
+               indirect_flow_metric_2_to_1 = c(0, 0, 0)), class = "data.frame", row.names = c(NA, -3L)))
   })

@@ -21,6 +21,22 @@ patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs 
   pt_trans_net$source_facil <- as.character(pt_trans_net$source_facil)
   pt_trans_net$dest_facil <- as.character(pt_trans_net$dest_facil)
 
+  # fill in missing source and destination facilities (doesn't change results, but will error out otherwise)
+  all_facils <- unique(c(pt_trans_net$source_facil,pt_trans_net$dest_facil))
+  not_in_source <- all_facils[!(all_facils %in% pt_trans_net$source_facil)]
+  not_in_dest <- all_facils[!(all_facils %in% pt_trans_net$dest_facil)]
+  if(length(not_in_source) != 0 | length(not_in_dest) != 0){
+    pt_trans_net <- dplyr::bind_rows(pt_trans_net,
+                                     dplyr::bind_cols(source_facil = not_in_source,
+                                                      dest_facil = pt_trans_net$dest_facil[1],
+                                                      n_transfers = NA),
+                                     dplyr::bind_cols(source_facil = pt_trans_net$source_facil[1],
+                                                      dest_facil = not_in_dest,
+                                                      n_transfers = NA))
+    pt_trans_net <- pt_trans_net %>% tidyr::expand(source_facil, dest_facil) %>%
+      dplyr::left_join(pt_trans_net, by = c("source_facil", "dest_facil"))
+  }
+
   #run get_snv_dists if necessary
   if(run_snv_dists){
     message("Running get_snv_dists...")
