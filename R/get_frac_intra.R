@@ -9,7 +9,7 @@
 #' @return fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data
 #' @export
 #'
-#' @examples either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
+#' @examples get_frac_intra(dists = dists, locs = locs)
 get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL){
 
   #make one check

@@ -132,7 +132,7 @@ get_long_form <- function(facil_dist){
   #check that it is a symmetric matrix
   check_long_form_input(facil_dist)
   #change to longform
-  facil_dist_long <- na.omit(data.frame(as.table(as.matrix(facil_dist)))) %>% dplyr::filter(Freq != 0)
+  facil_dist_long <- stats::na.omit(data.frame(as.table(as.matrix(facil_dist)))) %>% dplyr::filter(Freq != 0)
   colnames(facil_dist_long) <- c("Facil_1", "Facil_2", "Fsp_val")
   return(facil_dist_long)
 }

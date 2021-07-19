@@ -36,5 +36,5 @@ a summary of number of closely related isolate pairs and number of direct patien
 Get summary of patient transfer network and closely-related isolates
 }
 \examples{
-a patient transfer network and either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
+get_patient_transfers(pt_trans_net = pt_flow, dists = dists, locs = locs)
 }

@@ -8,7 +8,7 @@
 #' @return a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs. If pt_trans_net provided will return both direct transfer and indirect flow metric for each facility pair.
 #' @export
 #'
-#' @examples to reduce this dataframe to include only one row that represents each pair, use the subset_pairs() function on the output of this function
+#' @examples get_snv_dists(dists, locs)
 get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
   #checks
   check_get_snv_dists_input(dists, locs, pt, pt_trans_net)
@@ -34,7 +34,7 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
   dists_sub <- dists[isolates, isolates]
 
   #make df
-  snps <- na.omit(data.frame(as.table(as.matrix(dists_sub))))
+  snps <- stats::na.omit(data.frame(as.table(as.matrix(dists_sub))))
   #change freq colname?
   colnames(snps) <- c("Isolate1", "Isolate2", "Pairwise_Dists")
 
