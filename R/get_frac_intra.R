@@ -20,6 +20,7 @@ get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NUL
     snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt, pt_trans_net = pt_trans_net)
   }
 
+  # get intra-facility count and fraction for each pairwise SNV distance in the dataset
   intra_cts <- snv_dists %>%
     dplyr::group_by(Pair_Type, Pairwise_Dists) %>%
     dplyr::mutate(Pair_Type = factor(Pair_Type, levels = c('Intra-facility pair','Inter-facility pair'))) %>%
