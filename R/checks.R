@@ -55,8 +55,8 @@ check_pt <- function(pt, dists){
   }
   #check that the pt object has at least 2 items
   if(length(pt) < 2){
-    stop(paste("You have only supplied patient IDs for "), length(locs),
-         " isolates. Please supply a named vector of patient IDs for at least 2 isolates")
+    stop(paste("You have only supplied patient IDs for "), length(pt),
+         " isolate. Please supply a named vector of patient IDs for at least 2 isolates")
   }
   #check that there are at least 2 dists and locs in common
   if(length(intersect(rownames(dists), names(pt))) < 2){
@@ -208,23 +208,6 @@ check_snv_dists <- function(snv_dists){
 
 }
 
-#some vector of numbers, max number isn't > max snv distance or negative
-check_threshs <- function(threshs, snv_dists){
-  #check numeric vector
-  if(!(is.vector(threshs) && (class(threshs) == "numeric" | class(threshs) == "integer"))){
-    stop(paste("threshs must be a numeric vector, you provided a ", typeof(threshs)))
-  }
-  #check that max number isn't > max snv distance or negative
-  #we are not meeting this condition right now so I will just throw a warning
-  if(!max(threshs) <= max(snv_dists$Pairwise_Dists)){
-    stop(paste("Your max threshold ", max(threshs), " is greater than your max CNV distance of ", max(snv_dists$Pairwise_Dists),
-                  "If you are using the default thereshold input, please enter a numeric vector of thresholds"))
-  }
-  if(any(threshs < 0)){
-    stop("You provided a threshold below 0")
-  }
-}
-
 check_get_frac_intra_input <- function(snv_dists, dists, locs, pt, pt_trans_net){
   #if SNV_dists doesnt exist and they didn't input locs and dists
   if(is.null(snv_dists) & is.null(dists) & is.null(locs)){
@@ -241,8 +224,6 @@ check_get_frac_intra_input <- function(snv_dists, dists, locs, pt, pt_trans_net)
   }
   #checks snv_dists input
   check_snv_dists(snv_dists)
-  #check threshs input
-  # check_threshs(threshs, snv_dists)
   #return the snv_dists made
   return(run_snv_dists)
 }
@@ -513,8 +494,8 @@ check_subtrs_vs_isolate_labs <- function(subtrs, isolate_labels, type){
 #This controls for clustering by requiring that the pure clusters must contain multiple of the control labels.
 check_control_labels <- function(control_labels){
   #can be null or a named vector
-  if(!(is.null(control_labels) || (is.vector(control_labels)) || is.null(names(control_labels)))){
-    stop(paste("control_labels must be either a null (default) or a named vector of labels known to cluster"))
+  if(!is.null(control_labels) & (!is.vector(control_labels) | is.null(names(control_labels)))){
+    stop(paste("control_labels must be either null (default) or a named vector of labels known to cluster"))
   }
 }
 
