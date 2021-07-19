@@ -42,6 +42,6 @@ test_that("patient_transfer works", {
   expect_true(all(sapply(test_pt_trans_paths, class) == c("data.frame", "list")))
   # check that get_snv_dists part works
   expect_message(patient_transfer(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt, thresh = 50),'Running get_snv_dists...')
-  expect_equal(patient_transfer(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt),
+  expect_equal(patient_transfer(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt, thresh = 50),
                test_pt_trans)
 })
