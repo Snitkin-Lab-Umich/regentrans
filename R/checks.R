@@ -3,7 +3,12 @@
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_snv_dists FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
-#checks dists input to get_snv_dists function
+#' Check dists input to get_snv_dists function
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_dists <- function(dists){
   #if it is not a matrix
   if(!(any(class(dists) == "matrix") || any(class(dists) == "data.frame"))){
@@ -32,7 +37,12 @@ check_dists <- function(dists){
 
 }
 
-#checks locs input to get_snv_dists function
+#' Check locs input to get_snv_dists function
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_locs <- function(locs){
   #check that the locs object is a named vector
   #if it is not a vector or has no names then not good (check both of these in tests)
@@ -46,7 +56,12 @@ check_locs <- function(locs){
   }
 }
 
-#checks pt input to get_snv_dists function
+#' Check pt input to get_snv_dists function
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_pt <- function(pt, dists){
   #check that the pt object is a named vector
   #if it is not a vector or has no names then not good (check both of these in tests)
@@ -64,7 +79,12 @@ check_pt <- function(pt, dists){
   }
 }
 
-#check that samples and lengths of pt and locs vectors are the same
+#' Check that samples and lengths of pt and locs vectors are the same
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_pt_vs_locs <- function(pt, locs){
   #check that there are the same number of samples in the pt vector as in the locs vector
   #where would I want to subet myself?
@@ -77,7 +97,12 @@ check_pt_vs_locs <- function(pt, locs){
   }
 }
 
-#check that the names of the isolates in locs actually exist in the SNV matrix
+#' Check that the names of the isolates in locs actually exist in the SNV matrix
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_dists_vs_locs <- function(dists, locs){
   #check that there are less than or equal to the number of samples in the vector than in the dists matrix
   if(length(locs) > nrow(dists)){
@@ -96,6 +121,12 @@ check_dists_vs_locs <- function(dists, locs){
   }
 }
 
+#' Check patient transfer network input
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_pt_trans_net <- function(pt_trans_net, locs){
   #default is null
   if(!is.null(pt_trans_net)){
@@ -136,7 +167,12 @@ check_pt_trans_net <- function(pt_trans_net, locs){
 }
 
 
-#wrapper for input to snv_dists
+#' Check input to snv_dists
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_get_snv_dists_input <- function(dists, locs, pt, pt_trans_net){
   #check everything that is common (aka no pt) first
   #check that the dists object is the snv object returned by dist.dna
@@ -158,7 +194,12 @@ check_get_snv_dists_input <- function(dists, locs, pt, pt_trans_net){
   }
 }
 
-#check subset pairs input
+#' Check subset pairs input
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_subset_pairs_input <- function(snv_dists){
   if(!(any(class(snv_dists) == "matrix") || any(class(snv_dists) == "data.frame"))){
     stop(paste("The dists object must be a data.frame, but you provided:",
@@ -173,6 +214,13 @@ check_subset_pairs_input <- function(snv_dists){
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_frac_intra FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
+
+#' Check snv dists dataframe
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_snv_dists <- function(snv_dists){
   #check the type
   if(!(class(snv_dists) == "data.frame")){
@@ -208,6 +256,12 @@ check_snv_dists <- function(snv_dists){
 
 }
 
+#' Check input of get_frac_intra
+#'
+#' @inheritParams get_snv_dists
+#'
+#' @noRd
+#'
 check_get_frac_intra_input <- function(snv_dists, dists, locs, pt, pt_trans_net){
   #if SNV_dists doesnt exist and they didn't input locs and dists
   if(is.null(snv_dists) & is.null(dists) & is.null(locs)){
@@ -235,7 +289,12 @@ check_get_frac_intra_input <- function(snv_dists, dists, locs, pt, pt_trans_net)
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_clusters FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
-#check that the tree object is a tree
+#' Check that the tree object is a tree
+#'
+#' @inheritParams get_clusters
+#'
+#' @noRd
+#'
 check_tree <- function(tr){
   if(!(class(tr) == "phylo")){
     stop(paste("The tr object must be a phylogenetic tree, read into R using the ape::read.tree() function. You have supplied a ",
@@ -243,7 +302,12 @@ check_tree <- function(tr){
   }
 }
 
-#check that the pureness is a double between 1 and .5
+# Check that the pureness is a double between 1 and .5
+#'
+#' @inheritParams get_clusters
+#'
+#' @noRd
+#'
 check_pureness <- function(pureness){
   if(!(typeof(pureness) == "double")){
     stop(paste("The pureness value must be a double, you supplied type ", typeof(pureness)))
@@ -253,7 +317,12 @@ check_pureness <- function(pureness){
   }
 }
 
-
+#' Check bootstrap value
+#'
+#' @inheritParams get_clusters
+#'
+#' @noRd
+#'
 check_bootstrap <- function(bootstrap){
   #check bootstrap value is an int value or null
   if(!(is.null(bootstrap) || typeof(bootstrap) == "double")){
@@ -265,7 +334,12 @@ check_bootstrap <- function(bootstrap){
   }
 }
 
-#check that the names of the isolates in locs actually exist in the SNV matrix
+#' Check that the names of the isolates in locs actually exist in the SNV matrix
+#'
+#' @inheritParams get_clusters
+#'
+#' @noRd
+#'
 check_tr_vs_locs <- function(tr, locs){
   #check that there are at least two in common and warn that we will subset
   if(length(intersect(names(locs), tr$tip.label)) < 2){
@@ -279,7 +353,12 @@ check_tr_vs_locs <- function(tr, locs){
   }
 }
 
-#check get_clusters mandatory inputs
+#' Check get_clusters mandatory inputs
+#'
+#' @inheritParams get_clusters
+#'
+#' @noRd
+#'
 check_get_clusters_inputs <- function(tr, locs, pureness, bootstrap){
   #check that the tree is a tree
   check_tree(tr)
@@ -300,7 +379,12 @@ check_get_clusters_inputs <- function(tr, locs, pureness, bootstrap){
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_facility_fsp FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
-#check that the fasta file is a dna bin object
+# Check that the fasta file is a dna bin object
+#'
+#' @inheritParams get_facility_fsp
+#'
+#' @noRd
+#'
 check_dna_bin <- function(fasta){
   if(all(class(fasta) != "DNAbin")){
     stop(paste("The fasta object must be of class DNAbin, you have supplied an object of class ",
@@ -308,7 +392,12 @@ check_dna_bin <- function(fasta){
   }
 }
 
-#make sure there are at least two rownames in the fasta that match rownames in the
+#' Make sure there are at least two rownames in the fasta that match rownames in the
+#'
+#' @inheritParams get_facility_fsp
+#'
+#' @noRd
+#'
 check_fasta_vs_locs <- function(fasta, locs){
   common_isolates <- intersect(rownames(fasta), names(locs))
   #check that there are at least 2 names of locs represented by rownames in the fasta for subsetting
@@ -333,8 +422,12 @@ check_fasta_vs_locs <- function(fasta, locs){
 }
 
 
-
-#do I need to check something here about how they are related? Its just confusing because how do they know what facility??
+#' Check get_facility_fsp input
+#'
+#' @inheritParams get_facility_fsp
+#'
+#' @noRd
+#'
 check_facility_fsp_input <- function(fasta, locs, form){
   #check form
   if(!(form == "matrix" || form == "long")){
@@ -349,7 +442,12 @@ check_facility_fsp_input <- function(fasta, locs, form){
   check_fasta_vs_locs(fasta, locs)
 }
 
-#long form function
+# Check function to convert matrix to long form
+#'
+#' @inheritParams get_facility_fsp
+#'
+#' @noRd
+#'
 check_long_form_input <- function(facil_dist){
   #make sure it is a data.frame
   if(!(any(class(facil_dist) == "matrix") || any(class(facil_dist) == "data.frame"))){
@@ -373,6 +471,13 @@ check_long_form_input <- function(facil_dist){
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR allele_freq functions FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
+
+#' Check allele frequency inputs
+#'
+#' @inheritParams get_facility_fsp
+#'
+#' @noRd
+#'
 check_allele_freq_input <- function(x, subset, allele_n, alleles){
   #one option for allele_freq_between where subset !null
   #check x
@@ -417,6 +522,13 @@ check_allele_freq_input <- function(x, subset, allele_n, alleles){
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR within_pop_var functions FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
+
+#' Check get_within_pop_var inputs
+#'
+#' @inheritParams get_facility_fsp
+#'
+#' @noRd
+#'
 check_within_pop_var_inputs <- function(subset_snp_mat, subset){
   #check subset
   if(class(subset) != "logical"){
@@ -445,6 +557,13 @@ check_within_pop_var_inputs <- function(subset_snp_mat, subset){
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR reverse_list_str FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
+
+#' Check reverse list structure function inputs
+#'
+#' @inheritParams get_facility_fsp
+#'
+#' @noRd
+#'
 check_reverse_list_str_input <- function(ls){
   #check that it is a list
   if(class(ls) != "list"){
@@ -463,8 +582,14 @@ check_reverse_list_str_input <- function(ls){
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR get_largest_subtree FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
-#check that subtrs are Subtrees created using ape::subtrees to look for clustering on.
-#Should include all isolates of interest.
+
+#' Check that subtrs are Subtrees created using ape::subtrees to look for clustering on.
+#' Should include all isolates of interest.
+#'
+#' @inheritParams get_clusters
+#'
+#' @noRd
+#'
 check_subtrs <- function(subtrs, isolate_labels){
   #check that it is a list
   if(class(subtrs) != "list"){
@@ -476,7 +601,12 @@ check_subtrs <- function(subtrs, isolate_labels){
   }
 }
 
-#check tip labels vs. isolate list
+# Check tip labels vs. isolate list
+#'
+#' @inheritParams get_clusters
+#'
+#' @noRd
+#'
 check_subtrs_vs_isolate_labs <- function(subtrs, isolate_labels, type){
   #check that all isolates of interest are included
   isolates <- ""
@@ -490,8 +620,13 @@ check_subtrs_vs_isolate_labs <- function(subtrs, isolate_labels, type){
   }
 }
 
-#Named vector of labels known to cluster. Names must be equivalent to tree tip label names.
-#This controls for clustering by requiring that the pure clusters must contain multiple of the control labels.
+#' Check named vector of labels known to cluster. Names must be equivalent to tree tip label names.
+#' This controls for clustering by requiring that the pure clusters must contain multiple of the control labels.
+#'
+#' @inheritParams get_clusters
+#'
+#' @noRd
+#'
 check_control_labels <- function(control_labels){
   #can be null or a named vector
   if(!is.null(control_labels) & (!is.vector(control_labels) | is.null(names(control_labels)))){
@@ -499,6 +634,12 @@ check_control_labels <- function(control_labels){
   }
 }
 
+#' Check get_largest_subtree input
+#'
+#' @inheritParams get_clusters
+#'
+#' @noRd
+#'
 check_get_largest_subtree_input <- function(subtrs, isolate_labels, control_labels, bootstrap, pureness){
   #use check_locs to check that it is a named vector of more than one isolate
   check_locs(isolate_labels)
@@ -522,6 +663,13 @@ check_get_largest_subtree_input <- function(subtrs, isolate_labels, control_labe
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR patient_transfer FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
+
+#' Check threshold
+#'
+#' @inheritParams get_patient_transfers
+#'
+#' @noRd
+#'
 check_thresh <- function(thresh){
   #make sure it is a single number
   if(length(thresh) != 1){
@@ -540,7 +688,12 @@ check_thresh <- function(thresh){
 
 }
 
-#check the paths input
+# Check the paths input
+#'
+#' @inheritParams get_patient_transfers
+#'
+#' @noRd
+#'
 check_paths <- function(paths){
   #make sure it is a boolean (T or F)
   if(class(paths) != "logical"){
@@ -549,7 +702,12 @@ check_paths <- function(paths){
   }
 }
 
-
+#' Check patient transfer input
+#'
+#' @inheritParams get_patient_transfers
+#'
+#' @noRd
+#'
 check_pt_transfer_input <- function(pt_trans_net, snv_dists, dists, locs, pt, thresh, paths){
   #check whether to run snv_dists same as get frac_intra
   #if SNV_dists doesnt exist and they didn't input locs and dists

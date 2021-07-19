@@ -78,7 +78,12 @@ get_facility_fsp <- function(fasta, locs, form = "matrix"){
 }#end facility_fst
 
 
-#find allele frequency for each allele at each site
+#' Find allele frequency for each allele at each site
+#'
+#' @inheritParams get_facility_fsp
+#'
+#' @noRd
+#'
 get_allele_freq_btwn <- function(x, subset, allele_n, alleles){
   #checks
   check_allele_freq_input(x, subset, allele_n, alleles)
@@ -93,6 +98,12 @@ get_allele_freq_within <- function(x, allele_n, alleles){
   return(sum(as.character(x) %in% alleles[allele_n])/length(x))
 }
 
+#' Get within population variation
+#'
+#' @inheritParams get_facility_fsp
+#'
+#' @noRd
+#'
 get_within_pop_var <- function(subset_snp_mat, subset){
   #checks
   check_within_pop_var_inputs(subset_snp_mat, subset)
@@ -114,7 +125,7 @@ get_within_pop_var <- function(subset_snp_mat, subset){
 #' @param facil_dist
 #'
 #' @return long form data where each row represents a cell in the matrix
-#' @export
+#' @noRd
 #'
 #' @examples get_long_form(facil_dist)
 get_long_form <- function(facil_dist){
