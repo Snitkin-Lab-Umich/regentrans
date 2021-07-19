@@ -51,19 +51,19 @@ get_facility_fsp <- function(fasta, locs, form = "matrix"){
         #skip multi-allelic sites
         if (length(alleles) > 2){0} else{
           #find allele frequency for each allele at each site
-          f1_allele1 = allele_freq_btwn(x = x, subset = subset_f1, allele_n = 1, alleles = alleles)
-          f1_allele2 = allele_freq_btwn(x, subset_f1, 2, alleles)
-          f2_allele1 = allele_freq_btwn(x, subset_f2, 1, alleles)
-          f2_allele2 = allele_freq_btwn(x, subset_f2, 2, alleles)
+          f1_allele1 = get_allele_freq_btwn(x = x, subset = subset_f1, allele_n = 1, alleles = alleles)
+          f1_allele2 = get_allele_freq_btwn(x, subset_f1, 2, alleles)
+          f2_allele1 = get_allele_freq_btwn(x, subset_f2, 1, alleles)
+          f2_allele2 = get_allele_freq_btwn(x, subset_f2, 2, alleles)
           #calculate between pop variation for each allele site?
           f1_allele1 * f1_allele2 * f2_allele1 * f2_allele2}
       })
       #sum
       between_sum = sum(between)
       #WITHIN POPULATION 1 VARIATION
-      within_f1_sum <- within_pop_var(subset_snp_mat, subset_f1)
+      within_f1_sum <- get_within_pop_var(subset_snp_mat, subset_f1)
       #WITHIN POPULATION 2 VARIATION
-      within_f2_sum <- within_pop_var(subset_snp_mat, subset_f2)
+      within_f2_sum <- get_within_pop_var(subset_snp_mat, subset_f2)
       #calculate Fsp
       Fsp = (((within_f1_sum + within_f2_sum) / 2) - between_sum) / ((within_f1_sum + within_f2_sum) / 2)
       return(Fsp)
@@ -73,36 +73,36 @@ get_facility_fsp <- function(fasta, locs, form = "matrix"){
   rownames(facil_dist) <- locs_unique
   colnames(facil_dist) <- locs_unique
   #change to long form if that is specified
-  if(form != "matrix"){ facil_dist <- long_form(facil_dist) }
+  if(form != "matrix"){ facil_dist <- get_long_form(facil_dist) }
   return(facil_dist);
 }#end facility_fst
 
 
 #find allele frequency for each allele at each site
-allele_freq_btwn <- function(x, subset, allele_n, alleles){
+get_allele_freq_btwn <- function(x, subset, allele_n, alleles){
   #checks
   check_allele_freq_input(x, subset, allele_n, alleles)
   #calculate
   return(sum(as.character(x)[subset] %in% alleles[allele_n])/sum(subset))
 }
 
-allele_freq_within <- function(x, allele_n, alleles){
+get_allele_freq_within <- function(x, allele_n, alleles){
   #checks
   check_allele_freq_input(x, subset = NULL, allele_n, alleles)
   #calculate
   return(sum(as.character(x) %in% alleles[allele_n])/length(x))
 }
 
-within_pop_var <- function(subset_snp_mat, subset){
+get_within_pop_var <- function(subset_snp_mat, subset){
   #checks
-  within_pop_var_input_checks(subset_snp_mat, subset)
+  check_within_pop_var_inputs(subset_snp_mat, subset)
 
   f_subset_snp_mat = subset_snp_mat[subset,apply(subset_snp_mat[subset,], 2, FUN = function(x){sum(x != x[1] | x == 'N') > 0})]
   within_f = apply(f_subset_snp_mat, 2, FUN = function(x){
     alleles = names(table(as.character(x)))
     if (length(alleles) > 2){0}else{
-      f_allele1 = allele_freq_within(x, 1, alleles)
-      f_allele2 = allele_freq_within(x, 2, alleles)
+      f_allele1 = get_allele_freq_within(x, 1, alleles)
+      f_allele2 = get_allele_freq_within(x, 2, alleles)
 
       (f_allele1 * f_allele2)^2}
   })
@@ -116,8 +116,8 @@ within_pop_var <- function(subset_snp_mat, subset){
 #' @return long form data where each row represents a cell in the matrix
 #' @export
 #'
-#' @examples long_form(facil_dist)
-long_form <- function(facil_dist){
+#' @examples get_long_form(facil_dist)
+get_long_form <- function(facil_dist){
   #check that it is a symmetric matrix
   check_long_form_input(facil_dist)
   #change to longform

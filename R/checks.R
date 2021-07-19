@@ -436,7 +436,7 @@ check_allele_freq_input <- function(x, subset, allele_n, alleles){
 #*******************************************************************************************************************************************#
 #***********************************************START CHECKS FOR within_pop_var functions FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
-within_pop_var_input_checks <- function(subset_snp_mat, subset){
+check_within_pop_var_inputs <- function(subset_snp_mat, subset){
   #check subset
   if(class(subset) != "logical"){
     stop(paste("The subset vector you have provided is not logical, you provided a",
