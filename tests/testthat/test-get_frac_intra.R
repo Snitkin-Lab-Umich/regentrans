@@ -43,7 +43,7 @@ test_that("get_frac_intra works", {
   expect_true(all((test_frac_intra_pt_trans_net$Frac_Intra == test_frac_intra_pt_trans_net$n_Intra/(test_frac_intra_pt_trans_net$n_Intra + test_frac_intra_pt_trans_net$n_Inter)) | test_frac_intra_pt_trans_net$Frac_Intra == 0))
   expect_true(all((test_frac_intra_pt_trans_net$Frac_Inter == test_frac_intra_pt_trans_net$n_Inter/(test_frac_intra_pt_trans_net$n_Intra + test_frac_intra_pt_trans_net$n_Inter)) | test_frac_intra_pt_trans_net$Frac_Inter == 0))
   # check that get_snv_dists part works
-  expect_equal(expect_warning(expect_message(get_frac_intra(dists = test_dists, locs = test_locs, pt = test_pt),
-                              'Running get_snv_dists...')),
+  expect_equal(expect_message(get_frac_intra(dists = test_dists, locs = test_locs, pt = test_pt),
+                              'Running get_snv_dists...'),
     test_frac_intra)
 })
