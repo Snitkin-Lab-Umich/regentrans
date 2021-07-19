@@ -381,18 +381,18 @@ test_that("check_allele_freq_input works", {
 })
 
 ##################################test within_pop_var#####################################
-test_that("within_pop_var_input_checks works", {
+test_that("check_within_pop_var_inputs works", {
   #one that works
-  expect_true(is.null(within_pop_var_input_checks(subset_snp_mat = test_fasta, subset = c(TRUE, FALSE, FALSE))))
+  expect_true(is.null(check_within_pop_var_inputs(subset_snp_mat = test_fasta, subset = c(TRUE, FALSE, FALSE))))
   #one with wrong subset_snp_mat
   expect_error(
-    within_pop_var_input_checks(subset_snp_mat = test_fasta, subset = "TRUE"),
+    check_within_pop_var_inputs(subset_snp_mat = test_fasta, subset = "TRUE"),
     "The subset vector you have provided is not logical, you provided a character",
     fixed = TRUE
   )
   #one with wrong subset
   expect_error(
-    within_pop_var_input_checks(subset_snp_mat = "test_fasta", subset = c(TRUE, FALSE, FALSE)),
+    check_within_pop_var_inputs(subset_snp_mat = "test_fasta", subset = c(TRUE, FALSE, FALSE)),
     "The subset_snp_mat you have provided is not a DNAbin, you provided a character",
     fixed = TRUE
   )

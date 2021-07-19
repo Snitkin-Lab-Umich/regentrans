@@ -5,8 +5,8 @@
 #' @return facility x facility matrix of metric of patient flow between each facility pair
 #' @export
 #'
-#' @examples indirect_flow(pt_trans_net)
-indirect_flow <- function(pt_trans_net){
+#' @examples get_indirect_flow(pt_trans_net)
+get_indirect_flow <- function(pt_trans_net){
   #don't want to subset before getting here, need whole network for indirect
   #checks
   check_pt_trans_net(pt_trans_net, unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))))

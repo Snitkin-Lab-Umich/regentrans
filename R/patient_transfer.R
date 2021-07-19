@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples a patient transfer network and either input a snv_dists object that is the output of the get_snv_dists function or input a SNV distance matrix (made by ape::dists.dna) and a named vector of isolate locations and optionally isolate patient IDs.
-patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, thresh = 10, paths = FALSE){
+get_patient_transfers <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, thresh = 10, paths = FALSE){
   #run checks
   run_snv_dists <- check_pt_transfer_input(pt_trans_net = pt_trans_net, snv_dists = snv_dists,
                                            dists = dists, locs = locs, pt = pt, thresh = thresh, paths = paths)
@@ -44,7 +44,7 @@ patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs 
   }
 
   #run indirect flow
-  ind_flow_output <- indirect_flow(pt_trans_net)
+  ind_flow_output <- get_indirect_flow(pt_trans_net)
   pt_trans_net_i <- ind_flow_output$transfer_network
   paths_list <- ind_flow_output$paths
 
