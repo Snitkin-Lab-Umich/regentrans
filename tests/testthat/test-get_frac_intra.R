@@ -14,7 +14,7 @@ mat <- data.frame(matrix(data = c(0, 20, 12,
 rownames(mat) <- c("A", "B", "C")
 colnames(mat) <- c("A", "B", "C")
 test_pt_trans_net <- na.omit(data.frame(as.table(as.matrix(mat))))
-#pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
+#pat_flow <- dplyr::bind_cols(pat_flow %>% dplyr::filter(Var1 != Var2))
 colnames(test_pt_trans_net) <- c("source_facil", "dest_facil", "n_transfers")
 test_pt_trans_net$n_transfers <- as.numeric(test_pt_trans_net$n_transfers)
 test_snv_dists_pt_trans_net <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = test_pt_trans_net)
@@ -42,5 +42,8 @@ test_that("get_frac_intra works", {
   #check that rows are the divisions of other rows...
   expect_true(all((test_frac_intra_pt_trans_net$Frac_Intra == test_frac_intra_pt_trans_net$n_Intra/(test_frac_intra_pt_trans_net$n_Intra + test_frac_intra_pt_trans_net$n_Inter)) | test_frac_intra_pt_trans_net$Frac_Intra == 0))
   expect_true(all((test_frac_intra_pt_trans_net$Frac_Inter == test_frac_intra_pt_trans_net$n_Inter/(test_frac_intra_pt_trans_net$n_Intra + test_frac_intra_pt_trans_net$n_Inter)) | test_frac_intra_pt_trans_net$Frac_Inter == 0))
-
+  # check that get_snv_dists part works
+  expect_equal(expect_warning(expect_message(get_frac_intra(dists = test_dists, locs = test_locs, pt = test_pt),
+                              'Running get_snv_dists...')),
+    test_frac_intra)
 })

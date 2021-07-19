@@ -6,7 +6,7 @@ test_locs_4 <- locs[1]
 test_locs_5 <- locs[locs %in% c("A", "F", "H")]
 test_locs_6 <- locs[1:4]
 test_locs_7 <- test_locs_5[1:4]
-test_locs_8 <- test_locs_5[2:6]
+test_locs_8 <- test_locs_5[1:5]
 test_locs_9 <- test_locs_5[1:6]
 test_locs_fsp <- test_locs
 test_locs_fsp[1:4] <- "A"
@@ -38,7 +38,7 @@ mat <- data.frame(matrix(data = c(0, 20, 30, 40,
 rownames(mat) <- c("A", "B", "C", "D")
 colnames(mat) <- c("A", "B", "C", "D")
 test_pt_trans_net <- na.omit(data.frame(as.table(as.matrix(mat))))
-#pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
+#pat_flow <- dplyr::bind_cols(pat_flow %>% dplyr::filter(Var1 != Var2))
 colnames(test_pt_trans_net) <- c("source_facil", "dest_facil", "n_transfers")
 test_pt_trans_net$n_transfers <- as.numeric(test_pt_trans_net$n_transfers)
 test_pt_trans_net_2 <- test_pt_trans_net[,2:ncol(test_pt_trans_net)]
@@ -56,7 +56,7 @@ mat2 <- data.frame(matrix(data = c(0, 20, 12,
 rownames(mat2) <- c("A", "B", "C")
 colnames(mat2) <- c("A", "B", "C")
 test_pt_trans_net2 <- na.omit(data.frame(as.table(as.matrix(mat2))))
-#pat_flow <- dplyr::bind_cols(pat_flow %>% filter(Var1 != Var2))
+#pat_flow <- dplyr::bind_cols(pat_flow %>% dplyr::filter(Var1 != Var2))
 colnames(test_pt_trans_net2) <- c("source_facil", "dest_facil", "n_transfers")
 test_pt_trans_net2$n_transfers <- as.numeric(test_pt_trans_net2$n_transfers)
 

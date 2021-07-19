@@ -23,7 +23,7 @@ patient_transfer <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs 
 
   #run get_snv_dists if necessary
   if(run_snv_dists){
-    cat("Running get_snv_dists...")
+    message("Running get_snv_dists...")
     snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
   }
 

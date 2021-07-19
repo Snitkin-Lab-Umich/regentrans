@@ -16,7 +16,7 @@ get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NUL
   run_snv_dists <- check_get_frac_intra_input(snv_dists = snv_dists, dists = dists, locs = locs, pt = pt, pt_trans_net = pt_trans_net)
 
   if(run_snv_dists){
-    cat("Running get_snv_dists...")
+    message("Running get_snv_dists...")
     snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt, pt_trans_net = pt_trans_net)
   }
 
@@ -39,7 +39,7 @@ get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NUL
   # intra_cts
 
   #remove all of the rows that have NaN as the fraction
-  #intra_cts <- intra_cts %>% as.data.frame() %>% filter(!is.na(Frac_Intra), !is.na(Frac_Inter))
+  #intra_cts <- intra_cts %>% as.data.frame() %>% dplyr::filter(!is.na(Frac_Intra), !is.na(Frac_Inter))
   intra_cts <- intra_cts %>%
     # as.data.frame() %>%
     dplyr::mutate(Frac_Intra=ifelse(is.na(Frac_Intra), 0, Frac_Intra)) %>%

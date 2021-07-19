@@ -33,10 +33,10 @@ test_that("get_snv_dists works", {
   #check column types
   expect_true(all(sapply(test_pure_subtree_info, class) == c("character", "numeric", "integer", "character")))
   #make sure if there is an index there is no isolate name
-  expect_true(all(filter(test_pure_subtree_info, !is.na(test_pure_subtree_info$index))$isolate_name == " "))
+  expect_true(all(dplyr::filter(test_pure_subtree_info, !is.na(test_pure_subtree_info$index))$isolate_name == " "))
   #make sure if there is.na(index) size == 1 and isolate name != " "
-  expect_true(all(filter(test_pure_subtree_info, is.na(test_pure_subtree_info$index))$isolate_name != " ") &
-                all(filter(test_pure_subtree_info, is.na(test_pure_subtree_info$index))$subtr_size == 1))
+  expect_true(all(dplyr::filter(test_pure_subtree_info, is.na(test_pure_subtree_info$index))$isolate_name != " ") &
+                all(dplyr::filter(test_pure_subtree_info, is.na(test_pure_subtree_info$index))$subtr_size == 1))
   #make sure all of the fids exist in the test_locs
   #this might break down when we add tree pruning??
   expect_true(length(intersect(unique(test_locs), unique(test_pure_subtree_info$f_id))) ==
