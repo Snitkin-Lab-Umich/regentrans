@@ -1,3 +1,101 @@
+
+#' Get summary of patient transfer network
+#'
+#' @param edge_df a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
+#' @param paths boolean value, TRUE if you want the shortest paths returned, FALSE if you don't
+#'
+#' @return the number of direct patient transfers and indirect flow metrics between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
+#' @export
+#'
+#' @examples
+#' get_patient_flow(edge_df = pt_trans_df)
+get_patient_flow <- function(edge_df, paths = FALSE){
+  #run checks
+  check_get_patient_flow_input(edge_df = edge_df, paths = paths)
+
+  #make pt_trans_net not factors
+  edge_df$source_facil <- as.character(edge_df$source_facil)
+  edge_df$dest_facil <- as.character(edge_df$dest_facil)
+
+  #run indirect flow
+  ind_flow_output <- get_indirect_flow(edge_df)
+  edge_df_i <- ind_flow_output$transfer_network
+  paths_list <- ind_flow_output$paths
+
+  #remove any same-facility pairs
+  pat_flow <- edge_df %>% dplyr::filter(source_facil != dest_facil)
+
+  pt_trans_summary <- full_join(pat_flow, edge_df_i)
+
+  #make df
+  # pt_trans_summary <- as.data.frame(pt_trans_summary)
+
+  if(paths == TRUE){
+    #return paths and summary as a list
+    pt_trans_summary <- list("pt_trans_summary" = pt_trans_summary, "paths" = paths_list)
+  }
+  return(pt_trans_summary)
+}
+
+
+
+#' Get number of closely related pairs between facilities for different SNV distance thresholds
+#'
+#' @param snv_dists the output object of the get_snv_dists function
+#' @param threshs SNV thresholds to use
+#'
+#' @return a summary of number of closely related isolate pairs between each facility pair.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+#' snv_dists <- get_snv_dists(dists, locs)
+#' count_pairs(snv_dists = snv_dists, locs = locs)
+#' }
+count_pairs <- function(snv_dists, threshs = NULL){
+  #run checks
+  check_count_pairs_input(snv_dists = snv_dists, threshs = threshs)
+
+
+  #instead of all of that we will just left join
+  pt_trans_summary <- snv_dists %>%
+    dplyr::mutate(Pairwise_Dists = as.numeric(Pairwise_Dists)) %>%
+    #group by locations (directed)
+    dplyr::group_by(Loc1, Loc2) %>%
+    #summarize how many closely related isolates are in each location pair
+    dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>%
+    #remove locations that are the same
+    dplyr::filter(Loc1 != Loc2) %>%
+    #add in patient transfers from 1 to 2
+    dplyr::left_join(pat_flow, by = c("Loc1" = "source_facil", "Loc2" = "dest_facil")) %>%
+    dplyr::rename("n_1_to_2_transfers" = "n_transfers") %>%
+    #add in patient transfers from 2 to 1
+    dplyr::left_join(pat_flow, by = c("Loc2" = "source_facil", "Loc1" = "dest_facil")) %>%
+    dplyr::rename("n_2_to_1_transfers" = "n_transfers") %>%
+    #add in indirect flow 1 to 2
+    dplyr::left_join(pt_trans_net_i, by = c("Loc1" = "source_facil", "Loc2" = "dest_facil")) %>%
+    dplyr::rename("indirect_flow_metric_1_to_2" = "pt_trans_metric") %>%
+    #add in indirect flow 2 to 1
+    dplyr::left_join(pt_trans_net_i, by = c("Loc2" = "source_facil", "Loc1" = "dest_facil")) %>%
+    dplyr::rename("indirect_flow_metric_2_to_1" = "pt_trans_metric")
+
+  #make df
+  pt_trans_summary <- as.data.frame(pt_trans_summary)
+
+  if(paths == TRUE){
+    #return paths and summary as a list
+    returns <- list("pt_trans_summary" = pt_trans_summary, "paths" = paths_list)
+
+    return(returns)
+  }
+  else{
+    return(pt_trans_summary)
+  }
+}
+
+
+
 #' Get summary of patient transfer network and closely-related isolates
 #'
 #' @param pt_trans_net a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
@@ -93,20 +191,23 @@ get_patient_transfers <- function(pt_trans_net, snv_dists = NULL, thresh = 10, p
 
 #' Calculate indirect patient flow from patient transfer network
 #'
-#' @param pt_trans_net a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
+#' @param edge_df a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
 #'
 #' @return facility x facility matrix of metric of patient flow between each facility pair
 #' @noRd
 #'
 #' @examples
 #' get_indirect_flow(pt_trans_df)
-get_indirect_flow <- function(pt_trans_net){
+get_indirect_flow <- function(edge_df){
   #don't want to subset before getting here, need whole network for indirect
   #checks
-  check_pt_trans_net(pt_trans_net, unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))))
+  check_pt_trans_net(edge_df)
+
+  # fill in missing source and destination facilities (doesn't change results, but will error out otherwise)
+  edge_df <- fill_missing_src_dest(edge_df)
 
   #make matrix format
-  trans_mat <- tidyr::pivot_wider(pt_trans_net, names_from = source_facil, values_from = n_transfers)
+  trans_mat <- tidyr::pivot_wider(edge_df, names_from = source_facil, values_from = n_transfers)
   trans_mat <- as.data.frame(trans_mat[,2:ncol(trans_mat)])
   rownames(trans_mat) <- colnames(trans_mat)
   trans_mat = t(trans_mat)
@@ -138,5 +239,31 @@ get_indirect_flow <- function(pt_trans_net){
   paths <- igraph::get.shortest.paths(g, 1, mode = "out")
   returns <- list("transfer_network" = trans_net_i, "paths" = paths)
   return(returns)
+}
+
+
+#' Fill in missing source and destination facilities in network edge list
+#'
+#' @param edge_df a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
+#'
+#' @return filled in edge_df
+#' @noRd
+#'
+fill_missing_src_dest <- function(edge_df) {
+  all_facils <- unique(c(edge_df$source_facil,edge_df$dest_facil))
+  not_in_source <- all_facils[!(all_facils %in% edge_df$source_facil)]
+  not_in_dest <- all_facils[!(all_facils %in% edge_df$dest_facil)]
+  if(length(not_in_source) != 0 | length(not_in_dest) != 0){
+    edge_df <- dplyr::bind_rows(edge_df,
+                                dplyr::bind_cols(source_facil = not_in_source,
+                                                 dest_facil = edge_df$dest_facil[1],
+                                                 n_transfers = 0),
+                                dplyr::bind_cols(source_facil = edge_df$source_facil[1],
+                                                 dest_facil = not_in_dest,
+                                                 n_transfers = 0))
+  }
+  edge_df <- edge_df %>% tidyr::expand(source_facil, dest_facil) %>%
+    dplyr::left_join(edge_df, by = c("source_facil", "dest_facil"))
+  return(edge_df)
 }
 
