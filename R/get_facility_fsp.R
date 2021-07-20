@@ -9,7 +9,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_facility_fsp(aln, locs, form = "matrix")
 #' }
 
@@ -126,9 +126,9 @@ get_within_pop_var <- function(subset_snp_mat, subset){
 
 #' Make symmetric matrix long-form where each row represents a cell in the matrix
 #'
-#' @param facil_dist
+#' @param facil_dist symmetric matrix that you want to convert to long form
 #'
-#' @return long form data where each row represents a cell in the matrix
+#' @return long form data where each row represents a cell in the matrix (rowname, column name, value)
 #' @export
 #'
 #' @examples

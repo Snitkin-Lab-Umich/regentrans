@@ -1,7 +1,7 @@
 #utils
 #' dplyr pipe
 #' @importFrom dplyr %>%
-#' @noRd
+#' @export
 dplyr::`%>%`
 
 ## make R CMD CHECK shut up about the dot `.``
@@ -13,9 +13,9 @@ utils::globalVariables(c("."))
 #' @param ls list you want to reverse
 #'
 #' @return reversed list
-#' @noRd
+#' @export
 #'
-#' #Reference with example: https://stackoverflow.com/questions/15263146/revert-list-structure
+#' @details Reference with example: https://stackoverflow.com/questions/15263146/revert-list-structure
 reverse_list_str <- function(ls) { # @Josh O'Brien
   #checks
   check_reverse_list_str_input(ls)

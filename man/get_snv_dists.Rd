@@ -22,5 +22,6 @@ a data.frame of isolate pairs, their SNV distance, and labeled as either inter- 
 Get matrix of inter- and intra-facility pariwise snv distances
 }
 \examples{
+locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
 get_snv_dists(dists, locs)
 }

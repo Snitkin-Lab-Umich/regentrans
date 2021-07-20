@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples
-#' locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_snv_dists(dists, locs)
 get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
   #checks
@@ -79,7 +79,7 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
 #' @noRd
 #'
 #' @examples
-#' locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
 #' subset_pairs(snv_dists)
 subset_pairs <- function(snv_dists){

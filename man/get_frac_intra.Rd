@@ -30,5 +30,6 @@ fraction of intra-facility pairs for different snv thresholds, lowest threshold 
 Get fraction of intra-facility pairs for different snv thresholds
 }
 \examples{
+locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
 get_frac_intra(dists = dists, locs = locs)
 }

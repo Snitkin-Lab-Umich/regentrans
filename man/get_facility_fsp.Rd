@@ -20,5 +20,8 @@ matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp
 Make facility x facility matrix with Fsp values. Calculates fst as described in Donker et al. 2017
 }
 \examples{
-\dontrun{get_facility_fsp(fasta, locs, form = "matrix")}
+\dontrun{
+locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
+get_facility_fsp(aln, locs, form = "matrix")
+}
 }

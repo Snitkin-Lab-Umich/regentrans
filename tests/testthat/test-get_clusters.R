@@ -1,6 +1,9 @@
 #test get_clusters output
-test_locs <- regentrans::locs[1:10]
-test_tr <- ape::keep.tip(regentrans::tr,names(test_locs))
+locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
+
+test_locs <- locs[1:10]
+test_tr <- ape::keep.tip(tr,names(test_locs))
 test_clusters <- get_clusters(tr = test_tr,locs = test_locs)
 test_pure_subtree_info <- test_clusters$pure_subtree_info
 test_subtrees <- test_clusters$subtrees
