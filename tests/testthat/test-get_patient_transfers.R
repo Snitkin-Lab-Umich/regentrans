@@ -41,10 +41,6 @@ test_that("get_patient_transfers works", {
   expect_true(all(names(test_pt_trans_paths) == c("pt_trans_summary", "paths")))
   #list types
   expect_true(all(sapply(test_pt_trans_paths, class) == c("data.frame", "list")))
-  # check that get_snv_dists part works
-  expect_message(get_patient_transfers(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, thresh = 50),'Running get_snv_dists...')
-  expect_equal(get_patient_transfers(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, thresh = 50),
-               test_pt_trans)
   # duplicate source/destination facility rows returns error
   expect_error(get_patient_transfers(dplyr::bind_rows(pat_flow,pat_flow),test_snv_dists),
                "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.")

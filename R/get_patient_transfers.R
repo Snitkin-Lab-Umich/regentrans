@@ -3,8 +3,6 @@
 #' @param pt_trans_net a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
 #' @param snv_dists the output object of the get_snv_dists function
 #' @param thresh SNV thresholds to use
-#' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
-#' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
 #' @param paths boolean value, TRUE if you want the shortest paths returned, FALSE if you don't
 #'
 #' @return a summary of number of closely related isolate pairs and number of direct patient transfers and indirect flow metrics between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
@@ -15,10 +13,10 @@
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_patient_transfers(pt_trans_net = pt_trans_df, dists = dists, locs = locs)
 #' }
-get_patient_transfers <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs = NULL, thresh = 10, paths = FALSE){
+get_patient_transfers <- function(pt_trans_net, snv_dists = NULL, thresh = 10, paths = FALSE){
   #run checks
-  run_snv_dists <- check_pt_transfer_input(pt_trans_net = pt_trans_net, snv_dists = snv_dists,
-                                           dists = dists, locs = locs, thresh = thresh, paths = paths)
+  check_pt_transfer_input(pt_trans_net = pt_trans_net, snv_dists = snv_dists,
+                                           thresh = thresh, paths = paths)
 
   #make pt_trans_net not factors
   pt_trans_net$source_facil <- as.character(pt_trans_net$source_facil)
@@ -38,12 +36,6 @@ get_patient_transfers <- function(pt_trans_net, snv_dists = NULL, dists = NULL, 
                                                       n_transfers = NA))
     pt_trans_net <- pt_trans_net %>% tidyr::expand(source_facil, dest_facil) %>%
       dplyr::left_join(pt_trans_net, by = c("source_facil", "dest_facil"))
-  }
-
-  #run get_snv_dists if necessary
-  if(run_snv_dists){
-    message("Running get_snv_dists...")
-    snv_dists <- get_snv_dists(dists = dists, locs = locs)
   }
 
   #run indirect flow

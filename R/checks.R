@@ -214,24 +214,15 @@ check_snv_dists <- function(snv_dists){
 #'
 #' @noRd
 #'
-check_get_frac_intra_input <- function(snv_dists, dists, locs, pt_trans_net){
+check_get_frac_intra_input <- function(snv_dists){
   #if SNV_dists doesnt exist and they didn't input locs and dists
-  if(is.null(snv_dists) & is.null(dists) & is.null(locs)){
-    stop("Please provide either an SNV dists matrix or dists and locs objecst so we can generate one for you.")
+  if(is.null(snv_dists)){
+    stop("Please provide the output from `get_snv_dists()` to this function.")
   }
   #make the SNV dists object if it needs to be made
-  if(is.null(snv_dists)){
-    #checks for get_snv_dists are done within here
-    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt_trans_net = pt_trans_net)
-    run_snv_dists <- TRUE
-  }
-  else{
-    run_snv_dists <- FALSE
-  }
   #checks snv_dists input
   check_snv_dists(snv_dists)
   #return the snv_dists made
-  return(run_snv_dists)
 }
 
 #*******************************************************************************************************************************************#
@@ -660,18 +651,13 @@ check_paths <- function(paths){
 #'
 #' @noRd
 #'
-check_pt_transfer_input <- function(pt_trans_net, snv_dists, dists, locs, thresh, paths){
+check_pt_transfer_input <- function(pt_trans_net, snv_dists, thresh, paths){
   #check whether to run snv_dists same as get frac_intra
   #if SNV_dists doesnt exist and they didn't input locs and dists
-  if(is.null(snv_dists) & is.null(dists) & is.null(locs)){
-    stop("Please provide either an SNV dists matrix or dists and locs objecst so we can generate one for you.")
+  if(is.null(snv_dists)){
+    stop("Please provide the output from `get_snv_dists()` to this function.")
   }
   #make the SNV dists object if it needs to be made
-  if(is.null(snv_dists)){
-    #checks for get_snv_dists are done within here
-    snv_dists <- get_snv_dists(dists = dists, locs = locs)
-    run_snv_dists <- TRUE
-  }
   else{
     run_snv_dists <- FALSE
   }
@@ -684,9 +670,6 @@ check_pt_transfer_input <- function(pt_trans_net, snv_dists, dists, locs, thresh
   check_pt_trans_net(pt_trans_net, c(snv_dists$Loc1, snv_dists$Loc2))
   #check the paths input
   check_paths(paths)
-
-  #return the snv_dists made
-  return(run_snv_dists)
 }
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR patient_transfer FUNCTION*******************************************************#
