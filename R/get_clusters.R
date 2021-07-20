@@ -9,8 +9,10 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
+#' }
 get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){
   #check inputs
   check_get_clusters_inputs(tr, locs, pureness, bootstrap)
@@ -23,7 +25,7 @@ get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){
   tr <- ape::keep.tip(tr,isolates)
 
   subtrs_sub <- ape::subtrees(tr)
-  pure_subtrees <- get_largest_subtree(subtrs = subtrs_sub, isolate_labels = locs_sub, bootstrap = bootstrap, pureness = pureness) #this _might_ be buggy, so definitely good to add unit tests for it
+  pure_subtrees <- get_largest_subtree(subtrs = subtrs_sub, isolate_labels = locs_sub, bootstrap = bootstrap, pureness = pureness)
   pure_subtr_info <- dplyr::bind_cols(f_id=locs_sub,
                                subtr_size=unlist(pure_subtrees$largest_st),
                                index=unlist(pure_subtrees$largest_st_i),

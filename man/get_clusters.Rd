@@ -22,6 +22,8 @@ list where pure_subtree_info is a data.frame of facility clusters on phylogeny, 
 Get facility clusters on phylogeny
 }
 \examples{
+\dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
 get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
+}
 }

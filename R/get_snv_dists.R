@@ -9,8 +9,10 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_snv_dists(dists, locs)
+#' }
 get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
   #checks
   check_get_snv_dists_input(dists, locs, pt, pt_trans_net)
@@ -79,9 +81,11 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
 #' @noRd
 #'
 #' @examples
+#' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
 #' subset_pairs(snv_dists)
+#' }
 subset_pairs <- function(snv_dists){
   #check that it is a data.frame object
   check_subset_pairs_input(snv_dists)
