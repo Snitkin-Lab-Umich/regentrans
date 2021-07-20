@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples
-#' locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
 get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){
   #check inputs

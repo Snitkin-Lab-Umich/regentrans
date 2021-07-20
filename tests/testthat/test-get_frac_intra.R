@@ -1,4 +1,7 @@
 #tests for get_frac_intra output
+locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
+
 test_locs <- locs[1:3]
 test_pt <- as.character(pt[1:3])
 names(test_pt) <- names(pt[1:3])

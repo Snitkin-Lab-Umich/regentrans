@@ -1,4 +1,7 @@
 ###################################test data######################################
+locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
+
 test_locs <- locs[1:4]
 test_locs_2 <- locs[5:8]
 test_locs_3 <- locs[1:3]
@@ -28,9 +31,9 @@ test_snv_dists_4$Pairwise_Dists <- as.character(test_snv_dists_4$Pairwise_Dists)
 test_snv_dists_5 <- test_snv_dists %>% tibble::tibble() %>% dplyr::filter(Isolate1 == 'a') %>% data.frame()
 test_tr <- ape::keep.tip(tr,names(test_pt))
 test_tr_2 <- ape::keep.tip(tr,names(test_pt_3))
-test_fasta <- fasta[names(test_locs),]
-test_fasta_2 <- fasta[names(test_locs_5),]
-test_fasta_3 <- fasta[names(test_locs_8),]
+test_fasta <- aln[names(test_locs),]
+test_fasta_2 <- aln[names(test_locs_5),]
+test_fasta_3 <- aln[names(test_locs_8),]
 ls <- list(list(a = 2, b = 3), list(c = "a", d = "b"))
 ls_2 <- list(list(a = 2, b = 3), list(c = "a", d = "b"), "x")
 test_subtr <- ape::subtrees(test_tr)
