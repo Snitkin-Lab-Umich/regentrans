@@ -1,6 +1,5 @@
 #test get_clusters output
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
 
 test_locs <- locs[1:10]
 test_tr <- ape::keep.tip(tr,names(test_locs))

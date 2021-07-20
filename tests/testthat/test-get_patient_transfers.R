@@ -1,7 +1,6 @@
 #tests for patient transfer
 #make a source destination pair test matrix
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
 
 mat <- data.frame(matrix(data = c(0, 20, 12,
                         20, 0, 26,
@@ -15,10 +14,8 @@ pat_flow$n_transfers <- as.numeric(pat_flow$n_transfers)
 pt_flow_sub <- pat_flow[1:3,]
 
 test_locs <- locs[1:3]
-test_pt <- as.character(pt[1:3])
-names(test_pt) <- names(pt[1:3])
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt)
+test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs)
 #one without paths returned
 test_pt_trans <- get_patient_transfers(pt_trans_net = pat_flow, snv_dists = test_snv_dists, thresh = 50)
 #one with paths returned
@@ -45,8 +42,8 @@ test_that("get_patient_transfers works", {
   #list types
   expect_true(all(sapply(test_pt_trans_paths, class) == c("data.frame", "list")))
   # check that get_snv_dists part works
-  expect_message(get_patient_transfers(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt, thresh = 50),'Running get_snv_dists...')
-  expect_equal(get_patient_transfers(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, pt = test_pt, thresh = 50),
+  expect_message(get_patient_transfers(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, thresh = 50),'Running get_snv_dists...')
+  expect_equal(get_patient_transfers(pt_trans_net = pat_flow, dists = test_dists, locs = test_locs, thresh = 50),
                test_pt_trans)
   # duplicate source/destination facility rows returns error
   expect_error(get_patient_transfers(dplyr::bind_rows(pat_flow,pat_flow),test_snv_dists),

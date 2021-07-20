@@ -8,7 +8,6 @@ get_frac_intra(
   snv_dists = NULL,
   dists = NULL,
   locs = NULL,
-  pt = NULL,
   pt_trans_net = NULL
 )
 }
@@ -18,8 +17,6 @@ get_frac_intra(
 \item{dists}{a SNV distance matrix returned by the dist.dna function from the ape package}
 
 \item{locs}{a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID}
-
-\item{pt}{a named vector of patient that isolate was taken from with the name being sample ID (optional)}
 
 \item{pt_trans_net}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)}
 }

@@ -1,12 +1,9 @@
 #tests for get_frac_intra output
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
 
 test_locs <- locs[1:3]
-test_pt <- as.character(pt[1:3])
-names(test_pt) <- names(pt[1:3])
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt)
+test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs)
 test_snv_df <- structure(list(Isolate1 = "MN_CRE202", Isolate2 = "MN_CRE17",
                Pairwise_Dists = 10, Loc1 = "M0211", Loc2 = "M0211", Pair_Type = "Intra-facility pair"), row.names = 1958L, class = "data.frame")
 test_frac_intra <- get_frac_intra(snv_dists = test_snv_dists)
@@ -20,7 +17,7 @@ test_pt_trans_net <- stats::na.omit(data.frame(as.table(as.matrix(mat))))
 #pat_flow <- dplyr::bind_cols(pat_flow %>% dplyr::filter(Var1 != Var2))
 colnames(test_pt_trans_net) <- c("source_facil", "dest_facil", "n_transfers")
 test_pt_trans_net$n_transfers <- as.numeric(test_pt_trans_net$n_transfers)
-test_snv_dists_pt_trans_net <- get_snv_dists(dists = test_dists, locs = test_locs, pt = test_pt, pt_trans_net = test_pt_trans_net)
+test_snv_dists_pt_trans_net <- get_snv_dists(dists = test_dists, locs = test_locs, pt_trans_net = test_pt_trans_net)
 
 test_frac_intra_pt_trans_net <- get_frac_intra(snv_dists = test_snv_dists_pt_trans_net)
 
@@ -46,7 +43,7 @@ test_that("get_frac_intra works", {
   expect_true(all((test_frac_intra_pt_trans_net$Frac_Intra == test_frac_intra_pt_trans_net$n_Intra/(test_frac_intra_pt_trans_net$n_Intra + test_frac_intra_pt_trans_net$n_Inter)) | test_frac_intra_pt_trans_net$Frac_Intra == 0))
   expect_true(all((test_frac_intra_pt_trans_net$Frac_Inter == test_frac_intra_pt_trans_net$n_Inter/(test_frac_intra_pt_trans_net$n_Intra + test_frac_intra_pt_trans_net$n_Inter)) | test_frac_intra_pt_trans_net$Frac_Inter == 0))
   # check that get_snv_dists part works
-  expect_equal(expect_message(get_frac_intra(dists = test_dists, locs = test_locs, pt = test_pt),
+  expect_equal(expect_message(get_frac_intra(dists = test_dists, locs = test_locs),
                               'Running get_snv_dists...'),
     test_frac_intra)
 })
