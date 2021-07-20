@@ -8,7 +8,9 @@
 #' @return list where pure_subtree_info is a data.frame of facility clusters on phylogeny, index indicates which element that cluster is in the list of subtrees, NA indicates it is not part of a subtree; subtrees is an object of the actual subtrees (can be used for plotting);cluster_pureness is the purness of each cluster
 #' @export
 #'
-#' @examples get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
+#' @examples
+#' locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#' get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
 get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){
   #check inputs
   check_get_clusters_inputs(tr, locs, pureness, bootstrap)

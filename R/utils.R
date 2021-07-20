@@ -15,7 +15,6 @@ utils::globalVariables(c("."))
 #' @return reversed list
 #' @noRd
 #'
-#' @examples
 #' #Reference with example: https://stackoverflow.com/questions/15263146/revert-list-structure
 reverse_list_str <- function(ls) { # @Josh O'Brien
   #checks

@@ -8,7 +8,9 @@
 #' @return a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs. If pt_trans_net provided will return both direct transfer and indirect flow metric for each facility pair.
 #' @export
 #'
-#' @examples get_snv_dists(dists, locs)
+#' @examples
+#' locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#' get_snv_dists(dists, locs)
 get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
   #checks
   check_get_snv_dists_input(dists, locs, pt, pt_trans_net)
@@ -76,7 +78,10 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
 #' @return a data.frame of isolate pairs subsetted to one row representing each pair
 #' @noRd
 #'
-#' @examples subset_pairs(snv_dists)
+#' @examples
+#' locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#' snv_dists <- get_snv_dists(dists, locs)
+#' subset_pairs(snv_dists)
 subset_pairs <- function(snv_dists){
   #check that it is a data.frame object
   check_subset_pairs_input(snv_dists)
