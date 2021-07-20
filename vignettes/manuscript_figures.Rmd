@@ -89,7 +89,7 @@ f2 <- frac_intra %>%
   ylim(0, 1) + xlim(-1,51) #+
   #theme(legend.position = 'none')
 
-ggsave('manuscript-figures/Fig2.png', f2)
+ggsave('manuscript_figures/Fig2.png', f2)
 f2
 ```
 
@@ -123,7 +123,7 @@ cluster_plot <- ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size, c
 
 f3 <- plot_grid(tr_facil, cluster_plot, labels = 'AUTO') #, rel_widths = c(0.4,0.6))
 
-ggsave('manuscript-figures/Fig3.png', f3, width = 8, height = 5)
+ggsave('manuscript_figures/Fig3.png', f3, width = 8, height = 5)
 f3
 ```
 
@@ -150,7 +150,7 @@ pw_snv_plot_zoom <- snv_dists %>%
 f4 <- pw_snv_plot + annotation_custom(ggplotGrob(pw_snv_plot_zoom), xmin = 250, xmax = 450, 
                        ymin = 200, ymax = 2800)
 
-ggsave('manuscript-figures/Fig4.png', f4)
+ggsave('manuscript_figures/Fig4.png', f4)
 f4
 ```
 
@@ -167,7 +167,7 @@ fsp <- regentrans::Fsp
 pheatmap(fsp, border_color = 'white',
          legend_breaks = c(0, 0.2, 0.4, 0.6, 0.8, max(fsp)), 
          legend_labels = c(0, 0.2, 0.4, 0.6, 0.8, 'Fsp'), 
-         filename = 'manuscript-figures/Fig5.png', width = 7, height = 6)
+         filename = 'manuscript_figures/Fig5.png', width = 7, height = 6)
 
 pheatmap(fsp, border_color = 'white',
          legend_breaks = c(0, 0.2, 0.4, 0.6, 0.8, max(fsp)), 
@@ -194,7 +194,7 @@ f6 <- coldat %>% mutate(Pair_Type = factor(Pair_Type, levels = c('Intra-facility
   facet_grid(factor(snvthresh, levels = c('< 7 SNVs','< 11 SNVs'))~.)
 
 
-ggsave('manuscript-figures/Fig6.png',f6, width = 7, height = 5)
+ggsave('manuscript_figures/Fig6.png',f6, width = 7, height = 5)
 f6
 ```
 
@@ -235,7 +235,7 @@ flow_snv_plot <- pair_info %>%
                          paste('Spearman p =', signif(flow_snv_spear$p.value, 1))))
 
 f7 <- plot_grid(flow_fsp_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
-ggsave('manuscript-figures/Fig7.png',f7)
+ggsave('manuscript_figures/Fig7.png',f7)
 f7
 ```
 
@@ -265,7 +265,7 @@ time2 <- snv_dists %>%
         panel.border = element_blank())
 
 f8 <- plot_grid(time1, time2, nrow = 2, labels = 'AUTO')
-ggsave('manuscript-figures/Fig8.png', f8, width = 7, height = 5)
+ggsave('manuscript_figures/Fig8.png', f8, width = 7, height = 5)
 f8
 ```
 
@@ -338,7 +338,7 @@ geo_snv <- geo_dat %>%
                          paste0('Spearman p = ', signif(geo_snv_spear$p.value, 1))))
 
 f9 <- plot_grid(plot_grid(NULL, geo_map, NULL, nrow = 1, rel_widths = c(0.1,0.9,0), labels = c('','A','')), plot_grid(geo_fsp, geo_snv, labels = c('B','C')), ncol = 1, rel_heights = c(0.6, 0.4))
-ggsave('manuscript-figures/Fig9.png', f9, width = 12, height = 12)
+ggsave('manuscript_figures/Fig9.png', f9, width = 12, height = 12)
 f9
 ```
 
