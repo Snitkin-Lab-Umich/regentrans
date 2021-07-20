@@ -88,22 +88,22 @@ A patient transfer network representing facilities that isolates came from repre
 If you want to use your own data as input to the functions in the vignette, format your data according to the instructions above and set the following objects equal to your data. If you will not be using any of the optional data, make sure to assign those objects to `NULL`. 
 
 ```{r, message=FALSE}
-# named list of locations
-locs <- regentrans::locs
-# named list of patient IDs
-pt <- regentrans::pt
-# named list of isolate collection dates
-dates <- regentrans::dates
-# named list of sequence types
-st <- NULL
-# fasta file 
-fasta <- regentrans::fasta
-# SNV distance matrix 
-dists <- regentrans::dists
-# phylogenetic tree
-tree <- regentrans::tr
-# patient transfer network
-pt_flow <- regentrans::pt_flow
+#named vector of locations
+locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#named vector of patient IDs
+pt <- metadata %>% select(isolate_id, patient_id) %>% deframe()
+#named vector of isolate collection dates
+dates <- metadata %>% select(isolate_id, collection_date) %>% deframe()
+#fasta file 
+fasta <- aln
+#SNV distance matrix 
+dists <- dists
+#phylogenetic tree
+tree <- tr
+#patient transfer network
+pt_flow <- pt_flow
+#fsp
+fsp <- fsp
 ```
 
 ### Subsetting to one isolate per patient per facility
@@ -115,7 +115,7 @@ isolate_subset <- cbind(locs, pt) %>% unique() %>% rownames()
 locs <- locs[isolate_subset]
 pt <- pt[isolate_subset]
 dates <- dates[isolate_subset]
-st <- st[isolate_subset]
+# st <- st[isolate_subset]
 fasta <- fasta[isolate_subset, ]
 dists <- dists[isolate_subset, isolate_subset]
 tree <- keep.tip(tree, isolate_subset)
@@ -187,7 +187,7 @@ ggplot() +
 ```{r, message=FALSE}
 frac_intra <- get_frac_intra(snv_dists = snv_dists) #or get_frac_intra(dists = dists, locs = locs, pt = pt)
 
-ggplot(data = frac_intra, aes(x = Thresh, y = Frac_Intra)) + geom_bar(stat = "identity", fill = "blue", alpha = 0.5) + labs(x = "SNV Distance Threshold", y = "Fraction of Intra-Facility Pairs") +  ggtitle("Fraction of Isolate Pairs from the Same \nFacility at Each SNV Distance Threshold") + ylim(0, 1) 
+ggplot(data = frac_intra, aes(x = Pairwise_Dists, y = Frac_Intra)) + geom_bar(stat = "identity", fill = "blue", alpha = 0.5) + labs(x = "SNV Distance Threshold", y = "Fraction of Intra-Facility Pairs") +  ggtitle("Fraction of Isolate Pairs from the Same \nFacility at Each SNV Distance Threshold") + ylim(0, 1) 
 ```
 
 
@@ -226,8 +226,7 @@ pheatmap(Fsp)
 ```
 
 ```{r, echo=FALSE, message=FALSE}
-Fsp <- regentrans::Fsp
-pheatmap(Fsp)
+pheatmap(fsp)
 ```
 
 One way to determine whether Fsp values are significant is to use permutation (Donker et al. 2017). 
@@ -262,14 +261,14 @@ ggplot() +
 
 # Is transmission occurring along paths of higher patient flow? 
 
-In order to explore this question, we can leverage our WGS data in the form of the SNV distance matrix along with the patient flow network using the `patient_transfer()` function.
+In order to explore this question, we can leverage our WGS data in the form of the SNV distance matrix along with the patient flow network using the `get_patient_transfers()` function.
 
 *Note:* If you do not have a patient transfer network, you could use geographic distances between facilities as a proxy for patient transfer because they have been shown to correlate. 
 
 **Choosing a pairwise SNV distance threshold based on your dataset is very important, avoid using the default value**
 
 ```{r, message=FALSE}
-pt_trans <- patient_transfer(pt_trans_net = pt_flow, snv_dists = snv_dists, thresh = 10) %>% dplyr::mutate(avg_direct_transfers = rowMeans(select(., dplyr::ends_with("transfers")), na.rm = TRUE), avg_indirect_flow = rowMeans(select(., dplyr::starts_with("indirect")), na.rm = TRUE)) 
+pt_trans <- get_patient_transfers(pt_trans_net = pt_trans_df, snv_dists = snv_dists, thresh = 10) %>% dplyr::mutate(avg_direct_transfers = rowMeans(select(., dplyr::ends_with("transfers")), na.rm = TRUE), avg_indirect_flow = rowMeans(select(., dplyr::starts_with("indirect")), na.rm = TRUE)) 
 
 ggplot(data = pt_trans, mapping = aes(x = avg_direct_transfers, y = n_closely_related_pairs)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related Isolate Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
@@ -278,7 +277,7 @@ ggplot(data = pt_trans, mapping = aes(x = avg_direct_transfers, y = n_closely_re
 *Note:* This data is simulated
 
 ```{r, message=FALSE}
-Fsp %>% long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "Loc1", "Facil_2" = "Loc2")) %>% ggplot(mapping = aes(x = avg_direct_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+fsp %>% get_long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "Loc1", "Facil_2" = "Loc2")) %>% ggplot(mapping = aes(x = avg_direct_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
 
@@ -304,7 +303,7 @@ loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facilities", "
 
 facil_geo <- facil_coord %>% left_join(loc_n)
 
-Fsp_geo <- Fsp %>% long_form() %>% subset_pairs() %>% left_join(facil_geo, by = c("Facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+fsp_geo <- fsp %>% get_long_form() %>% subset_pairs() %>% left_join(facil_geo, by = c("Facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 facil_geo %>% ggplot(aes(x=long, y=lat)) +
   geom_point(aes(size=n), alpha=0.5, color = "blue") + 
@@ -312,7 +311,7 @@ facil_geo %>% ggplot(aes(x=long, y=lat)) +
   coord_quickmap() +
   geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
                  alpha = (1/Fsp_val)),
-             data = Fsp_geo, curvature = 0.33) +
+             data = fsp_geo, curvature = 0.33) +
   theme_void() + theme(legend.position = "none") 
 
 

@@ -7,7 +7,11 @@
 #' @return matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp values bween 0 (HP=HS) and 1 (Hp = 0)
 #' @export
 #'
-#' @examples \dontrun{get_facility_fsp(fasta, locs, form = "matrix")}
+#' @examples
+#' \dontrun{
+#' locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#' get_facility_fsp(aln, locs, form = "matrix")
+#' }
 
 
 #######################try to make sapply########
@@ -125,9 +129,11 @@ get_within_pop_var <- function(subset_snp_mat, subset){
 #' @param facil_dist
 #'
 #' @return long form data where each row represents a cell in the matrix
-#' @noRd
+#' @export
 #'
-#' @examples get_long_form(facil_dist)
+#' @examples
+#' get_long_form(dists)
+#' get_long_form(fsp)
 get_long_form <- function(facil_dist){
   #check that it is a symmetric matrix
   check_long_form_input(facil_dist)

@@ -13,12 +13,11 @@ devtools::load_all()
 ```
 
 ```{r setup,echo=TRUE,message=FALSE}
+library(tidyverse)
 library(ape)
-library(dplyr)
 library(devtools)
 library(ggtree)
 library(pheatmap)
-library(ggplot2)
 library(phytools)
 library(gridExtra)
 library(cowplot)
@@ -32,24 +31,22 @@ theme_set(theme_bw() + theme(strip.background = element_rect(fill="white",linety
 ### Input data
 
 ```{r, message=FALSE}
-#named list of locations
-locs <- regentrans::locs
-#named list of patient IDs
-pt <- regentrans::pt
-#named list of isolate collection dates
-dates <- regentrans::dates
-#named list of sequence types
-st <- NULL
+#named vector of locations
+locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#named vector of patient IDs
+pt <- metadata %>% select(isolate_id, patient_id) %>% deframe()
+#named vector of isolate collection dates
+dates <- metadata %>% select(isolate_id, collection_date) %>% deframe()
 #fasta file 
-fasta <- regentrans::fasta
+fasta <- aln
 #SNV distance matrix 
-dists <- regentrans::dists
+dists <- dists
 #phylogenetic tree
-tree <- regentrans::tr
+tree <- tr
 #patient transfer network
-pt_flow <- regentrans::pt_flow
+pt_flow <- pt_flow
 #fsp
-fsp <- regentrans::Fsp
+fsp <- fsp
 ```
 
 ### Subsetting to one isolate per patient per facility
@@ -59,7 +56,6 @@ isolate_subset <- cbind(locs, pt) %>% unique() %>% rownames()
 locs <- locs[isolate_subset]
 pt <- pt[isolate_subset]
 dates <- dates[isolate_subset]
-st <- st[isolate_subset]
 dists <- dists[isolate_subset,isolate_subset]
 
 ```
@@ -77,7 +73,8 @@ round(2*ref_genome_length*mutation_rate)
 ## Method 2: Intra-facility pair fraction distribution
 
 ```{r}
-dists <- dist.dna(fasta, model = 'N', pairwise.deletion = TRUE, as.matrix = TRUE)
+# pre-calculated in vignette
+# dists <- dist.dna(fasta, model = 'N', pairwise.deletion = TRUE, as.matrix = TRUE)
 snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt) %>% subset_pairs()
 
 frac_intra <- get_frac_intra(snv_dists = snv_dists) #or get_frac_intra(dists = dists, locs = locs, pt = pt)
@@ -201,95 +198,7 @@ ggsave('manuscript-figures/Fig6.png',f6, width = 7, height = 5)
 f6
 ```
 
-```{r, message=FALSE}
-# coldat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', snv_dists %>% 
-#                                 filter(Pairwise_Dists < 7 & Loc1 != Loc2) %>%
-#                      mutate(Facil_Pair=(paste(Loc1, Loc2))) %>%
-#                      group_by(Facil_Pair) %>% summarize(n = n())),
-#                     bind_cols(snvthresh = '< 11 SNVs', snv_dists %>% 
-#                                 filter(Pairwise_Dists < 11 & Loc1 != Loc2) %>%
-#                      mutate(Facil_Pair = (paste(Loc1, Loc2))) %>%
-#                      group_by(Facil_Pair) %>% summarize(n = n())))
-# 
-# inter_close <- coldat %>% mutate(Facil_Pair = ifelse(n >= 5, Facil_Pair, 'Other')#,
-#                                  #Facil_Pair = factor(Facil_Pair, )
-#                                  ) %>% 
-#   ggplot(aes(x = Facil_Pair, y = n)) + geom_col(fill = "salmon") + 
-#   scale_fill_manual(values=c("red")) + 
-#   labs(y = "Number of closely related \nisolate pairs", x = "Facility Pair") + 
-#   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-#   facet_grid(factor(snvthresh, levels = c('SNV threshold = 8','SNV threshold = 11'))~.)
-# # inter_close
-# 
-# 
-# snv_dists_7 <- snv_dists %>% filter(Pairwise_Dists < 7)
-# 
-# cts_7 <- sapply(unique(c(snv_dists$Loc1, snv_dists$Loc2)), function(x){
-#   sapply(unique(c(snv_dists$Loc1, snv_dists$Loc2)), function(y){
-#     sum(snv_dists_7$Loc1 == x & snv_dists_7$Loc2 == y)
-#   })
-# })
-# diag(cts_7) <- NA
-# # pheatmap(cts_7)
-# 
-# snv_dists_11 <- snv_dists %>% filter(Pairwise_Dists < 11)
-# 
-# cts_11 <- sapply(unique(c(snv_dists$Loc1, snv_dists$Loc2)), function(x){
-#   sapply(unique(c(snv_dists$Loc1, snv_dists$Loc2)), function(y){
-#     sum(snv_dists_11$Loc1 == x & snv_dists_11$Loc2 == y)
-#   })
-# })
-# diag(cts_11) <- NA
-# # pheatmap(cts_11)
-```
-
-
-
 ```{r}
-pt_flow <- structure(c(1, 1.71122994652408e-05, 1.40967224149537e-05, 0.000474074074074073, 
-0.000181771667856037, 5.96955526813254e-05, 6.25341182920926e-05, 
-0.000329896907216494, 1.79559003088417e-05, 0.00424361990053091, 
-3.76915038187176e-05, 0.000260310849248276, 1, 2.11840865735182e-05, 
-0.00049223929181057, 0.00264038021475091, 2.78373043591672e-05, 
-0.00195723974827721, 6.31601199268895e-05, 2.71526055905228e-05, 
-0.000254772320540862, 0.000117836481565193, 5.06444506343215e-06, 
-1.02719860784377e-05, 1, 2.16590859865714e-05, 4.2735042735043e-05, 
-0.000935486692948707, 0.00139281644367536, 7.57161860420929e-05, 
-0.00537240537240539, 1.84891380716003e-05, 0.00203488372093025, 
-0.00266006237387636, 0.000655364660370925, 0.000188781104829633, 
-1, 6.54568436258582e-05, 0.000831758034026462, 0.00270305876961852, 
-0.00163163643144462, 2.37908450468836e-05, 0.0106382978723404, 
-0.00105009489561482, 8.28622018387643e-06, 0.00279720279720279, 
-2.82027726589947e-06, 8.98957209636826e-05, 1, 2.04140231967224e-05, 
-0.000378469301934397, 3.00762475842331e-06, 2.1399518254864e-06, 
-5.4190701474378e-06, 5.16956162117448e-05, 4.58631443771784e-05, 
-3.26601235133297e-05, 0.00218315188915409, 0.000562962962962956, 
-4.35085276714237e-05, 1, 9.54505264850083e-05, 0.00705090540035253, 
-0.00098948670377241, 4.48873327946856e-05, 0.000102291325695581, 
-1.24081794719078e-05, 0.000768716577540108, 0.000142391135504582, 
-0.00320593942461823, 0.00243902439024388, 0.000596273291925468, 
-1, 1.96367206676486e-05, 1.82868846463318e-05, 3.41057385597683e-05, 
-0.0005686517783292, 0.000504494588148968, 0.0001241002730206, 
-0.00143820224719103, 0.00171765968867417, 4.43880103948647e-05, 
-0.0111304347826088, 0.000190901052970016, 1, 0.000115440115440116, 
-0.000493760660741536, 0.000234603040455405, 7.93788907105321e-06, 
-7.61436816906775e-06, 0.0104238932104101, 7.76601454985673e-06, 
-2.59839246119733e-05, 0.000405496733498536, 0.000333235091855784, 
-3.00854426571462e-05, 1, 0.000172047944027069, 0.00287122366962305, 
-0.00329188929123093, 0.000318606627017839, 4.48996627051994e-05, 
-0.00104341827275471, 4.35085276714237e-05, 9.83671060397392e-06, 
-9.75191137462946e-06, 7.67266994963933e-05, 3.97355203763749e-05, 
-1, 0.000249754373797667, 6.22642852060063e-06, 7.51936235807199e-06, 
-0.000125335456663423, 6.12688784731793e-06, 3.18126868995355e-05, 
-6.00541032875977e-05, 1.09443806574985e-05, 1.83618814685465e-05, 
-0.00108745087419629, 3.94496051301495e-06, 1), .Dim = c(11L, 
-11L), .Dimnames = list(c(`584` = "D", `587` = "H", `589` = "G", 
-`590` = "C", `591` = "T", `592` = "F", `593` = "I", `596` = "E", 
-`600` = "P", `601` = "M", `603` = "O"), c(`584` = "D", `587` = "H", 
-`589` = "G", `590` = "C", `591` = "T", `592` = "F", `593` = "I", 
-`596` = "E", `600` = "P", `601` = "M", `603` = "O")))
-diag(pt_flow) <- NA
-
 fsp_sub <- fsp[rownames(pt_flow), colnames(pt_flow)]
 
 fsp_flow <- full_join(reshape2::melt(as.matrix(pt_flow)) %>% rename(pt_flow = value),

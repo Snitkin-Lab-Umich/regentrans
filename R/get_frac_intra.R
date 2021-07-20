@@ -9,7 +9,9 @@
 #' @return fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data
 #' @export
 #'
-#' @examples get_frac_intra(dists = dists, locs = locs)
+#' @examples
+#' locs <- metadata %>% select(isolate_id, facility) %>% deframe()
+#' get_frac_intra(dists = dists, locs = locs)
 get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL){
 
   #make one check
