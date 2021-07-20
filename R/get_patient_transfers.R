@@ -12,8 +12,10 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_patient_transfers(pt_trans_net = pt_trans_df, dists = dists, locs = locs)
+#' }
 get_patient_transfers <- function(pt_trans_net, snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, thresh = 10, paths = FALSE){
   #run checks
   run_snv_dists <- check_pt_transfer_input(pt_trans_net = pt_trans_net, snv_dists = snv_dists,

@@ -6,7 +6,11 @@ dplyr::`%>%`
 
 ## make R CMD CHECK shut up about the dot `.``
 ## See: \url{https://github.com/tidyverse/magrittr/issues/29}
-utils::globalVariables(c("."))
+utils::globalVariables(c(".","subtr_size","index","isolate_name","Pair_Type","Pairwise_Dists",
+                         "n","Intra-facility pair","Inter-facility pair","Frac_Intra",
+                         "Frac_Inter","source_facil","n_transfers","Freq","dest_facil",
+                         "Loc1","Loc2","Pairwise_Dists","Patient1","Patient2","Isolate1",
+                         "Isolate2","n_closely_related_pairs"))
 
 #' Reverse list structure
 #'

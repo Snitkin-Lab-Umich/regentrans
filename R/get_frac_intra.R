@@ -10,8 +10,10 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_frac_intra(dists = dists, locs = locs)
+#' }
 get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt = NULL, pt_trans_net = NULL){
 
   #make one check

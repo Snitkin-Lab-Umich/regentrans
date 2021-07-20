@@ -36,6 +36,8 @@ a summary of number of closely related isolate pairs and number of direct patien
 Get summary of patient transfer network and closely-related isolates
 }
 \examples{
+\dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
 get_patient_transfers(pt_trans_net = pt_trans_df, dists = dists, locs = locs)
+}
 }
