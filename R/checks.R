@@ -56,47 +56,6 @@ check_locs <- function(locs){
   }
 }
 
-#' Check pt input to get_snv_dists function
-#'
-#' @inheritParams get_snv_dists
-#'
-#' @noRd
-#'
-check_pt <- function(pt, dists){
-  #check that the pt object is a named vector
-  #if it is not a vector or has no names then not good (check both of these in tests)
-  if(!(is.vector(pt)) | is.null(names(pt))){
-    stop("The pt object must be a a named list of locations named by sample IDs")
-  }
-  #check that the pt object has at least 2 items
-  if(length(pt) < 2){
-    stop(paste("You have only supplied patient IDs for "), length(pt),
-         " isolate. Please supply a named vector of patient IDs for at least 2 isolates")
-  }
-  #check that there are at least 2 dists and locs in common
-  if(length(intersect(rownames(dists), names(pt))) < 2){
-    stop(paste("You have not provided patient IDs for at least 2 isolates in your SNV distance matrix (dists). Please provide patient IDs for at least 2 isolates in your SNV distance matrix."))
-  }
-}
-
-#' Check that samples and lengths of pt and locs vectors are the same
-#'
-#' @inheritParams get_snv_dists
-#'
-#' @noRd
-#'
-check_pt_vs_locs <- function(pt, locs){
-  #check that there are the same number of samples in the pt vector as in the locs vector
-  #where would I want to subet myself?
-  if(length(pt) != length(locs)){
-    warning(paste("You have supplied a patient vector of length ", length(pt), " and  location vector of length ", length(locs), ". We will subset these lists so that they have the same isolates."))
-  }
-  #check that the names match between pt and locs
-  if(!setequal(names(pt), names(locs))){
-    warning("You have not supplied patient IDs (pt) and locations (locs) for the same samples. We will subset these vectors so that they contain the same isolates.")
-  }
-}
-
 #' Check that the names of the isolates in locs actually exist in the SNV matrix
 #'
 #' @inheritParams get_snv_dists
@@ -173,7 +132,7 @@ check_pt_trans_net <- function(pt_trans_net, locs){
 #'
 #' @noRd
 #'
-check_get_snv_dists_input <- function(dists, locs, pt, pt_trans_net){
+check_get_snv_dists_input <- function(dists, locs, pt_trans_net){
   #check everything that is common (aka no pt) first
   #check that the dists object is the snv object returned by dist.dna
   check_dists(dists)
@@ -181,13 +140,6 @@ check_get_snv_dists_input <- function(dists, locs, pt, pt_trans_net){
   check_locs(locs)
   #check that the locs names exist in the dists dataframe
   check_dists_vs_locs(dists, locs)
-  #if there is a pt
-  if(!is.null(pt)){
-    #check that the pt object is a named vector
-    check_pt(pt, dists)
-    #check that the pt and dists objects have the same lengths
-    check_pt_vs_locs(pt, locs)
-  }
   #check whether pt_trans_net is null or a directed graph
   if(!is.null(pt_trans_net)){
     check_pt_trans_net(pt_trans_net, locs)
@@ -262,7 +214,7 @@ check_snv_dists <- function(snv_dists){
 #'
 #' @noRd
 #'
-check_get_frac_intra_input <- function(snv_dists, dists, locs, pt, pt_trans_net){
+check_get_frac_intra_input <- function(snv_dists, dists, locs, pt_trans_net){
   #if SNV_dists doesnt exist and they didn't input locs and dists
   if(is.null(snv_dists) & is.null(dists) & is.null(locs)){
     stop("Please provide either an SNV dists matrix or dists and locs objecst so we can generate one for you.")
@@ -270,7 +222,7 @@ check_get_frac_intra_input <- function(snv_dists, dists, locs, pt, pt_trans_net)
   #make the SNV dists object if it needs to be made
   if(is.null(snv_dists)){
     #checks for get_snv_dists are done within here
-    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt, pt_trans_net = pt_trans_net)
+    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt_trans_net = pt_trans_net)
     run_snv_dists <- TRUE
   }
   else{
@@ -708,7 +660,7 @@ check_paths <- function(paths){
 #'
 #' @noRd
 #'
-check_pt_transfer_input <- function(pt_trans_net, snv_dists, dists, locs, pt, thresh, paths){
+check_pt_transfer_input <- function(pt_trans_net, snv_dists, dists, locs, thresh, paths){
   #check whether to run snv_dists same as get frac_intra
   #if SNV_dists doesnt exist and they didn't input locs and dists
   if(is.null(snv_dists) & is.null(dists) & is.null(locs)){
@@ -717,7 +669,7 @@ check_pt_transfer_input <- function(pt_trans_net, snv_dists, dists, locs, pt, th
   #make the SNV dists object if it needs to be made
   if(is.null(snv_dists)){
     #checks for get_snv_dists are done within here
-    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt)
+    snv_dists <- get_snv_dists(dists = dists, locs = locs)
     run_snv_dists <- TRUE
   }
   else{

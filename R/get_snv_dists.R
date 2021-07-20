@@ -2,7 +2,6 @@
 #'
 #' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
 #' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
-#' @param pt a named vector of patient that isolate was taken from with the name being sample ID (optional)
 #' @param pt_trans_net a data.frame representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'
 #'
 #' @return a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs. If pt_trans_net provided will return both direct transfer and indirect flow metric for each facility pair.
@@ -13,22 +12,12 @@
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_snv_dists(dists, locs)
 #' }
-get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
+get_snv_dists <- function(dists, locs, pt_trans_net = NULL){
   #checks
-  check_get_snv_dists_input(dists, locs, pt, pt_trans_net)
+  check_get_snv_dists_input(dists, locs, pt_trans_net)
 
-  #check pt if it isn't missing
-  if(!is.null(pt)){
-    #subset pt and locs to represent the same isolates,
-    #and make sure we only subset to the rownames dists has in common
-    isolates <- intersect(intersect(names(locs), names(pt)), rownames(dists))
-    #subset pt
-    pt_sub <- pt[isolates]
-  }
-  else{
-    #make the subsetted isolates object if there is no pt
-    isolates <- intersect(names(locs), rownames(dists))
-  }
+  #make the subsetted isolates object if there is no pt
+  isolates <- intersect(names(locs), rownames(dists))
 
   #subset by locs
   #list ones in common before subsetting
@@ -46,19 +35,10 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
   snps$Loc1 <- loc_sub[snps$Isolate1]
   snps$Loc2 <- loc_sub[snps$Isolate2]
 
-  #do pt stuff
-  if(!is.null(pt)){
-    #add pts
-    snps$Patient1 <- pt_sub[snps$Isolate1]
-    snps$Patient2 <- pt_sub[snps$Isolate2]
-    #add labels
-    snp_facility_pairs <- dplyr::bind_cols(snps %>% dplyr::filter(Patient1 != Patient2) %>% dplyr::mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
+  snp_facility_pairs <- dplyr::bind_cols(
+    snps %>% dplyr::filter(Isolate1 != Isolate2) %>%
+      dplyr::mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
 
-  }
-  else{
-    #add labels
-    snp_facility_pairs <- dplyr::bind_cols(snps %>% dplyr::filter(Isolate1 != Isolate2) %>% dplyr::mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
-  }
   #if there is a patient transfer network, add it
   if(!is.null(pt_trans_net)){
     #calculate pt_transfer summaries
@@ -67,8 +47,11 @@ get_snv_dists <- function(dists, locs, pt = NULL, pt_trans_net = NULL){
       #add in patient transfers from 1 to 2
       dplyr::left_join(pt_flow, by = c("Loc1" = "Loc1", "Loc2" = "Loc2")) %>% dplyr::select(-n_closely_related_pairs)
   }
-  #return snp matrix
+
+  # subset to include only one of each pair
   snp_facility_pairs <- subset_pairs(snp_facility_pairs)
+
+  #return snp matrix
   return(snp_facility_pairs)
 }
 

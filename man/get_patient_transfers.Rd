@@ -9,7 +9,6 @@ get_patient_transfers(
   snv_dists = NULL,
   dists = NULL,
   locs = NULL,
-  pt = NULL,
   thresh = 10,
   paths = FALSE
 )
@@ -22,8 +21,6 @@ get_patient_transfers(
 \item{dists}{a SNV distance matrix returned by the dist.dna function from the ape package}
 
 \item{locs}{a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID}
-
-\item{pt}{a named vector of patient that isolate was taken from with the name being sample ID (optional)}
 
 \item{thresh}{SNV thresholds to use}
 
