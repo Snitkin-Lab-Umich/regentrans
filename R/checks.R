@@ -86,7 +86,7 @@ check_dists_vs_locs <- function(dists, locs){
 #'
 #' @noRd
 #'
-check_pt_trans_net <- function(pt_trans_net, locs){
+check_pt_trans_net <- function(pt_trans_net){
   #default is null
   if(!is.null(pt_trans_net)){
     #make sure it is a dataframe of three columns, source, dest, n_transfers
@@ -109,16 +109,17 @@ check_pt_trans_net <- function(pt_trans_net, locs){
       stop(paste("The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided ",
                  paste(lapply(pt_trans_net, class), sep = " ", collapse = " ")))
     }
+    # MOVE THIS TO OTHER FUNCTION
     #make sure facilities have something in common with the locs and say we will subset if they are not all in common
     #make sure there are at least two in common
-    if(as.numeric(length(intersect(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs)))) < 2){
-      stop(paste("The pt_trans_net don't have at least two locations in common with the locs object. "))
-    }
-    #if not all in common warn you will subset
-    !setequal(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs))
-    if(!setequal(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs))){
-      warning(paste("Not all of the locations you have provided between locs and the pt_trans_network match. Will subset. "))
-    }
+    # if(as.numeric(length(intersect(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs)))) < 2){
+    #   stop(paste("The pt_trans_net don't have at least two locations in common with the locs object. "))
+    # }
+    # #if not all in common warn you will subset
+    # !setequal(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs))
+    # if(!setequal(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs))){
+    #   warning(paste("Not all of the locations you have provided between locs and the pt_trans_network match. Will subset. "))
+    # }
     if(length(paste(pt_trans_net$source_facil, pt_trans_net$dest_facil)) != length(unique(paste(pt_trans_net$source_facil, pt_trans_net$dest_facil)))){
       stop(paste("Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs."))
     }
@@ -142,7 +143,7 @@ check_get_snv_dists_input <- function(dists, locs, pt_trans_net){
   check_dists_vs_locs(dists, locs)
   #check whether pt_trans_net is null or a directed graph
   if(!is.null(pt_trans_net)){
-    check_pt_trans_net(pt_trans_net, locs)
+    check_pt_trans_net(pt_trans_net)
   }
 }
 
@@ -651,23 +652,9 @@ check_paths <- function(paths){
 #'
 #' @noRd
 #'
-check_pt_transfer_input <- function(pt_trans_net, snv_dists, thresh, paths){
-  #check whether to run snv_dists same as get frac_intra
-  #if SNV_dists doesnt exist and they didn't input locs and dists
-  if(is.null(snv_dists)){
-    stop("Please provide the output from `get_snv_dists()` to this function.")
-  }
-  #make the SNV dists object if it needs to be made
-  else{
-    run_snv_dists <- FALSE
-  }
-  #checks snv_dists input
-  check_snv_dists(snv_dists)
-  #check threshs input
-  check_thresh(thresh)
-  #if there is locs
-  #check the pt_trans_net input
-  check_pt_trans_net(pt_trans_net, c(snv_dists$Loc1, snv_dists$Loc2))
+check_get_patient_flow_input <- function(edge_df, paths){
+  #check the edge_df input
+  check_pt_trans_net(edge_df)
   #check the paths input
   check_paths(paths)
 }
