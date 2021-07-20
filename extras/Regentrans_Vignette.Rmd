@@ -113,7 +113,6 @@ If you have patient data for your isolates, it is a good idea to subset to one i
 ```{r}
 isolate_subset <- cbind(locs, pt) %>% unique() %>% rownames()
 locs <- locs[isolate_subset]
-pt <- pt[isolate_subset]
 dates <- dates[isolate_subset]
 # st <- st[isolate_subset]
 fasta <- fasta[isolate_subset, ]
@@ -159,7 +158,7 @@ ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size)) + geom_jitter(po
 Another way to explore this question is to leverage our WGS data in the form of the SNV distance matrix and the `get_snv_dists()` function. 
 
 ```{r, message=FALSE}
-snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt) 
+snv_dists <- get_snv_dists(dists = dists, locs = locs) 
 ```
 
 To subset to one representation of each isolate-isolate pair (undirected), use the `subset_pairs()` function with the `snv_dists` object as input. 
@@ -185,7 +184,7 @@ ggplot() +
 ### get_frac_intra()
 
 ```{r, message=FALSE}
-frac_intra <- get_frac_intra(snv_dists = snv_dists) #or get_frac_intra(dists = dists, locs = locs, pt = pt)
+frac_intra <- get_frac_intra(snv_dists = snv_dists)
 
 ggplot(data = frac_intra, aes(x = Pairwise_Dists, y = Frac_Intra)) + geom_bar(stat = "identity", fill = "blue", alpha = 0.5) + labs(x = "SNV Distance Threshold", y = "Fraction of Intra-Facility Pairs") +  ggtitle("Fraction of Isolate Pairs from the Same \nFacility at Each SNV Distance Threshold") + ylim(0, 1) 
 ```
@@ -233,7 +232,7 @@ One way to determine whether Fsp values are significant is to use permutation (D
 
 ### Is transmission occurring between different sample sources?
 
-If your dataset includes both environmental samples and patient samples, you could utilize the `pt` input to the `get_snv_dists()` function to explore whether transmission is occurring between different sample sources by considering each environmental source a "patient". You could then determine what fraction of your isolate pairs are patient-patient pairs vs. patient-environment pairs vs. environment-environment pairs with the code below. 
+If your dataset includes environmental samples and, you could utilize the `pt` input to the `get_snv_dists()` function to explore whether transmission is occurring between different sample sources by considering each environmental source a "patient". You could then determine what fraction of your isolate pairs are patient-patient pairs vs. patient-environment pairs vs. environment-environment pairs with the code below. 
 
 - This will be a **toy example** as this sample data only includes patient samples. For this example case we will say that any patient ID > 300 is an environmental source. 
 

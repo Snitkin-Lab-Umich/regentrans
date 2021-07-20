@@ -1,9 +1,6 @@
 #' Get fraction of intra-facility pairs for different snv thresholds
 #'
 #' @param snv_dists the output object of the get_snv_dists function
-#' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
-#' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
-#' @param pt_trans_net a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
 #'
 #' @return fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data
 #' @export
@@ -13,16 +10,10 @@
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' get_frac_intra(dists = dists, locs = locs)
 #' }
-get_frac_intra <- function(snv_dists = NULL, dists = NULL, locs = NULL, pt_trans_net = NULL){
+get_frac_intra <- function(snv_dists){
 
   #make one check
-  run_snv_dists <- check_get_frac_intra_input(snv_dists = snv_dists, dists = dists, locs = locs,
-                                              pt_trans_net = pt_trans_net)
-
-  if(run_snv_dists){
-    message("Running get_snv_dists...")
-    snv_dists <- get_snv_dists(dists = dists, locs = locs, pt_trans_net = pt_trans_net)
-  }
+  check_get_frac_intra_input(snv_dists = snv_dists)
 
   # get intra-facility count and fraction for each pairwise SNV distance in the dataset
   intra_cts <- snv_dists %>%
