@@ -164,7 +164,6 @@ snv_dists <- get_snv_dists(dists = dists, locs = locs)
 To subset to one representation of each isolate-isolate pair (undirected), use the `subset_pairs()` function with the `snv_dists` object as input. 
 
 ```{r, message=FALSE}
-snv_dists_sub <- subset_pairs(snv_dists)
 ggplot() + 
   geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
   geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs")
@@ -211,7 +210,7 @@ snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Pair_Type) %>%
 
 
 ```{r, message=FALSE}
-snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Loc2) %>% summarize(n = n()) %>% filter(Loc1 != Loc2) %>% subset_pairs() %>% mutate(Facil_Pair = paste(Loc1, Loc2)) %>% filter(n >=  mean(n)) %>% ggplot(aes(x = Facil_Pair, y = n)) + geom_bar(position = "dodge", stat = "identity", fill = "salmon") + labs(y = "Number of Closely Related Isolate Pairs", x = "Facility Pair", title = "Number of Closely Related Isolate Pairs \nby Facility Pair") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+snv_dists %>% filter(Pairwise_Dists <= cutoff) %>% group_by(Loc1, Loc2) %>% summarize(n = n()) %>% filter(Loc1 != Loc2) %>% mutate(Facil_Pair = paste(Loc1, Loc2)) %>% filter(n >=  mean(n)) %>% ggplot(aes(x = Facil_Pair, y = n)) + geom_bar(position = "dodge", stat = "identity", fill = "salmon") + labs(y = "Number of Closely Related Isolate Pairs", x = "Facility Pair", title = "Number of Closely Related Isolate Pairs \nby Facility Pair") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 ```
 
