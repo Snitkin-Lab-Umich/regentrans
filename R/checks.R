@@ -648,7 +648,7 @@ check_paths <- function(paths){
 
 #' Check patient transfer input
 #'
-#' @inheritParams get_patient_transfers
+#' @inheritParams get_patient_flow
 #'
 #' @noRd
 #'
@@ -658,6 +658,53 @@ check_get_patient_flow_input <- function(edge_df, paths){
   #check the paths input
   check_paths(paths)
 }
+
+
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR patient_transfer FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
+
+## Checks for summarizing inter-facility pairs
+
+#' Check summarize inter pairs input
+#'
+#' @inheritParams summarize_inter_pairs
+#'
+#' @noRd
+#'
+check_summarize_inter_pairs_input <- function(snv_dists = snv_dists, summary_fns = summary_fns, threshs = threshs){
+
+  # check snv_dists
+  check_snv_dists(snv_dists)
+
+  # check summary_fns
+  if(!is.character(summary_fns) & !is.null(summary_fns)){
+    stop(paste("The summary_fns argment must either be `NULL or a character vector of function names you wish to use to summarize inter-facility pariwise distances. You have provided",
+               class(summary_fns)))
+  }
+  out <- tryCatch(sapply(summary_fns, get), error = function(e) e)
+  not_all_fns <- any(class(out) == "error")
+  if(not_all_fns){
+    stop(paste("The summary_fns argment must either be `NULL` or a character vector of function names you wish to use to summarize inter-facility pairwise distances. You have provided at least one element that is not a function:",
+               out))
+  }
+
+  # check threshs
+  if(!is.numeric(threshs) & !is.null(threshs)){
+    stop(paste("The threshs argment must either be `NULL` or a numeric vector of the pairwise SNV distance thresholds you wish to use to summarize inter-facility pairs. You have provided",
+               class(summary_fns)))
+  }
+}
+
+## Checks for summarizing inter-facility pairs
+
+#' Check summarize inter pairs input
+#'
+#' @inheritParams merge_inter_summaries
+#'
+#' @noRd
+#'
+check_merge_inter_summaries_input <-
+  function(patient_flow = patient_flow, inter_pair_summary = inter_pair_summary, fsp = fsp){
+
+}

@@ -25,7 +25,8 @@ get_patient_flow <- function(edge_df, paths = FALSE){
   #remove any same-facility pairs
   pat_flow <- edge_df %>% dplyr::filter(source_facil != dest_facil)
 
-  pt_trans_summary <- full_join(pat_flow, edge_df_i)
+  pt_trans_summary <- full_join(pat_flow, edge_df_i, by = c("source_facil", "dest_facil")) %>%
+    filter(source_facil != dest_facil)
 
   #make df
   # pt_trans_summary <- as.data.frame(pt_trans_summary)
@@ -36,64 +37,6 @@ get_patient_flow <- function(edge_df, paths = FALSE){
   }
   return(pt_trans_summary)
 }
-
-
-
-#' Get number of closely related pairs between facilities for different SNV distance thresholds
-#'
-#' @param snv_dists the output object of the get_snv_dists function
-#' @param threshs SNV thresholds to use
-#'
-#' @return a summary of number of closely related isolate pairs between each facility pair.
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' snv_dists <- get_snv_dists(dists, locs)
-#' count_pairs(snv_dists = snv_dists, locs = locs)
-#' }
-count_pairs <- function(snv_dists, threshs = NULL){
-  #run checks
-  check_count_pairs_input(snv_dists = snv_dists, threshs = threshs)
-
-
-  #instead of all of that we will just left join
-  pt_trans_summary <- snv_dists %>%
-    dplyr::mutate(Pairwise_Dists = as.numeric(Pairwise_Dists)) %>%
-    #group by locations (directed)
-    dplyr::group_by(Loc1, Loc2) %>%
-    #summarize how many closely related isolates are in each location pair
-    dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>%
-    #remove locations that are the same
-    dplyr::filter(Loc1 != Loc2) %>%
-    #add in patient transfers from 1 to 2
-    dplyr::left_join(pat_flow, by = c("Loc1" = "source_facil", "Loc2" = "dest_facil")) %>%
-    dplyr::rename("n_1_to_2_transfers" = "n_transfers") %>%
-    #add in patient transfers from 2 to 1
-    dplyr::left_join(pat_flow, by = c("Loc2" = "source_facil", "Loc1" = "dest_facil")) %>%
-    dplyr::rename("n_2_to_1_transfers" = "n_transfers") %>%
-    #add in indirect flow 1 to 2
-    dplyr::left_join(pt_trans_net_i, by = c("Loc1" = "source_facil", "Loc2" = "dest_facil")) %>%
-    dplyr::rename("indirect_flow_metric_1_to_2" = "pt_trans_metric") %>%
-    #add in indirect flow 2 to 1
-    dplyr::left_join(pt_trans_net_i, by = c("Loc2" = "source_facil", "Loc1" = "dest_facil")) %>%
-    dplyr::rename("indirect_flow_metric_2_to_1" = "pt_trans_metric")
-
-  #make df
-  pt_trans_summary <- as.data.frame(pt_trans_summary)
-
-  if(paths == TRUE){
-    #return paths and summary as a list
-    returns <- list("pt_trans_summary" = pt_trans_summary, "paths" = paths_list)
-
-    return(returns)
-  }
-  else{
-    return(pt_trans_summary)
-  }
-}
-
 
 
 #' Get summary of patient transfer network and closely-related isolates
@@ -197,7 +140,7 @@ get_patient_transfers <- function(pt_trans_net, snv_dists = NULL, thresh = 10, p
 #' @noRd
 #'
 #' @examples
-#' get_indirect_flow(pt_trans_df)
+#' get_indirect_flow(edge_df = pt_trans_df)
 get_indirect_flow <- function(edge_df){
   #don't want to subset before getting here, need whole network for indirect
   #checks
@@ -250,10 +193,11 @@ get_indirect_flow <- function(edge_df){
 #' @noRd
 #'
 fill_missing_src_dest <- function(edge_df) {
-  all_facils <- unique(c(edge_df$source_facil,edge_df$dest_facil))
+  all_facils <- unique(c(as.character(edge_df$source_facil),as.character(edge_df$dest_facil)))
   not_in_source <- all_facils[!(all_facils %in% edge_df$source_facil)]
   not_in_dest <- all_facils[!(all_facils %in% edge_df$dest_facil)]
   if(length(not_in_source) != 0 | length(not_in_dest) != 0){
+    edge_df$source_facil <- as.character(edge_df$source_facil)
     edge_df <- dplyr::bind_rows(edge_df,
                                 dplyr::bind_cols(source_facil = not_in_source,
                                                  dest_facil = edge_df$dest_facil[1],
@@ -263,7 +207,8 @@ fill_missing_src_dest <- function(edge_df) {
                                                  n_transfers = 0))
   }
   edge_df <- edge_df %>% tidyr::expand(source_facil, dest_facil) %>%
-    dplyr::left_join(edge_df, by = c("source_facil", "dest_facil"))
+    dplyr::left_join(edge_df, by = c("source_facil", "dest_facil")) %>%
+    filter("source_facil" != "dest_facil") %>% mutate(n_transfers = ifelse(is.na(n_transfers), 0, n_transfers))
   return(edge_df)
 }
 

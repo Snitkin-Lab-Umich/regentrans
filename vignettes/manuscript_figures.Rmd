@@ -75,9 +75,9 @@ round(2*ref_genome_length*mutation_rate)
 ```{r}
 # pre-calculated in vignette
 # dists <- dist.dna(fasta, model = 'N', pairwise.deletion = TRUE, as.matrix = TRUE)
-snv_dists <- get_snv_dists(dists = dists, locs = locs, pt = pt) %>% subset_pairs()
+snv_dists <- get_snv_dists(dists = dists, locs = locs) %>% subset_pairs()
 
-frac_intra <- get_frac_intra(snv_dists = snv_dists) #or get_frac_intra(dists = dists, locs = locs, pt = pt)
+frac_intra <- get_frac_intra(snv_dists = snv_dists)
 
 f2 <- frac_intra %>% 
   mutate(under = ifelse(Pairwise_Dists < 11, '< 11 SNVs','Over threshold'), under = ifelse(Pairwise_Dists < 7, '< 7 SNVs',under),
@@ -208,6 +208,9 @@ thresh = 7
 
 snv_dist_summary <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>% dplyr::filter(Loc1 != Loc2)
 
+# USE MIN INSTEAD/IN ADDITION?
+# snv_dist_summary <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = min(Pairwise_Dists)) %>% dplyr::filter(Loc1 != Loc2)
+
 pair_info <- full_join(fsp_flow, snv_dist_summary)
 
 flow_fsp_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$fsp)],
@@ -232,7 +235,7 @@ flow_snv_plot <- pair_info %>%
   labs(x = 'Patient flow', y = '# closely related\npairs (< 7 SNVs)') + 
   annotate('text', x = 0.005, y = 4.5, 
            label = paste(paste('Spearman rho =', round(flow_snv_spear$estimate, 2)),'\n',
-                         paste('Spearman p =', signif(flow_snv_spear$p.value, 1))))
+                         paste('Spearman p =', signif(flow_snv_spear$p.value, 1)))) #+ ylim(c(0,100))
 
 f7 <- plot_grid(flow_fsp_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
 ggsave('manuscript_figures/Fig7.png',f7)
