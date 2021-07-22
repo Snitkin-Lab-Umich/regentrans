@@ -4,7 +4,6 @@ locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 test_locs_5 <- locs[locs %in% c("A", "F", "H")]
 test_fasta_2 <- aln[names(test_locs_5),]
 
-
 fsp_mat <- get_facility_fsp(fasta = test_fasta_2, locs = test_locs_5, matrix = TRUE)
 fsp_long <- get_facility_fsp(fasta = test_fasta_2, locs = test_locs_5, matrix = FALSE)
 
