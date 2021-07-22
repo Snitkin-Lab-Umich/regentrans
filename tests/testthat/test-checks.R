@@ -38,6 +38,9 @@ ls <- list(list(a = 2, b = 3), list(c = "a", d = "b"))
 ls_2 <- list(list(a = 2, b = 3), list(c = "a", d = "b"), "x")
 test_subtr <- ape::subtrees(test_tr)
 test_subtr_2 <- ape::subtrees(test_tr_2)
+test_pt_flow <- pt_trans_df %>% dplyr::filter(source_facil %in% c('C','D','E') & dest_facil %in% c('C','D','E')) %>% get_patient_flow()
+test_inter_pair_summary <- summarize_inter_pairs(test_snv_dists)
+test_fsp_long <- make_long_form(fsp)
 
 mat <- data.frame(matrix(data = c(0, 20, 30, 40,
                                   20, 0, 26, 50,
@@ -56,7 +59,7 @@ test_pt_trans_net_4 <- test_pt_trans_net
 test_pt_trans_net_4$n_transfers <- as.character(test_pt_trans_net_4$n_transfers)
 test_pt_trans_net_5 <- test_pt_trans_net %>% dplyr::filter(source_facil == "A", dest_facil == "A")
 
-test_snv_dists_pt_trans <- get_snv_dists(dists = test_dists, locs = test_locs, pt_trans = test_pt_trans_net)
+test_snv_dists_pt_trans <- get_snv_dists(dists = test_dists, locs = test_locs)
 
 mat2 <- data.frame(matrix(data = c(0, 20, 12,
                                   20, 0, 26,
@@ -74,60 +77,62 @@ rownames(mat3) <- c(1, 2, 3, 4)
 ####################################test get_snv_dists######################################
 test_that("check_get_snv_dists_input works", {
   #check ones that should pass
-  expect_true(is.null(check_get_snv_dists_input(test_dists, test_locs, pt_trans_net=NULL)))
+  expect_true(is.null(check_get_snv_dists_input(test_dists, test_locs)))
   #one input - dists
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, pt_trans_net=NULL),
+    check_get_snv_dists_input(dists = test_dists),
     'argument "locs" is missing, with no default',
     fixed = TRUE
   )
   #one input - locs
   expect_error(
-    check_get_snv_dists_input(locs = test_locs, pt_trans_net=NULL),
+    check_get_snv_dists_input(locs = test_locs),
     'argument "dists" is missing, with no default',
     fixed = TRUE
   )
   #no locs input
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, pt_trans_net=NULL),
+    check_get_snv_dists_input(dists = test_dists),
     'argument "locs" is missing, with no default',
     fixed = TRUE
   )
   #test_dists not a dists object
   expect_error(
-    check_get_snv_dists_input(dists = "test_dists", locs = test_locs, pt_trans_net=NULL),
+    check_get_snv_dists_input(dists = "test_dists", locs = test_locs),
     "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character",
     fixed = TRUE
   )
   #locs not a named list
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = "test_locs", pt_trans_net=NULL),
+    check_get_snv_dists_input(dists = test_dists, locs = "test_locs"),
     "The locs object must be a a named list of locations named by sample IDs",
     fixed = TRUE
   )
   #dist names not matching locs names
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs_2, pt_trans_net=NULL),
+    check_get_snv_dists_input(dists = test_dists, locs = test_locs_2),
     "You have not provided locations of at least 2 isolates in your SNV distance matrix (dists). Please provide locations for at least 2 isolates in your SNV distance matrix.",
     fixed = TRUE
   )
   #one with less than two in common
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs_4, pt_trans_net=NULL),
+    check_get_snv_dists_input(dists = test_dists, locs = test_locs_4),
     "You have only supplied locations for 1 isolates. Please supply a named vector of locations for at least 2 isolates",
     fixed = TRUE
   )
+
   #warnings
   #dist names being a subset of locs names
-  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists_2, locs = test_locs, pt_trans_net=NULL))
+  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists_2, locs = test_locs))
   expect_true(warnings[1] == "You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset")
   expect_true(warnings[2] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
   #locs names being a subset of dists names
-  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists, locs = test_locs_3,  pt_trans_net=NULL))
+  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists, locs = test_locs_3))
   expect_true(warnings[1] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
-  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists_2, locs = test_locs, pt_trans_net=NULL))
+  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists_2, locs = test_locs))
   expect_true(warnings[1] == "You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset")
   expect_true(warnings[2] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
+
 })
 
 # check_dists
@@ -154,6 +159,8 @@ test_that("check_snv_dists works", {
                "The snv_dists object")
   expect_error(check_snv_dists(test_snv_dists_5),
                "Your snv_dists input has  ")
+  expect_error(check_snv_dists('test_snv_dists'),
+               "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character", fixed = TRUE)
 })
 
 #test check_subset_pairs_input works
@@ -492,59 +499,33 @@ test_that("check_get_largest_subtree_input works", {
 
 
 ##################################test patient_flow#####################################
-test_that("check_pt_transfer_input works", {
+test_that("check_get_patient_flow_input works", {
   #one that works with snv_dists
-  expect_null(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = 50, paths = FALSE))
-  #one with wrong snv_dists input
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = "test_snv_dists", thresh = 50, paths = FALSE),
-               "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character",
+  expect_null(check_get_patient_flow_input(edge_df = test_pt_trans_net, paths = FALSE))
+  #one where edge_df is wrong
+  expect_error(check_get_patient_flow_input(edge_df = "test_pt_trans_net", paths = FALSE),
+               "The edge_df object must be a data.frame or matrix, you provided a  character",
                fixed = TRUE)
-  #one with similar to snv_dists but not right ncols
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_2, thresh = 50, paths = FALSE),
-               "The snv_dists object must be the output of the get_snv_dists() function, but you provided a data.frame with  5  columns.",
+  #one where edge_df has wrong ncol
+  expect_error(check_get_patient_flow_input(edge_df = test_pt_trans_net_2, paths = FALSE),
+               "The edge_df object must be a data.frame or matrix with 3 columns, you provided  2",
                fixed = TRUE)
-  #one similar but not right colnames
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_3, thresh = 50, paths = FALSE),
-               "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  6  columns that are not the output columns needed.",
+  #one where edge_df has wrong colnames
+  expect_error(check_get_patient_flow_input(edge_df = test_pt_trans_net_3, paths = FALSE),
+               "The edge_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided  A B C",
                fixed = TRUE)
-  #one similar with wrong coltype
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists_4, thresh = 50, paths = FALSE),
-               "Your snv_dists input does not have numeric pairwise distances, you supplied one with type character",
+  #one where edge_df has wrong coltypes
+  expect_error(check_get_patient_flow_input(edge_df = test_pt_trans_net_4, paths = FALSE),
+               "The edge_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided  factor factor character",
                fixed = TRUE)
-  #one where thresh is wrong
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = test_snv_dists, thresh = -1, paths = FALSE),
-               "thresh must be a positive numeric value, you provided -1",
-               fixed = TRUE)
-  #one where pt_trans_net is wrong
-  expect_error(check_pt_transfer_input(pt_trans_net = "test_pt_trans_net", snv_dists = test_snv_dists, thresh = 50, paths = FALSE),
-               "The pt_trans_net object must be a data.frame or matrix, you provided a  character",
-               fixed = TRUE)
-  #one where pt_trans_net has wrong ncol
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_2, snv_dists = test_snv_dists, thresh = 50, paths = FALSE),
-               "The pt_trans_net object must be a data.frame or matrix with 3 columns, you provided  2",
-               fixed = TRUE)
-  #one where pt_trans_net has wrong colnames
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_3, snv_dists = test_snv_dists, thresh = 50, paths = FALSE),
-               "The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided  A B C",
-               fixed = TRUE)
-  #one where pt_trans_net has wrong coltypes
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_4, snv_dists = test_snv_dists, thresh = 50, paths = FALSE),
-               "The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided  factor factor character",
-               fixed = TRUE)
-  #one where there aren't at least two locations in common
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_5, snv_dists = test_snv_dists, thresh = 50, paths = FALSE),
-               "The pt_trans_net don't have at least two locations in common with the locs object.",
-               fixed = TRUE)
-  #one where there aren't all in common
-  expect_warning(check_pt_transfer_input(pt_trans_net = test_pt_trans_net2, snv_dists = test_snv_dists, thresh = 50, paths = FALSE),
-                 "Not all of the locations you have provided between locs and the pt_trans_network match. Will subset.",
-                 fixed = TRUE)
   #one where paths is wrong
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net_5, snv_dists = test_snv_dists, thresh = 50, paths = 12),
-               "The pt_trans_net don't have at least two locations in common with the locs object.",
+  expect_error(check_get_patient_flow_input(edge_df = test_pt_trans_net_5, paths = 12),
+               "paths argument must be a logical/logical value representing whether you want to return the shortest paths used to generate the indirect flow metric. You have provided numeric",
                fixed = TRUE)
-  expect_error(check_pt_transfer_input(pt_trans_net = test_pt_trans_net, snv_dists = NULL, thresh = 50, paths = FALSE),
-               "Please provide the output from")
+
+  expect_error(check_get_patient_flow_input(edge_df = dplyr::bind_rows(test_pt_trans_net, test_pt_trans_net), paths = FALSE),
+               "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.",
+               fixed = TRUE)
 })
 
 # check_thresh
@@ -565,4 +546,42 @@ test_that("check_paths works", {
   expect_null(check_paths(TRUE))
   expect_error(check_paths(1),
                "paths argument must be a logical/logical value representing whether you want to return the shortest paths used to generate the indirect flow metric. You have provided numeric")
+})
+
+
+# check_summarize_inter_pairs_input
+
+test_that("check_summarize_inter_pairs_input works", {
+  expect_null(check_summarize_inter_pairs_input(test_snv_dists, 'min', 5))
+  expect_null(check_summarize_inter_pairs_input(test_snv_dists, c('min', 'median'), 5))
+  expect_null(check_summarize_inter_pairs_input(test_snv_dists, 'min', c(5, 10)))
+  expect_null(check_summarize_inter_pairs_input(test_snv_dists, NULL, 5))
+  expect_null(check_summarize_inter_pairs_input(test_snv_dists, 'min', NULL))
+  expect_error(check_summarize_inter_pairs_input('test_snv_dists', min, 5),
+               "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character", fixed = TRUE)
+  expect_error(check_summarize_inter_pairs_input(test_snv_dists, min, 5),
+               "The summary_fns argment must either be `NULL` or a character vector of function names you wish to use to summarize inter-facility pariwise distances. You have provided function")
+  expect_error(check_summarize_inter_pairs_input(test_snv_dists, c('min','asd'), 5),
+               "The summary_fns argment must either be `NULL` or a character vector of function names you wish to use to summarize inter-facility pairwise distances. You have provided at least one element that is not a function:")
+  expect_error(check_summarize_inter_pairs_input(test_snv_dists, 'min', '5'),
+               "The threshs argment must either be `NULL` or a numeric vector of the pairwise SNV distance thresholds you wish to use to summarize inter-facility pairs. You have provided character")
+
+})
+
+# check_merge_inter_summaries_input
+
+test_that("check_merge_inter_summaries_input works", {
+  expect_null(check_merge_inter_summaries_input(test_pt_flow, test_inter_pair_summary, test_fsp_long))
+  expect_null(check_merge_inter_summaries_input(test_pt_flow, test_inter_pair_summary, NULL))
+  expect_null(check_merge_inter_summaries_input(test_pt_flow, NULL, test_fsp_long))
+  expect_null(check_merge_inter_summaries_input(NULL, test_inter_pair_summary, test_fsp_long))
+  expect_null(check_merge_inter_summaries_input(NULL, NULL, NULL))
+  expect_error(check_merge_inter_summaries_input('test_pt_flow', test_inter_pair_summary, test_fsp_long),
+               "patient_flow must be a data.frame but you provided character")
+  expect_error(check_merge_inter_summaries_input(test_pt_flow, 'test_inter_pair_summary', test_fsp_long),
+               "inter_pair_summary must be a data.frame but you provided character")
+  expect_error(check_merge_inter_summaries_input(test_pt_flow, test_inter_pair_summary, 'test_fsp_long'),
+               "fsp_long must be a data.frame but you provided character")
+  expect_error(check_merge_inter_summaries_input(test_pt_flow[,3:5], test_inter_pair_summary, test_fsp_long),
+               "There must be at least one column in common between all inputs.")
 })
