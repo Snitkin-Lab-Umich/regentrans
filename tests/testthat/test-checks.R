@@ -39,7 +39,7 @@ ls_2 <- list(list(a = 2, b = 3), list(c = "a", d = "b"), "x")
 test_subtr <- ape::subtrees(test_tr)
 test_subtr_2 <- ape::subtrees(test_tr_2)
 test_pt_flow <- pt_trans_df %>% dplyr::filter(source_facil %in% c('C','D','E') & dest_facil %in% c('C','D','E')) %>% get_patient_flow()
-test_inter_pair_summary <- summarize_inter_pairs(test_snv_dists)
+test_inter_pair_summary <- summarize_pairs(test_snv_dists)
 test_fsp_long <- make_long_form(fsp)
 
 mat <- data.frame(matrix(data = c(0, 20, 30, 40,
@@ -549,21 +549,21 @@ test_that("check_paths works", {
 })
 
 
-# check_summarize_inter_pairs_input
+# check_summarize_pairs_input
 
-test_that("check_summarize_inter_pairs_input works", {
-  expect_null(check_summarize_inter_pairs_input(test_snv_dists, 'min', 5))
-  expect_null(check_summarize_inter_pairs_input(test_snv_dists, c('min', 'median'), 5))
-  expect_null(check_summarize_inter_pairs_input(test_snv_dists, 'min', c(5, 10)))
-  expect_null(check_summarize_inter_pairs_input(test_snv_dists, NULL, 5))
-  expect_null(check_summarize_inter_pairs_input(test_snv_dists, 'min', NULL))
-  expect_error(check_summarize_inter_pairs_input('test_snv_dists', min, 5),
+test_that("check_summarize_pairs_input works", {
+  expect_null(check_summarize_pairs_input(test_snv_dists, 'min', 5))
+  expect_null(check_summarize_pairs_input(test_snv_dists, c('min', 'median'), 5))
+  expect_null(check_summarize_pairs_input(test_snv_dists, 'min', c(5, 10)))
+  expect_null(check_summarize_pairs_input(test_snv_dists, NULL, 5))
+  expect_null(check_summarize_pairs_input(test_snv_dists, 'min', NULL))
+  expect_error(check_summarize_pairs_input('test_snv_dists', min, 5),
                "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character", fixed = TRUE)
-  expect_error(check_summarize_inter_pairs_input(test_snv_dists, min, 5),
+  expect_error(check_summarize_pairs_input(test_snv_dists, min, 5),
                "The summary_fns argment must either be `NULL` or a character vector of function names you wish to use to summarize inter-facility pariwise distances. You have provided function")
-  expect_error(check_summarize_inter_pairs_input(test_snv_dists, c('min','asd'), 5),
+  expect_error(check_summarize_pairs_input(test_snv_dists, c('min','asd'), 5),
                "The summary_fns argment must either be `NULL` or a character vector of function names you wish to use to summarize inter-facility pairwise distances. You have provided at least one element that is not a function:")
-  expect_error(check_summarize_inter_pairs_input(test_snv_dists, 'min', '5'),
+  expect_error(check_summarize_pairs_input(test_snv_dists, 'min', '5'),
                "The threshs argment must either be `NULL` or a numeric vector of the pairwise SNV distance thresholds you wish to use to summarize inter-facility pairs. You have provided character")
 
 })

@@ -11,11 +11,11 @@
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
-#' summarize_inter_pairs(snv_dists = snv_dists)
+#' summarize_pairs(snv_dists = snv_dists)
 #' }
-summarize_inter_pairs <- function(snv_dists, summary_fns = c("min"), threshs = seq(5,20,5)){
+summarize_pairs <- function(snv_dists, summary_fns = c("min"), threshs = seq(5,20,5)){
   #run checks
-  check_summarize_inter_pairs_input(snv_dists = snv_dists, summary_fns = summary_fns, threshs = threshs)
+  check_summarize_pairs_input(snv_dists = snv_dists, summary_fns = summary_fns, threshs = threshs)
 
   inter_dists_stats_summary <- data.frame(Loc1=character(), Loc2=character())
 
@@ -46,8 +46,8 @@ summarize_inter_pairs <- function(snv_dists, summary_fns = c("min"), threshs = s
 #' Merge summarized data about facility pairs
 #'
 #' @param patient_flow output of get_patient_flow function
-#' @param inter_pair_summary output of summarize_inter_pairs function
-#' @param fsp output of get_facility_fsp function
+#' @param inter_pair_summary output of summarize_pairs function
+#' @param fsp_long output of get_facility_fsp function
 #'
 #' @return merged dataframe
 #' @export
@@ -55,7 +55,7 @@ summarize_inter_pairs <- function(snv_dists, summary_fns = c("min"), threshs = s
 #' @examples
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
-#' inter_pair_summary <- summarize_inter_pairs(snv_dists)
+#' inter_pair_summary <- summarize_pairs(snv_dists)
 #' patient_flow <- get_patient_flow(edge_df = pt_trans_df)
 #' fsp_long <- make_long_form(fsp)
 #' merge_inter_summaries(patient_flow, inter_pair_summary, fsp_long)

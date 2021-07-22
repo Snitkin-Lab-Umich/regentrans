@@ -659,11 +659,11 @@ check_get_patient_flow_input <- function(edge_df, paths){
 
 #' Check summarize inter pairs input
 #'
-#' @inheritParams summarize_inter_pairs
+#' @inheritParams summarize_pairs
 #'
 #' @noRd
 #'
-check_summarize_inter_pairs_input <- function(snv_dists, summary_fns, threshs){
+check_summarize_pairs_input <- function(snv_dists, summary_fns, threshs){
 
   # check snv_dists
   check_snv_dists(snv_dists)
