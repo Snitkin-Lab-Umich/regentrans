@@ -26,10 +26,10 @@ test_that("get_patient_flow works", {
   #check ncols
   expect_true(ncol(test_pt_trans) == 8)
   #check colnames
-  expect_true(all(colnames(test_pt_trans) == c("Loc1", "Loc2", "n_transfers_f12", "pt_trans_metric_f12", "n_transfers_f21",
+  expect_true(all(colnames(test_pt_trans) == c("loc1", "loc2", "n_transfers_f12", "pt_trans_metric_f12", "n_transfers_f21",
                                                "pt_trans_metric_f21", "sum_transfers", "sum_pt_trans_metric")))
   #check coltypes
-  expect_true(all(sapply(test_pt_trans, class) == c(Loc1 = "character", Loc2 = "character", n_transfers_f12 = "numeric",
+  expect_true(all(sapply(test_pt_trans, class) == c(loc1 = "character", loc2 = "character", n_transfers_f12 = "numeric",
                                                     pt_trans_metric_f12 = "numeric", n_transfers_f21 = "numeric",
                                                     pt_trans_metric_f21 = "numeric", sum_transfers = "numeric", sum_pt_trans_metric = "numeric"
   )))
@@ -50,7 +50,7 @@ test_that("get_patient_flow works", {
                "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.")
   # missing patient transfers for some facilities
   expect_warning(expect_equal(get_patient_flow(pt_flow_sub),
-               structure(list(Loc1 = c("A", "A", "B"), Loc2 = c("B", "C", "C"),
+               structure(list(loc1 = c("A", "A", "B"), loc2 = c("B", "C", "C"),
                n_transfers_f12 = c(NA_real_, NA_real_, NA_real_),
                pt_trans_metric_f12 = c(0, 0, 0), n_transfers_f21 = c(20, 12, NA),
                pt_trans_metric_f21 = c(1, 1, 0), sum_transfers = c(NA_real_, NA_real_, NA_real_),

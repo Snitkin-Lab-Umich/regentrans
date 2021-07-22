@@ -33,10 +33,10 @@ get_patient_flow <- function(edge_df, paths = FALSE){
 
   pt_trans_summary <- lapply(facil_pairs, function(x){
     f12 <- pt_trans_summary %>% dplyr::filter(source_facil == substring(x, 1, 1) & dest_facil == substring(x, 2, 2)) %>%
-      dplyr::rename(Loc1 = source_facil, Loc2 = dest_facil, n_transfers_f12 = n_transfers, pt_trans_metric_f12 = pt_trans_metric)
+      dplyr::rename(loc1 = source_facil, loc2 = dest_facil, n_transfers_f12 = n_transfers, pt_trans_metric_f12 = pt_trans_metric)
     f21 <- pt_trans_summary %>% dplyr::filter(source_facil == substring(x, 2, 2) & dest_facil == substring(x, 1, 1)) %>%
-      dplyr::rename(Loc1 = dest_facil, Loc2 = source_facil, n_transfers_f21 = n_transfers, pt_trans_metric_f21 = pt_trans_metric)
-    pt_flow_sub <- dplyr::full_join(f12, f21, by = c('Loc1','Loc2'))
+      dplyr::rename(loc1 = dest_facil, loc2 = source_facil, n_transfers_f21 = n_transfers, pt_trans_metric_f21 = pt_trans_metric)
+    pt_flow_sub <- dplyr::full_join(f12, f21, by = c('loc1','loc2'))
   }) %>% dplyr::bind_rows() %>% dplyr::mutate(sum_transfers = n_transfers_f12 + n_transfers_f21,
                                 sum_pt_trans_metric = pt_trans_metric_f12 + pt_trans_metric_f21)
 
