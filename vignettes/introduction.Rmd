@@ -165,8 +165,8 @@ To subset to one representation of each isolate-isolate pair (undirected), use t
 
 ```{r, message=FALSE}
 ggplot() + 
-  geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs")
+  geom_histogram(data = subset(snv_dists,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
+  geom_histogram(data = subset(snv_dists,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs")
 ```
 
 - This plot can give you an idea of the population structure of your isolates. 
@@ -175,8 +175,8 @@ We can also take a closer look at the closely related pairs which can give us in
 
 ```{r, message=FALSE}
 ggplot() + 
-  geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
-  geom_histogram(data = subset(snv_dists_sub,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \n< 20 SNV Distance")
+  geom_histogram(data = subset(snv_dists,Pair_Type == "Inter-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2, binwidth = 1) + 
+  geom_histogram(data = subset(snv_dists,Pair_Type == "Intra-facility pair" & Pairwise_Dists < 20), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \n< 20 SNV Distance")
 ```
 
 
@@ -240,9 +240,9 @@ If your dataset includes environmental samples and, you could utilize the `pt` i
 - It is important to consider whether you have subsetted to one sample per "patient" (or sample) source per location before performing this analysis. 
 
 ```{r, message = FALSE}
-thresh = 10 
-
-snv_dists %>% filter(Pair_Type == "Intra-facility pair") %>% mutate(Pt_Pair_Type = ifelse(Patient1 < 300 & Patient2 < 300, "pt-pt", ifelse(Patient1 > 300 & Patient2 > 300, "env-env", "pt-env"))) %>% filter(Pairwise_Dists <= thresh) %>% group_by(Pt_Pair_Type) %>% summarize(n = n()) %>% ggplot() + geom_bar(mapping = aes(x = Pt_Pair_Type, y = n), stat = "Identity", fill = "salmon") + labs(y = "Number of Closely Related Isolate Pairs", x = "Sample Pair Type", title = "Number of Closely Related Isolate Pairs \nby Sample Pair Type")
+# thresh = 10 
+# 
+# snv_dists %>% filter(Pair_Type == "Intra-facility pair") %>% mutate(Pt_Pair_Type = ifelse(Patient1 < 300 & Patient2 < 300, "pt-pt", ifelse(Patient1 > 300 & Patient2 > 300, "env-env", "pt-env"))) %>% filter(Pairwise_Dists <= thresh) %>% group_by(Pt_Pair_Type) %>% summarize(n = n()) %>% ggplot() + geom_bar(mapping = aes(x = Pt_Pair_Type, y = n), stat = "Identity", fill = "salmon") + labs(y = "Number of Closely Related Isolate Pairs", x = "Sample Pair Type", title = "Number of Closely Related Isolate Pairs \nby Sample Pair Type")
 ```
 
 # Have transmission dynamics changed over time or across species?
@@ -250,11 +250,11 @@ snv_dists %>% filter(Pair_Type == "Intra-facility pair") %>% mutate(Pt_Pair_Type
 In order to investigate whether transmission dynamics have changed over time or differ across groups (such as sequence type or species) we can "facet" on those variables. Here is an example of faceting on date:
 
 ```{r, message=FALSE}
-snv_dists_sub_dates <- snv_dists_sub %>% left_join(bind_cols(names(dates), dates), by = c("Isolate1" = "...1")) %>% rename("date" = "...2") 
+snv_dists_dates <- snv_dists %>% left_join(bind_cols(names(dates), dates), by = c("Isolate1" = "...1")) %>% rename("date" = "...2") 
 
 ggplot() + 
-  geom_histogram(data = subset(snv_dists_sub_dates,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_sub_dates,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \nby Date of Isolate Collection") + facet_wrap(~date)
+  geom_histogram(data = subset(snv_dists_dates,Pair_Type == "Inter-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Inter-facility pair"), alpha = 0.2) + 
+  geom_histogram(data = subset(snv_dists_dates,Pair_Type == "Intra-facility pair"), mapping = aes(x = Pairwise_Dists, fill = "Intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \nby Date of Isolate Collection") + facet_wrap(~date)
 ```
 
 # Is transmission occurring along paths of higher patient flow? 
@@ -266,16 +266,19 @@ In order to explore this question, we can leverage our WGS data in the form of t
 **Choosing a pairwise SNV distance threshold based on your dataset is very important, avoid using the default value**
 
 ```{r, message=FALSE}
-pt_trans <- get_patient_transfers(pt_trans_net = pt_trans_df, snv_dists = snv_dists, thresh = 10) %>% dplyr::mutate(avg_direct_transfers = rowMeans(select(., dplyr::ends_with("transfers")), na.rm = TRUE), avg_indirect_flow = rowMeans(select(., dplyr::starts_with("indirect")), na.rm = TRUE)) 
+# get summary ofpairwise SNV distance data
+snv_summary <- summarize_pairs(snv_dists, threshs = c(7, 11)) %>% filter(Loc1 != Loc2)
 
-ggplot(data = pt_trans, mapping = aes(x = avg_direct_transfers, y = n_closely_related_pairs)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related Isolate Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+pt_trans <- get_patient_flow(edge_df = pt_trans_df)
+
+merge_inter_summaries(pt_trans, snv_summary) %>% ggplot(mapping = aes(x = sum_transfers, y = under_7)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related Isolate Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related Isolate Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
 
 *Note:* This data is simulated
 
 ```{r, message=FALSE}
-fsp %>% get_long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Facil_1" = "Loc1", "Facil_2" = "Loc2")) %>% ggplot(mapping = aes(x = avg_direct_transfers, y = Fsp_val)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+fsp %>% make_long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Loc1", "Loc2")) %>% ggplot(mapping = aes(x = sum_transfers, y = Fsp)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
 
@@ -301,14 +304,14 @@ loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facilities", "
 
 facil_geo <- facil_coord %>% left_join(loc_n)
 
-fsp_geo <- fsp %>% get_long_form() %>% subset_pairs() %>% left_join(facil_geo, by = c("Facil_1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Facil_2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+fsp_geo <- fsp %>% make_long_form() %>% subset_pairs() %>% left_join(facil_geo, by = c("Loc1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 facil_geo %>% ggplot(aes(x=long, y=lat)) +
   geom_point(aes(size=n), alpha=0.5, color = "blue") + 
   borders("state") +
   coord_quickmap() +
   geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
-                 alpha = (1/Fsp_val)),
+                 alpha = (1/Fsp)),
              data = fsp_geo, curvature = 0.33) +
   theme_void() + theme(legend.position = "none") 
 
