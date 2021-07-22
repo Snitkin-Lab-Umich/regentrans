@@ -5,8 +5,8 @@ test_locs_5 <- locs[locs %in% c("A", "F", "H")]
 test_fasta_2 <- aln[names(test_locs_5),]
 
 
-fsp_mat <- get_facility_fsp(fasta = test_fasta_2, locs = test_locs_5, form = "matrix")
-fsp_long <- get_facility_fsp(fasta = test_fasta_2, locs = test_locs_5, form = "long")
+fsp_mat <- get_facility_fsp(fasta = test_fasta_2, locs = test_locs_5, matrix = TRUE)
+fsp_long <- get_facility_fsp(fasta = test_fasta_2, locs = test_locs_5, matrix = FALSE)
 
 test_that("get_facility_fsp works", {
   #for long
@@ -14,13 +14,13 @@ test_that("get_facility_fsp works", {
   #ncol = 3
   expect_true(ncol(fsp_long) == 3)
   #colnames
-  expect_true(all(colnames(fsp_long) == c("Loc1","Loc2","Fsp")))
+  expect_true(all(colnames(fsp_long) == c("loc1","loc2","fsp")))
   #nrow =
-  expect_true(nrow(fsp_long) == (length(unique(test_locs_5))^2)-length(unique(test_locs_5)))
+  expect_true(nrow(fsp_long) == ((length(unique(test_locs_5))^2)-length(unique(test_locs_5)))/2)
   #col types
   expect_true(all(sapply(fsp_long, class) == c("character","character","numeric")))
   #make sure all vals between 0, 1
-  expect_true(all(fsp_long$Fsp <= 1) & all(fsp_long$Fsp > 0))
+  expect_true(all(fsp_long$fsp <= 1) & all(fsp_long$fsp > 0))
 
 
   #for mat

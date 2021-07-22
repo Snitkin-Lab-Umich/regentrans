@@ -17,16 +17,16 @@ test_that("get_snv_dists works", {
   #check row #s
   expect_true(nrow(test_snv_dists) == (length(test_locs)^2-length(test_locs))/2)
   #check colnames
-  expect_true(all(colnames(test_snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type")))
+  expect_true(all(colnames(test_snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type")))
   #check col types
   #this won't be true when all of the patients IDs aren't numeric
   expect_true(all(sapply(test_snv_dists, class) == c("factor", "factor", "numeric", "character", "character", "character")))
   #check isolates in both lists are in the locs names
-  expect_true(all(unique(c(as.character(test_snv_dists$Isolate1), as.character(test_snv_dists$Isolate2))) %in% names(test_locs)))
-  # expect_true(all(setequal(unique(test_snv_dists$Isolate1), unique(test_snv_dists$Isolate2)) & setequal(unique(test_snv_dists$Isolate2), unique(names(test_locs)))))
+  expect_true(all(unique(c(as.character(test_snv_dists$sample1), as.character(test_snv_dists$sample2))) %in% names(test_locs)))
+  # expect_true(all(setequal(unique(test_snv_dists$sample1), unique(test_snv_dists$sample2)) & setequal(unique(test_snv_dists$sample2), unique(names(test_locs)))))
   #same with locs
-  expect_true(all(unique(c(as.character(test_snv_dists$Loc1), as.character(test_snv_dists$Loc2))) %in% test_locs))
-  # expect_true(all(setequal(unique(test_snv_dists$Loc1), unique(test_snv_dists$Loc2)) & setequal(unique(test_snv_dists$Loc2), unique(test_locs))))
+  expect_true(all(unique(c(as.character(test_snv_dists$loc1), as.character(test_snv_dists$loc2))) %in% test_locs))
+  # expect_true(all(setequal(unique(test_snv_dists$loc1), unique(test_snv_dists$loc2)) & setequal(unique(test_snv_dists$loc2), unique(test_locs))))
 
 })
 
@@ -38,43 +38,43 @@ test_dists <- dists[names(test_locs), names(test_locs)]
 test_snv_dists_dup <-
   structure(
     list(
-      Isolate1 = structure(
+      sample1 = structure(
         c(2L, 3L, 4L, 1L, 3L, 4L,
           1L, 2L, 4L, 1L, 2L, 3L),
         .Label = c("PCMP_H1", "PCMP_H2", "PCMP_H3",
                    "PCMP_H4"),
         class = "factor"
       ),
-      Isolate2 = structure(
+      sample2 = structure(
         c(1L, 1L,
           1L, 2L, 2L, 2L, 3L, 3L, 3L, 4L, 4L, 4L),
         .Label = c("PCMP_H1",
                    "PCMP_H2", "PCMP_H3", "PCMP_H4"),
         class = "factor"
       ),
-      Pairwise_Dists = c(42,
+      pairwise_dist = c(42,
                          91, 65, 42, 18, 5, 91, 18, 4, 65, 5, 4),
-      Loc1 = c("B", "C", "D",
+      loc1 = c("B", "C", "D",
                "A", "C", "D", "A", "B", "D", "A", "B", "C"),
-      Loc2 = c("A", "A",
+      loc2 = c("A", "A",
                "A", "B", "B", "B", "C", "C", "C", "D", "D", "D"),
       Patient1 = c(2L,
                    3L, 4L, 1L, 3L, 4L, 1L, 2L, 4L, 1L, 2L, 3L),
       Patient2 = c(1L,
                    1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L, 4L, 4L, 4L),
-      Pair_Type = c(
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair",
-        "Inter-facility pair"
+      pair_type = c(
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair",
+        "inter-facility pair"
       )
     ),
     row.names = c(NA,-12L),
@@ -90,7 +90,7 @@ test_that("subset_pairs works", {
   expect_true(nrow(test_subset_pairs) == sum(1:(length(test_locs) - 1)))
   #check that each isolate in locs is represented only length(locs)-1 times
   expect_true(all(table(
-    c(test_subset_pairs$Isolate1, test_subset_pairs$Isolate2)
+    c(test_subset_pairs$sample1, test_subset_pairs$sample2)
   ) == (length(test_locs) - 1)))
 })
 

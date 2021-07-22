@@ -27,8 +27,8 @@ test_snv_dists_2 <- test_snv_dists[,2:ncol(test_snv_dists)]
 test_snv_dists_3 <- test_snv_dists
 colnames(test_snv_dists_3) <- c("A", "B", "C", "D", "E", "F")
 test_snv_dists_4 <- test_snv_dists
-test_snv_dists_4$Pairwise_Dists <- as.character(test_snv_dists_4$Pairwise_Dists)
-test_snv_dists_5 <- test_snv_dists %>% tibble::tibble() %>% dplyr::filter(Isolate1 == 'a') %>% data.frame()
+test_snv_dists_4$pairwise_dist <- as.character(test_snv_dists_4$pairwise_dist)
+test_snv_dists_5 <- test_snv_dists %>% tibble::tibble() %>% dplyr::filter(sample1 == 'a') %>% data.frame()
 test_tr <- ape::keep.tip(tr,names(test_locs))
 test_tr_2 <- ape::keep.tip(tr,names(test_locs_3))
 test_fasta <- aln[names(test_locs),]
@@ -275,53 +275,53 @@ test_that("check_control_labels works", {
 ##################################test get_facility_fsp#####################################
 test_that("check_facility_fsp_input works", {
   #one that works
-  expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, form = "matrix")))
+  expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, matrix = TRUE)))
   #one that works w long form
-  expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, form = "long")))
+  expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, matrix = FALSE)))
   #one that doesn't work because no more than one isolate/facility
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, form = "matrix"),
+    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, matrix = TRUE),
     "Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities",
     fixed = TRUE
   )
   #check form input
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, form = "hi"),
-    "form must be either 'long' or 'matrix' to determine output format, you have provided hi",
+    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, matrix = "hi"),
+    "matrix must be logical to determine output format, you have provided hi",
     fixed = TRUE
   )
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, form = 12),
-    "form must be either 'long' or 'matrix' to determine output format, you have provided 12",
+    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, matrix = 12),
+    "matrix must be logical to determine output format, you have provided 12",
     fixed = TRUE
   )
   #check fasta
   expect_error(
-    check_facility_fsp_input(fasta = "test_fasta", locs = test_locs, form = "matrix"),
+    check_facility_fsp_input(fasta = "test_fasta", locs = test_locs, matrix = TRUE),
     "The fasta object must be of class DNAbin, you have supplied an object of class  character",
     fixed = TRUE
   )
   #check fasta vs. locs when they don't have 2 in common
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_6, form = "matrix"),
+    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_6, matrix = TRUE),
     "Please provde a fasta object and locs object with at least two samples in common",
     fixed = TRUE
   )
   #when not two isolates in two facilities
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_7, form = "matrix"),
+    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_7, matrix = TRUE),
     "Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities",
     fixed = TRUE
   )
   #check fasta vs. locs when you have to subset
   expect_warning(
-    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_9, form = "matrix"),
+    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_9, matrix = TRUE),
     "You have provided  6  isolate IDs in common between locs and your fasta. Will subset.",
     fixed = TRUE
   )
   #one where there's only isolate from a location and will subset
   expect_warning(
-    check_facility_fsp_input(fasta = test_fasta_3, locs = test_locs_8, form = "matrix"),
+    check_facility_fsp_input(fasta = test_fasta_3, locs = test_locs_8, matrix = TRUE),
     "You have provided at least one isolate that is the only one in its location. Will subset to exclude location  1",
     fixed = TRUE
   )
@@ -329,7 +329,7 @@ test_that("check_facility_fsp_input works", {
 
 test_that("check_long_form_input works", {
   #a good one
-  expect_true(is.null(check_long_form_input(mat)))
+  expect_true(is.null(check_long_form_input(mat, c('loc1','loc2','fsp'))))
   expect_null(check_long_form_input(mat, c('a','b','c')))
   #one that is wrong type
   expect_error(is.null(check_long_form_input("mat")),

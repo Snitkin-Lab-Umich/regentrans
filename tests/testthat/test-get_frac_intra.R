@@ -4,8 +4,8 @@ locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs)
-test_snv_df <- structure(list(Isolate1 = "MN_CRE202", Isolate2 = "MN_CRE17",
-               Pairwise_Dists = 10, Loc1 = "M0211", Loc2 = "M0211", Pair_Type = "Intra-facility pair"), row.names = 1958L, class = "data.frame")
+test_snv_df <- structure(list(sample1 = "MN_CRE202", sample2 = "MN_CRE17",
+               pairwise_dist = 10, loc1 = "M0211", loc2 = "M0211", pair_type = "intra-facility pair"), row.names = 1958L, class = "data.frame")
 test_frac_intra <- get_frac_intra(snv_dists = test_snv_dists)
 test_frac_intra_df <- get_frac_intra(snv_dists = test_snv_df)
 mat <- data.frame(matrix(data = c(0, 20, 12,
@@ -18,10 +18,10 @@ test_that("get_frac_intra works", {
   #check n cols
   expect_true(ncol(test_frac_intra) == 5)
   #check colnames
-  expect_true(all(colnames(test_frac_intra) == c('Pairwise_Dists','n_Intra','n_Inter','Frac_Intra','Frac_Inter')))
+  expect_true(all(colnames(test_frac_intra) == c('pairwise_dist','n_intra','n_inter','frac_intra','frac_inter')))
   #check types of all cols
   expect_true(all(sapply(test_frac_intra, class) == c("numeric", "numeric", "numeric", "numeric", "numeric")))
   #check that rows are the divisions of other rows...
-  expect_true(all((test_frac_intra$Frac_Intra == test_frac_intra$n_Intra/(test_frac_intra$n_Intra + test_frac_intra$n_Inter)) | test_frac_intra$Frac_Intra == 0))
-  expect_true(all((test_frac_intra$Frac_Inter == test_frac_intra$n_Inter/(test_frac_intra$n_Intra + test_frac_intra$n_Inter)) | test_frac_intra$Frac_Inter == 0))
+  expect_true(all((test_frac_intra$frac_intra == test_frac_intra$n_intra/(test_frac_intra$n_intra + test_frac_intra$n_inter)) | test_frac_intra$frac_intra == 0))
+  expect_true(all((test_frac_intra$frac_inter == test_frac_intra$n_inter/(test_frac_intra$n_intra + test_frac_intra$n_inter)) | test_frac_intra$frac_inter == 0))
 })

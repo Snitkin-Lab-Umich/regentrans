@@ -11,7 +11,7 @@
 #' Klebiella pneumoniae ST258 isolate variant alignment
 #'
 #' Variant alignment for Klebsiella pneumoniae ST258 isolates in the study.
-#' Isolates were collected from long-term acute care hospitals across the US.
+#' samples were collected from long-term acute care hospitals across the US.
 #' Corresponding manuscript: https://aac.asm.org/content/63/11/e01622-19
 #'
 #' @format A DNAbin object with 413 rows and 83976 nucelotide sites.
@@ -20,7 +20,7 @@
 #' Klebiella pneumoniae ST258 isolate phylogenetic tree
 #'
 #' Phylogenetic tree of Klebsiella pneumoniae ST258 isolates in the study.
-#' Isolates were collected from long-term acute care hospitals across the US.
+#' samples were collected from long-term acute care hospitals across the US.
 #' Corresponding manuscript: https://aac.asm.org/content/63/11/e01622-19
 #'
 #' @format A phylo object with 413 tips.
@@ -30,7 +30,7 @@
 #'
 #' Pairwise single nucleotide variant (SNV) distance matrix for
 #' Klebsiella pneumoniae ST258 isolates in the study.
-#' Isolates were collected from long-term acute care hospitals across the US.
+#' samples were collected from long-term acute care hospitals across the US.
 #' Corresponding manuscript: https://aac.asm.org/content/63/11/e01622-19
 #'
 #' @format A data frame with 413 rows and 413 columns.
@@ -38,8 +38,8 @@
 
 #' Klebiella pneumoniae ST258 gene flow
 #'
-#' Gene flow (Fsp) between facilities for Klebsiella pneumoniae ST258 isolates.
-#' Isolates were collected from long-term acute care hospitals across the US.
+#' Gene flow (fsp) between facilities for Klebsiella pneumoniae ST258 isolates.
+#' samples were collected from long-term acute care hospitals across the US.
 #' Corresponding manuscript: https://aac.asm.org/content/63/11/e01622-19
 #'
 #' @format A data frame with 413 rows and 413 columns.

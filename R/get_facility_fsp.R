@@ -1,10 +1,10 @@
-#' Make facility x facility matrix with Fsp values. Calculates fst as described in Donker et al. 2017
+#' Make facility x facility matrix with fsp values. Calculates fst as described in Donker et al. 2017
 #'
 #' @param fasta ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
 #' @param locs locations names for pairwise comparison
 #' @param matrix whether to output symmetric matrix (TRUE; default) or long form (FALSE)
 #'
-#' @return matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp values bween 0 (HP=HS) and 1 (Hp = 0)
+#' @return matrix of facility x facility matrix with fsp values. Only bi-allelic sites. fsp values bween 0 (HP=HS) and 1 (Hp = 0)
 #' @export
 #'
 #' @examples
@@ -68,9 +68,9 @@ get_facility_fsp <- function(fasta, locs, matrix = TRUE){
       within_f1_sum <- get_within_pop_var(subset_snp_mat, subset_f1)
       #WITHIN POPULATION 2 VARIATION
       within_f2_sum <- get_within_pop_var(subset_snp_mat, subset_f2)
-      #calculate Fsp
-      Fsp = (((within_f1_sum + within_f2_sum) / 2) - between_sum) / ((within_f1_sum + within_f2_sum) / 2)
-      return(Fsp)
+      #calculate fsp
+      fsp = (((within_f1_sum + within_f2_sum) / 2) - between_sum) / ((within_f1_sum + within_f2_sum) / 2)
+      return(fsp)
     })#end loop 1
   }))#end loop 2
   #add row and column names
@@ -133,7 +133,7 @@ get_within_pop_var <- function(subset_snp_mat, subset){
 #'
 #' @examples
 #' make_long_form(fsp)
-make_long_form <- function(facil_dist, col_names = c('Loc1', 'Loc2', 'Fsp')){
+make_long_form <- function(facil_dist, col_names = c('loc1', 'loc2', 'fsp')){
   #check that it is a symmetric matrix
   check_long_form_input(facil_dist, col_names)
   #change to longform
@@ -141,10 +141,10 @@ make_long_form <- function(facil_dist, col_names = c('Loc1', 'Loc2', 'Fsp')){
   colnames(facil_dist_long) <- col_names
 
   facil_pairs <- sapply(1:nrow(facil_dist_long), function(x)
-    paste0(sort(c(as.character(facil_dist_long$Loc1[x]), as.character(facil_dist_long$Loc2[x]))), collapse = ''))
+    paste0(sort(c(as.character(facil_dist_long$loc1[x]), as.character(facil_dist_long$loc2[x]))), collapse = ''))
 
-  facil_dist_long$Loc1 <- sapply(facil_pairs, function(x) substring(x, 1, 1))
-  facil_dist_long$Loc2 <- sapply(facil_pairs, function(x) substring(x, 2, 2))
+  facil_dist_long$loc1 <- sapply(facil_pairs, function(x) substring(x, 1, 1))
+  facil_dist_long$loc2 <- sapply(facil_pairs, function(x) substring(x, 2, 2))
 
   return(subset_pairs(facil_dist_long))
 }

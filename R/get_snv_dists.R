@@ -28,22 +28,22 @@ get_snv_dists <- function(dists, locs){
   #make df
   snps <- stats::na.omit(data.frame(as.table(as.matrix(dists_sub))))
   #change freq colname?
-  colnames(snps) <- c("Isolate1", "Isolate2", "Pairwise_Dists")
+  colnames(snps) <- c("sample1", "sample2", "pairwise_dist")
 
   #add locs
-  snps$Loc1 <- loc_sub[snps$Isolate1]
-  snps$Loc2 <- loc_sub[snps$Isolate2]
+  snps$loc1 <- loc_sub[snps$sample1]
+  snps$loc2 <- loc_sub[snps$sample2]
 
   snp_facility_pairs <- dplyr::bind_cols(
-    snps %>% dplyr::filter(Isolate1 != Isolate2) %>%
-      dplyr::mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
+    snps %>% dplyr::filter(sample1 != sample2) %>%
+      dplyr::mutate(pair_type=ifelse(loc1==loc2,'intra-facility pair','inter-facility pair')))
 
   ## should probably make this into a separate function (alphabetize loc1 and loc2)
   facil_pairs <- sapply(1:nrow(snp_facility_pairs), function(x)
-    paste0(sort(c(as.character(snp_facility_pairs$Loc1[x]), as.character(snp_facility_pairs$Loc2[x]))), collapse = ''))
+    paste0(sort(c(as.character(snp_facility_pairs$loc1[x]), as.character(snp_facility_pairs$loc2[x]))), collapse = ''))
 
-  snp_facility_pairs$Loc1 <- sapply(facil_pairs, function(x) substring(x, 1, 1))
-  snp_facility_pairs$Loc2 <- sapply(facil_pairs, function(x) substring(x, 2, 2))
+  snp_facility_pairs$loc1 <- sapply(facil_pairs, function(x) substring(x, 1, 1))
+  snp_facility_pairs$loc2 <- sapply(facil_pairs, function(x) substring(x, 2, 2))
   ##
 
 

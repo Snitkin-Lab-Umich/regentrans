@@ -178,13 +178,13 @@ check_snv_dists <- function(snv_dists){
   }
   #check the colnames
   if(!((ncol(snv_dists) == 8 &&
-        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1",  "Patient2", "Pair_Type"))) ||
+        all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
        (ncol(snv_dists) == 12 &&
-        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Patient1",  "Patient2", "Pair_Type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+        all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
        (ncol(snv_dists) == 10 &&
-        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+        all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
        (ncol(snv_dists) == 6 &&
-        all(colnames(snv_dists) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type"))))){
+        all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
     stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has ",
                ncol(snv_dists), " columns that are not the output columns needed."))
   }
@@ -193,9 +193,9 @@ check_snv_dists <- function(snv_dists){
       stop(paste("Your snv_dists input has ", nrow(snv_dists), " facility pairs. Please use an snv_dists input that has 1 or more pairs (rows)"))
   }
   #check pairwise dist column is numeric
-  if(!class(snv_dists$Pairwise_Dists) == "numeric"){
+  if(!class(snv_dists$pairwise_dist) == "numeric"){
     stop(paste("Your snv_dists input does not have numeric pairwise distances, you supplied one with type",
-               class(snv_dists$Pairwise_Dists)))
+               class(snv_dists$pairwise_dist)))
   }
 
 }
@@ -363,11 +363,11 @@ check_fasta_vs_locs <- function(fasta, locs){
 #'
 #' @noRd
 #'
-check_facility_fsp_input <- function(fasta, locs, form){
-  #check form
-  if(!(form == "matrix" || form == "long")){
-    stop(paste("form must be either 'long' or 'matrix' to determine output format, you have provided",
-               form))
+check_facility_fsp_input <- function(fasta, locs, matrix){
+  #check output form
+  if(!is.logical(matrix)){
+    stop(paste("matrix must be logical to determine output format, you have provided",
+               matrix))
   }
   #check fasta
   check_dna_bin(fasta)
@@ -716,9 +716,9 @@ check_merge_inter_summaries_input <-
       stop(paste('fsp_long must be a data.frame but you provided', class(fsp_long)))
     }
     # check all
-    if(is.null(patient_flow)) patient_flow <- data.frame(Loc1=character(), Loc2=character())
-    if(is.null(inter_pair_summary)) inter_pair_summary <- data.frame(Loc1=character(), Loc2=character())
-    if(is.null(fsp_long)) fsp_long <- data.frame(Loc1=character(), Loc2=character())
+    if(is.null(patient_flow)) patient_flow <- data.frame(loc1=character(), loc2=character())
+    if(is.null(inter_pair_summary)) inter_pair_summary <- data.frame(loc1=character(), loc2=character())
+    if(is.null(fsp_long)) fsp_long <- data.frame(loc1=character(), loc2=character())
     if(length(intersect(intersect(colnames(patient_flow), colnames(inter_pair_summary)), colnames(fsp_long))) == 0){
       stop('There must be at least one column in common between all inputs.')
     }
