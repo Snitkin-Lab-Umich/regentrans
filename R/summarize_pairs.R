@@ -47,7 +47,7 @@ summarize_pairs <- function(snv_dists, summary_fns = c("min"), threshs = seq(5,2
 #'
 #' @param patient_flow output of get_patient_flow function
 #' @param inter_pair_summary output of summarize_pairs function
-#' @param fsp_long output of get_facility_fsp function
+#' @param fsp_long long-form output of get_facility_fsp function
 #'
 #' @return merged dataframe
 #' @export

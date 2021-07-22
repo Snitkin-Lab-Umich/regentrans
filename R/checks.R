@@ -383,7 +383,7 @@ check_facility_fsp_input <- function(fasta, locs, form){
 #'
 #' @noRd
 #'
-check_long_form_input <- function(facil_dist){
+check_long_form_input <- function(facil_dist, col_names){
   #make sure it is a data.frame
   if(!(any(class(facil_dist) == "matrix") || any(class(facil_dist) == "data.frame"))){
     stop(paste("The fsp matrix object must be a data.frame or matrix but you provided:",
@@ -396,6 +396,12 @@ check_long_form_input <- function(facil_dist){
   #rownames = colnames
   if(!all(rownames(facil_dist) == colnames(facil_dist))){
     stop("The fsp matrix object must be symmetric, same number of columns as rows and columns and rows must have the same names")
+  }
+  if(!is.character(col_names)){
+    stop("col_names must be a character vector but you provided: ", class(col_names))
+  }
+  if(length(col_names) != 3){
+    stop("col_names must be vector of length 3, but you provided length: ", length(col_names))
   }
 }
 

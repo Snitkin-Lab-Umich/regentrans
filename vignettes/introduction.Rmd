@@ -278,7 +278,7 @@ merge_inter_summaries(pt_trans, snv_summary) %>% ggplot(mapping = aes(x = sum_tr
 *Note:* This data is simulated
 
 ```{r, message=FALSE}
-fsp %>% make_long_form() %>% subset_pairs() %>% left_join(pt_trans, by = c("Loc1", "Loc2")) %>% ggplot(mapping = aes(x = sum_transfers, y = Fsp)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+fsp %>% make_long_form() %>% left_join(pt_trans, by = c("Loc1", "Loc2")) %>% ggplot(mapping = aes(x = sum_transfers, y = Fsp)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
 
 ```
 
@@ -304,7 +304,7 @@ loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facilities", "
 
 facil_geo <- facil_coord %>% left_join(loc_n)
 
-fsp_geo <- fsp %>% make_long_form() %>% subset_pairs() %>% left_join(facil_geo, by = c("Loc1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+fsp_geo <- fsp %>% make_long_form() %>% left_join(facil_geo, by = c("Loc1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 facil_geo %>% ggplot(aes(x=long, y=lat)) +
   geom_point(aes(size=n), alpha=0.5, color = "blue") + 
