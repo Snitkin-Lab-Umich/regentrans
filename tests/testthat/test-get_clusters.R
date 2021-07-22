@@ -29,7 +29,7 @@ test_that("get_snv_dists works", {
   #check test_pure_subtree info ncol
   expect_true(ncol(test_pure_subtree_info) == 4)
   #colnames
-  expect_true(all(colnames(test_pure_subtree_info) == c("f_id", "subtr_size", "index", "isolate_name")))
+  expect_true(all(colnames(test_pure_subtree_info) == c("loc_id", "subtr_size", "index", "isolate_name")))
   #nrow, at most one for each isolate, at least one (if they are all in the same subtree)
   expect_true((nrow(test_pure_subtree_info) <= length(test_locs)) & (nrow(test_pure_subtree_info) >= 1))
   #check column types
@@ -41,9 +41,9 @@ test_that("get_snv_dists works", {
                 all(dplyr::filter(test_pure_subtree_info, is.na(test_pure_subtree_info$index))$subtr_size == 1))
   #make sure all of the fids exist in the test_locs
   #this might break down when we add tree pruning??
-  expect_true(length(intersect(unique(test_locs), unique(test_pure_subtree_info$f_id))) ==
-                length(unique(test_pure_subtree_info$f_id)) &
-                length(intersect(unique(test_locs), unique(test_pure_subtree_info$f_id))) ==
+  expect_true(length(intersect(unique(test_locs), unique(test_pure_subtree_info$loc_id))) ==
+                length(unique(test_pure_subtree_info$loc_id)) &
+                length(intersect(unique(test_locs), unique(test_pure_subtree_info$loc_id))) ==
                 length(unique(test_locs)))
   #make sure first subtree is the whole tree
   expect_true(all(test_first_subtr$tip.label == test_tr$tip.label))

@@ -2,7 +2,7 @@
 #'
 #' @param fasta ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
 #' @param locs locations names for pairwise comparison
-#' @param form can be "long" or "matrix", default is matrix. Determines output format
+#' @param matrix whether to output symmetric matrix (TRUE; default) or long form (FALSE)
 #'
 #' @return matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp values bween 0 (HP=HS) and 1 (Hp = 0)
 #' @export
@@ -10,14 +10,14 @@
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' get_facility_fsp(aln, locs, form = "matrix")
+#' facil_fsp <- get_facility_fsp(aln, locs, matrix = TRUE)
 #' }
 
 
 #######################try to make sapply########
-get_facility_fsp <- function(fasta, locs, form = "matrix"){
+get_facility_fsp <- function(fasta, locs, matrix = TRUE){
   #check the DNAbin object and locs
-  check_facility_fsp_input(fasta, locs, form)
+  check_facility_fsp_input(fasta, locs, matrix)
   #make a vector of only locs that appear more than once
   locs_over_one <- which(unlist(table(locs) > 1))
   locs_subset <- locs[locs %in% names(locs_over_one)]
@@ -77,7 +77,7 @@ get_facility_fsp <- function(fasta, locs, form = "matrix"){
   rownames(facil_dist) <- locs_unique
   colnames(facil_dist) <- locs_unique
   #change to long form if that is specified
-  if(form != "matrix"){ facil_dist <- make_long_form(facil_dist) }
+  if(!matrix){ facil_dist <- make_long_form(facil_dist) }
   return(facil_dist);
 }#end facility_fst
 
@@ -132,14 +132,13 @@ get_within_pop_var <- function(subset_snp_mat, subset){
 #' @export
 #'
 #' @examples
-#' make_long_form(dists)
 #' make_long_form(fsp)
-make_long_form <- function(facil_dist){
+make_long_form <- function(facil_dist, col_names = c('Loc1', 'Loc2', 'Fsp')){
   #check that it is a symmetric matrix
-  check_long_form_input(facil_dist)
+  check_long_form_input(facil_dist, col_names)
   #change to longform
   facil_dist_long <- stats::na.omit(data.frame(as.table(as.matrix(facil_dist)))) %>% dplyr::filter(Freq != 0)
-  colnames(facil_dist_long) <- c("Loc1", "Loc2", "Fsp")
+  colnames(facil_dist_long) <- col_names
 
   facil_pairs <- sapply(1:nrow(facil_dist_long), function(x)
     paste0(sort(c(as.character(facil_dist_long$Loc1[x]), as.character(facil_dist_long$Loc2[x]))), collapse = ''))
@@ -147,7 +146,7 @@ make_long_form <- function(facil_dist){
   facil_dist_long$Loc1 <- sapply(facil_pairs, function(x) substring(x, 1, 1))
   facil_dist_long$Loc2 <- sapply(facil_pairs, function(x) substring(x, 2, 2))
 
-  return(facil_dist_long)
+  return(subset_pairs(facil_dist_long))
 }
 
 

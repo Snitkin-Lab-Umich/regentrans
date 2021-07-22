@@ -330,6 +330,7 @@ test_that("check_facility_fsp_input works", {
 test_that("check_long_form_input works", {
   #a good one
   expect_true(is.null(check_long_form_input(mat)))
+  expect_null(check_long_form_input(mat, c('a','b','c')))
   #one that is wrong type
   expect_error(is.null(check_long_form_input("mat")),
                "The fsp matrix object must be a data.frame or matrix but you provided: character",
@@ -342,6 +343,10 @@ test_that("check_long_form_input works", {
   expect_error(is.null(check_long_form_input(mat3)),
                "The fsp matrix object must be symmetric, same number of columns as rows and columns and rows must have the same names",
                fixed = TRUE)
+  expect_error(check_long_form_input(mat, c('a','b')),
+               "col_names must be vector of length 3, but you provided length: 2")
+  expect_error(check_long_form_input(mat, mat),
+               "col_names must be a character vector but you provided: data.frame")
 })
 
 ##################################test allele_freq#####################################
