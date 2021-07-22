@@ -10,13 +10,6 @@ mat <- data.frame(matrix(data = c(0, 20, 12,
                                   30, 26, 0), nrow = 3, ncol = 3))
 rownames(mat) <- c("A", "B", "C")
 colnames(mat) <- c("A", "B", "C")
-test_pt_trans_net <- stats::na.omit(data.frame(as.table(as.matrix(mat))))
-#pat_flow <- dplyr::bind_cols(pat_flow %>% dplyr::filter(Var1 != Var2))
-colnames(test_pt_trans_net) <- c("source_facil", "dest_facil", "n_transfers")
-test_pt_trans_net$n_transfers <- as.numeric(test_pt_trans_net$n_transfers)
-
-test_snv_dists_pt_trans <- get_snv_dists(dists = test_dists, locs = test_locs, pt_trans_net = test_pt_trans_net)
-
 
 test_that("get_snv_dists works", {
   # check number of columns
@@ -34,14 +27,6 @@ test_that("get_snv_dists works", {
   #same with locs
   expect_true(all(unique(c(as.character(test_snv_dists$Loc1), as.character(test_snv_dists$Loc2))) %in% test_locs))
   # expect_true(all(setequal(unique(test_snv_dists$Loc1), unique(test_snv_dists$Loc2)) & setequal(unique(test_snv_dists$Loc2), unique(test_locs))))
-
-  #one with pt_trans net
-  expect_true(ncol(test_snv_dists_pt_trans) == 10)
-  #check colnames
-  expect_true(all(colnames(test_snv_dists_pt_trans) == c("Isolate1", "Isolate2", "Pairwise_Dists", "Loc1", "Loc2", "Pair_Type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1")))
-  #check coltypes
-  expect_true(class(test_snv_dists_pt_trans[,9]) == "numeric")
-  expect_true(class(test_snv_dists_pt_trans[,10]) == "numeric")
 
 })
 

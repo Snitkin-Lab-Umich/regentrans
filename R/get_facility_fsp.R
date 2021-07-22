@@ -77,7 +77,7 @@ get_facility_fsp <- function(fasta, locs, form = "matrix"){
   rownames(facil_dist) <- locs_unique
   colnames(facil_dist) <- locs_unique
   #change to long form if that is specified
-  if(form != "matrix"){ facil_dist <- get_long_form(facil_dist) }
+  if(form != "matrix"){ facil_dist <- make_long_form(facil_dist) }
   return(facil_dist);
 }#end facility_fst
 
@@ -132,14 +132,21 @@ get_within_pop_var <- function(subset_snp_mat, subset){
 #' @export
 #'
 #' @examples
-#' get_long_form(dists)
-#' get_long_form(fsp)
-get_long_form <- function(facil_dist){
+#' make_long_form(dists)
+#' make_long_form(fsp)
+make_long_form <- function(facil_dist){
   #check that it is a symmetric matrix
   check_long_form_input(facil_dist)
   #change to longform
   facil_dist_long <- stats::na.omit(data.frame(as.table(as.matrix(facil_dist)))) %>% dplyr::filter(Freq != 0)
-  colnames(facil_dist_long) <- c("Facil_1", "Facil_2", "Fsp_val")
+  colnames(facil_dist_long) <- c("Loc1", "Loc2", "Fsp")
+
+  facil_pairs <- sapply(1:nrow(facil_dist_long), function(x)
+    paste0(sort(c(as.character(facil_dist_long$Loc1[x]), as.character(facil_dist_long$Loc2[x]))), collapse = ''))
+
+  facil_dist_long$Loc1 <- sapply(facil_pairs, function(x) substring(x, 1, 1))
+  facil_dist_long$Loc2 <- sapply(facil_pairs, function(x) substring(x, 2, 2))
+
   return(facil_dist_long)
 }
 

@@ -86,41 +86,36 @@ check_dists_vs_locs <- function(dists, locs){
 #'
 #' @noRd
 #'
-check_pt_trans_net <- function(pt_trans_net){
+check_edge_df <- function(edge_df){
   #default is null
-  if(!is.null(pt_trans_net)){
+  if(!is.null(edge_df)){
     #make sure it is a dataframe of three columns, source, dest, n_transfers
-    if(!(any(class(pt_trans_net) == "data.frame") || any(class(pt_trans_net) == "matrix"))){
-      stop(paste("The pt_trans_net object must be a data.frame or matrix, you provided a ",
-                 class(pt_trans_net)))
+    if(!(any(class(edge_df) == "data.frame") || any(class(edge_df) == "matrix"))){
+      stop(paste("The edge_df object must be a data.frame or matrix, you provided a ",
+                 class(edge_df)))
     }
     #make sure three cols
-    if(ncol(pt_trans_net) != 3){
-      stop(paste("The pt_trans_net object must be a data.frame or matrix with 3 columns, you provided ",
-                 ncol(pt_trans_net)))
+    if(ncol(edge_df) != 3){
+      stop(paste("The edge_df object must be a data.frame or matrix with 3 columns, you provided ",
+                 ncol(edge_df)))
     }
     #make sure cols have correct names
-    if(!all(colnames(pt_trans_net) == c("source_facil", "dest_facil", "n_transfers" ))){
-      stop(paste("The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided ",
-                 paste(colnames(pt_trans_net), sep = " ", collapse = " ")))
+    if(!all(colnames(edge_df) == c("source_facil", "dest_facil", "n_transfers" ))){
+      stop(paste("The edge_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided ",
+                 paste(colnames(edge_df), sep = " ", collapse = " ")))
     }
     #make sure the column types are good
-    if(!(all(lapply(pt_trans_net, class) == c("factor", "factor", "numeric")) || all(lapply(pt_trans_net, class) == c("character", "character", "numeric")))){
-      stop(paste("The pt_trans_net object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided ",
-                 paste(lapply(pt_trans_net, class), sep = " ", collapse = " ")))
+    if(!(all(lapply(edge_df, class) == c("factor", "factor", "numeric")) || all(lapply(edge_df, class) == c("character", "character", "numeric")))){
+      stop(paste("The edge_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided ",
+                 paste(lapply(edge_df, class), sep = " ", collapse = " ")))
     }
     # MOVE THIS TO OTHER FUNCTION
-    #make sure facilities have something in common with the locs and say we will subset if they are not all in common
-    #make sure there are at least two in common
-    # if(as.numeric(length(intersect(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs)))) < 2){
-    #   stop(paste("The pt_trans_net don't have at least two locations in common with the locs object. "))
-    # }
     # #if not all in common warn you will subset
-    # !setequal(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs))
-    # if(!setequal(unique(c(as.character(pt_trans_net$source_facil), as.character(pt_trans_net$dest_facil))), unique(locs))){
-    #   warning(paste("Not all of the locations you have provided between locs and the pt_trans_network match. Will subset. "))
+    # !setequal(unique(c(as.character(edge_df$source_facil), as.character(edge_df$dest_facil))), unique(locs))
+    # if(!setequal(unique(c(as.character(edge_df$source_facil), as.character(edge_df$dest_facil))), unique(locs))){
+    #   warning(paste("Not all of the locations you have provided between locs and the edge_df match. Will subset. "))
     # }
-    if(length(paste(pt_trans_net$source_facil, pt_trans_net$dest_facil)) != length(unique(paste(pt_trans_net$source_facil, pt_trans_net$dest_facil)))){
+    if(length(paste(edge_df$source_facil, edge_df$dest_facil)) != length(unique(paste(edge_df$source_facil, edge_df$dest_facil)))){
       stop(paste("Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs."))
     }
   }
@@ -133,7 +128,7 @@ check_pt_trans_net <- function(pt_trans_net){
 #'
 #' @noRd
 #'
-check_get_snv_dists_input <- function(dists, locs, pt_trans_net){
+check_get_snv_dists_input <- function(dists, locs){
   #check everything that is common (aka no pt) first
   #check that the dists object is the snv object returned by dist.dna
   check_dists(dists)
@@ -141,10 +136,6 @@ check_get_snv_dists_input <- function(dists, locs, pt_trans_net){
   check_locs(locs)
   #check that the locs names exist in the dists dataframe
   check_dists_vs_locs(dists, locs)
-  #check whether pt_trans_net is null or a directed graph
-  if(!is.null(pt_trans_net)){
-    check_pt_trans_net(pt_trans_net)
-  }
 }
 
 #' Check subset pairs input
@@ -610,7 +601,7 @@ check_get_largest_subtree_input <- function(subtrs, isolate_labels, control_labe
 
 #' Check threshold
 #'
-#' @inheritParams get_patient_transfers
+#' @inheritParams get_patient_flow
 #'
 #' @noRd
 #'
@@ -634,7 +625,7 @@ check_thresh <- function(thresh){
 
 # Check the paths input
 #'
-#' @inheritParams get_patient_transfers
+#' @inheritParams get_patient_flow
 #'
 #' @noRd
 #'
@@ -654,7 +645,7 @@ check_paths <- function(paths){
 #'
 check_get_patient_flow_input <- function(edge_df, paths){
   #check the edge_df input
-  check_pt_trans_net(edge_df)
+  check_edge_df(edge_df)
   #check the paths input
   check_paths(paths)
 }
@@ -672,14 +663,14 @@ check_get_patient_flow_input <- function(edge_df, paths){
 #'
 #' @noRd
 #'
-check_summarize_inter_pairs_input <- function(snv_dists = snv_dists, summary_fns = summary_fns, threshs = threshs){
+check_summarize_inter_pairs_input <- function(snv_dists, summary_fns, threshs){
 
   # check snv_dists
   check_snv_dists(snv_dists)
 
   # check summary_fns
   if(!is.character(summary_fns) & !is.null(summary_fns)){
-    stop(paste("The summary_fns argment must either be `NULL or a character vector of function names you wish to use to summarize inter-facility pariwise distances. You have provided",
+    stop(paste("The summary_fns argment must either be `NULL` or a character vector of function names you wish to use to summarize inter-facility pariwise distances. You have provided",
                class(summary_fns)))
   }
   out <- tryCatch(sapply(summary_fns, get), error = function(e) e)
@@ -705,6 +696,24 @@ check_summarize_inter_pairs_input <- function(snv_dists = snv_dists, summary_fns
 #' @noRd
 #'
 check_merge_inter_summaries_input <-
-  function(patient_flow = patient_flow, inter_pair_summary = inter_pair_summary, fsp = fsp){
-
+  function(patient_flow = patient_flow, inter_pair_summary = inter_pair_summary, fsp_long = fsp_long){
+    # check patient flow
+    if(!'data.frame' %in% class(patient_flow) & !is.null(patient_flow)){
+      stop(paste('patient_flow must be a data.frame but you provided', class(patient_flow)))
+    }
+    # check inter pair summary
+    if(!'data.frame' %in% class(inter_pair_summary) & !is.null(inter_pair_summary)){
+      stop(paste('inter_pair_summary must be a data.frame but you provided', class(inter_pair_summary)))
+    }
+    # check fsp
+    if(!'data.frame' %in% class(fsp_long) & !is.null(fsp_long)){
+      stop(paste('fsp_long must be a data.frame but you provided', class(fsp_long)))
+    }
+    # check all
+    if(is.null(patient_flow)) patient_flow <- data.frame(Loc1=character(), Loc2=character())
+    if(is.null(inter_pair_summary)) inter_pair_summary <- data.frame(Loc1=character(), Loc2=character())
+    if(is.null(fsp_long)) fsp_long <- data.frame(Loc1=character(), Loc2=character())
+    if(length(intersect(intersect(colnames(patient_flow), colnames(inter_pair_summary)), colnames(fsp_long))) == 0){
+      stop('There must be at least one column in common between all inputs.')
+    }
 }

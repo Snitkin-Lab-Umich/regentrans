@@ -2,7 +2,6 @@
 #'
 #' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
 #' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
-#' @param pt_trans_net a data.frame representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'
 #'
 #' @return a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs. If pt_trans_net provided will return both direct transfer and indirect flow metric for each facility pair.
 #' @export
@@ -10,13 +9,13 @@
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' get_snv_dists(dists, locs)
+#' snv_dists <- get_snv_dists(dists, locs)
 #' }
-get_snv_dists <- function(dists, locs, pt_trans_net = NULL){
+get_snv_dists <- function(dists, locs){
   #checks
-  check_get_snv_dists_input(dists, locs, pt_trans_net)
+  check_get_snv_dists_input(dists, locs)
 
-  #make the subsetted isolates object if there is no pt
+  #make the subsetted isolates object
   isolates <- intersect(names(locs), rownames(dists))
 
   #subset by locs
@@ -39,14 +38,15 @@ get_snv_dists <- function(dists, locs, pt_trans_net = NULL){
     snps %>% dplyr::filter(Isolate1 != Isolate2) %>%
       dplyr::mutate(Pair_Type=ifelse(Loc1==Loc2,'Intra-facility pair','Inter-facility pair')))
 
-  #if there is a patient transfer network, add it
-  if(!is.null(pt_trans_net)){
-    #calculate pt_transfer summaries
-    pt_flow <- get_patient_transfers(pt_trans_net = pt_trans_net, snv_dists = snp_facility_pairs, paths = FALSE)
-    snp_facility_pairs <- snp_facility_pairs %>%
-      #add in patient transfers from 1 to 2
-      dplyr::left_join(pt_flow, by = c("Loc1" = "Loc1", "Loc2" = "Loc2")) %>% dplyr::select(-n_closely_related_pairs)
-  }
+  ## should probably make this into a separate function (alphabetize loc1 and loc2)
+  facil_pairs <- sapply(1:nrow(snp_facility_pairs), function(x)
+    paste0(sort(c(as.character(snp_facility_pairs$Loc1[x]), as.character(snp_facility_pairs$Loc2[x]))), collapse = ''))
+
+  snp_facility_pairs$Loc1 <- sapply(facil_pairs, function(x) substring(x, 1, 1))
+  snp_facility_pairs$Loc2 <- sapply(facil_pairs, function(x) substring(x, 2, 2))
+  ##
+
+
 
   # subset to include only one of each pair
   snp_facility_pairs <- subset_pairs(snp_facility_pairs)
@@ -74,6 +74,7 @@ subset_pairs <- function(snv_dists){
   check_subset_pairs_input(snv_dists)
   #subset to one of each pair
   unique_rows <- snv_dists[!duplicated(t(apply(snv_dists, 1, sort))),]
+
   #return new df
   return(unique_rows)
 }

@@ -17,18 +17,22 @@ test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs)
 #one without paths returned
-test_pt_trans <- get_patient_transfers(pt_trans_net = pat_flow, snv_dists = test_snv_dists, thresh = 50)
+test_pt_trans <- get_patient_flow(edge_df = pat_flow)
 #one with paths returned
-test_pt_trans_paths <- get_patient_transfers(pat_flow, test_snv_dists, thresh = 50, paths = TRUE)
+test_pt_trans_paths <- get_patient_flow(pat_flow, paths = TRUE)
 
-test_that("get_patient_transfers works", {
+test_that("get_patient_flow works", {
   #for without paths return
   #check ncols
-  expect_true(ncol(test_pt_trans) == 7)
+  expect_true(ncol(test_pt_trans) == 8)
   #check colnames
-  expect_true(all(colnames(test_pt_trans) == c("Loc1", "Loc2", "n_closely_related_pairs", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1")))
+  expect_true(all(colnames(test_pt_trans) == c("Loc1", "Loc2", "n_transfers_f12", "pt_trans_metric_f12", "n_transfers_f21",
+                                               "pt_trans_metric_f21", "sum_transfers", "sum_pt_trans_metric")))
   #check coltypes
-  expect_true(all(sapply(test_pt_trans, class) == c("character", "character", "integer", "numeric", "numeric", "numeric", "numeric")))
+  expect_true(all(sapply(test_pt_trans, class) == c(Loc1 = "character", Loc2 = "character", n_transfers_f12 = "numeric",
+                                                    pt_trans_metric_f12 = "numeric", n_transfers_f21 = "numeric",
+                                                    pt_trans_metric_f21 = "numeric", sum_transfers = "numeric", sum_pt_trans_metric = "numeric"
+  )))
   #check that there are <= nrow pat_dlow
   expect_true(nrow(test_pt_trans) <= nrow(pat_flow))
 
@@ -42,16 +46,15 @@ test_that("get_patient_transfers works", {
   #list types
   expect_true(all(sapply(test_pt_trans_paths, class) == c("data.frame", "list")))
   # duplicate source/destination facility rows returns error
-  expect_error(get_patient_transfers(dplyr::bind_rows(pat_flow,pat_flow),test_snv_dists),
+  expect_error(get_patient_flow(dplyr::bind_rows(pat_flow,pat_flow),test_snv_dists),
                "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.")
   # missing patient transfers for some facilities
-  expect_equal(get_patient_transfers(pt_flow_sub, test_snv_dists, thresh = 50),
-               structure(list(Loc1 = c("B", "C", "C"),
-                              Loc2 = c("A", "A", "B"),
-               n_closely_related_pairs = c(1L, 0L, 1L),
-               n_1_to_2_transfers = c(20, 12, NA), n_2_to_1_transfers = c(NA_real_, NA_real_, NA_real_),
-               indirect_flow_metric_1_to_2 = c(0, 0, 0),
-               indirect_flow_metric_2_to_1 = c(0, 0, 0)), class = "data.frame", row.names = c(NA, -3L)))
+  expect_warning(expect_equal(get_patient_flow(pt_flow_sub),
+               structure(list(Loc1 = c("A", "A", "B"), Loc2 = c("B", "C", "C"),
+               n_transfers_f12 = c(NA_real_, NA_real_, NA_real_),
+               pt_trans_metric_f12 = c(0, 0, 0), n_transfers_f21 = c(20, 12, NA),
+               pt_trans_metric_f21 = c(1, 1, 0), sum_transfers = c(NA_real_, NA_real_, NA_real_),
+               sum_pt_trans_metric = c(1, 1, 0)), row.names = c(NA, -3L), class = "data.frame")))
   })
 
 

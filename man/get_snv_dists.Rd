@@ -4,14 +4,12 @@
 \alias{get_snv_dists}
 \title{Get matrix of inter- and intra-facility pariwise snv distances}
 \usage{
-get_snv_dists(dists, locs, pt_trans_net = NULL)
+get_snv_dists(dists, locs)
 }
 \arguments{
 \item{dists}{a SNV distance matrix returned by the dist.dna function from the ape package}
 
 \item{locs}{a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID}
-
-\item{pt_trans_net}{a data.frame representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers'}
 }
 \value{
 a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs. If pt_trans_net provided will return both direct transfer and indirect flow metric for each facility pair.
@@ -22,6 +20,6 @@ Get matrix of inter- and intra-facility pariwise snv distances
 \examples{
 \dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
-get_snv_dists(dists, locs)
+snv_dists <- get_snv_dists(dists, locs)
 }
 }

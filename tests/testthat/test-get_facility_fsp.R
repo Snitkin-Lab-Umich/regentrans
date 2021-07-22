@@ -14,13 +14,13 @@ test_that("get_facility_fsp works", {
   #ncol = 3
   expect_true(ncol(fsp_long) == 3)
   #colnames
-  expect_true(all(colnames(fsp_long) == c("Facil_1","Facil_2","Fsp_val")))
+  expect_true(all(colnames(fsp_long) == c("Loc1","Loc2","Fsp")))
   #nrow =
   expect_true(nrow(fsp_long) == (length(unique(test_locs_5))^2)-length(unique(test_locs_5)))
   #col types
-  expect_true(all(sapply(fsp_long, class) == c("factor","factor","numeric")))
+  expect_true(all(sapply(fsp_long, class) == c("character","character","numeric")))
   #make sure all vals between 0, 1
-  expect_true(all(fsp_long$Fsp_val <= 1) & all(fsp_long$Fsp_val > 0))
+  expect_true(all(fsp_long$Fsp <= 1) & all(fsp_long$Fsp > 0))
 
 
   #for mat

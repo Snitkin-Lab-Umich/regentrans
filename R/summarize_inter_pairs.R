@@ -17,29 +17,26 @@ summarize_inter_pairs <- function(snv_dists, summary_fns = c("min"), threshs = s
   #run checks
   check_summarize_inter_pairs_input(snv_dists = snv_dists, summary_fns = summary_fns, threshs = threshs)
 
-  val_funs <- lapply(threshs, function(x) (function(a) as.integer(a < x)))
-  names(val_funs) <- paste0("<", threshs)
-
-  inter_dists_stats_summary <- setNames(data.frame(matrix(ncol = 2, nrow = 0)), c("Loc1", "Loc2"))
+  inter_dists_stats_summary <- data.frame(Loc1=character(), Loc2=character())
 
   if(!is.null(summary_fns)){
     inter_dists_stats_summary <- lapply(summary_fns, function(x){
-      snv_dists %>% group_by(Loc1, Loc2) %>%
-        summarize(!!quo_name(paste0('dists_', x)) := get(x)(Pairwise_Dists), .groups = 'keep')
+      snv_dists %>% dplyr::group_by(Loc1, Loc2) %>%
+        dplyr::summarize(!!dplyr::quo_name(paste0('dists_', x)) := get(x)(Pairwise_Dists), .groups = 'keep')
     }) %>%
-      purrr::reduce(full_join, by = c("Loc1", "Loc2"))
+      purrr::reduce(dplyr::full_join, by = c("Loc1", "Loc2"))
   }
 
-  inter_dists_thresh_summary <- setNames(data.frame(matrix(ncol = 2, nrow = 0)), c("Loc1", "Loc2"))
+  inter_dists_thresh_summary <- data.frame(Loc1=character(), Loc2=character())
   if(!is.null(threshs)){
     inter_dists_thresh_summary <- lapply(threshs, function(x){
-      snv_dists %>% group_by(Loc1, Loc2) %>%
-        summarize(!!quo_name(paste0('under_', x)) := sum(Pairwise_Dists < x), .groups = 'keep')
+      snv_dists %>% dplyr::group_by(Loc1, Loc2) %>%
+        dplyr::summarize(!!dplyr::quo_name(paste0('under_', x)) := sum(Pairwise_Dists < x), .groups = 'keep')
     }) %>%
-      purrr::reduce(full_join, by = c("Loc1", "Loc2"))
+      purrr::reduce(dplyr::full_join, by = c("Loc1", "Loc2"))
   }
 
-  inter_dists_summary <- full_join(inter_dists_stats_summary, inter_dists_thresh_summary,
+  inter_dists_summary <- dplyr::full_join(inter_dists_stats_summary, inter_dists_thresh_summary,
                                      by = c("Loc1", "Loc2"))
 
   return(inter_dists_summary)
@@ -60,15 +57,17 @@ summarize_inter_pairs <- function(snv_dists, summary_fns = c("min"), threshs = s
 #' snv_dists <- get_snv_dists(dists, locs)
 #' inter_pair_summary <- summarize_inter_pairs(snv_dists)
 #' patient_flow <- get_patient_flow(edge_df = pt_trans_df)
-#' merge_inter_summaries(patient_flow, inter_pair_summary, fsp)
-merge_inter_summaries <- function(patient_flow = NULL, inter_pair_summary = NULL, fsp = NULL){
-  check_merge_inter_summaries_input(patient_flow = patient_flow, inter_pair_summary = inter_pair_summary, fsp = fsp)
+#' fsp_long <- make_long_form(fsp)
+#' merge_inter_summaries(patient_flow, inter_pair_summary, fsp_long)
+merge_inter_summaries <- function(patient_flow = NULL, inter_pair_summary = NULL, fsp_long = NULL){
+  check_merge_inter_summaries_input(patient_flow = patient_flow, inter_pair_summary = inter_pair_summary, fsp_long = fsp_long)
 
-  if(is.null(patient_flow)) patient_flow <- setNames(data.frame(matrix(ncol = 2, nrow = 0)), c("Loc1", "Loc2"))
-  if(is.null(inter_pair_summary)) inter_pair_summary <- setNames(data.frame(matrix(ncol = 2, nrow = 0)), c("Loc1", "Loc2"))
-  if(is.null(fsp)) fsp <- setNames(data.frame(matrix(ncol = 2, nrow = 0)), c("Loc1", "Loc2"))
+  if(is.null(patient_flow)) patient_flow <- data.frame(Loc1=character(), Loc2=character())
+  if(is.null(inter_pair_summary)) inter_pair_summary <- data.frame(Loc1=character(), Loc2=character())
+  if(is.null(fsp_long)) fsp_long <- data.frame(Loc1=character(), Loc2=character())
 
-  merged_df <- full_join(inter_pair_summary, fsp) %>% left_join(patient_flow)
+  merged_df <- dplyr::full_join(inter_pair_summary, fsp_long, by = c("Loc1", "Loc2")) %>%
+    dplyr::left_join(patient_flow, by = c("Loc1", "Loc2"))
 
   return(merged_df)
 
