@@ -45,12 +45,10 @@ Imports:
 Suggests:
     testthat,
     devtools,
-    tidyr,
     knitr,
     ggplot2,
     ggtree,
     pheatmap,
-    phytools,
     gridExtra,
     cowplot,
     scales
