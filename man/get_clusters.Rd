@@ -2,28 +2,32 @@
 % Please edit documentation in R/get_clusters.R
 \name{get_clusters}
 \alias{get_clusters}
-\title{Get facility clusters on phylogeny}
+\title{Get facility clusters on the phylogeny}
 \usage{
 get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
 }
 \arguments{
 \item{tr}{a tree object returned by the read.tree function from the ape package}
 
-\item{locs}{a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID found in the tree}
+\item{locs}{a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID}
 
 \item{pureness}{how pure each cluster should be (must be > 0.5) (optional, defauly = 1)}
 
 \item{bootstrap}{Bootstrap support to use to filter unconfident tree edges (optional, default = NULL)}
 }
 \value{
-list where pure_subtree_info is a data.frame of facility clusters on phylogeny, index indicates which element that cluster is in the list of subtrees, NA indicates it is not part of a subtree; subtrees is an object of the actual subtrees (can be used for plotting);cluster_pureness is the purness of each cluster
+list where pure_subtree_info is a data.frame of facility clusters on phylogeny,
+index indicates which element that cluster is in the list of subtrees,
+NA indicates it is not part of a subtree;
+subtrees is an object of the actual subtrees (can be used for plotting);
+cluster_pureness is the purness of each cluster
 }
 \description{
-Get facility clusters on phylogeny
+Get facility clusters on the phylogeny
 }
 \examples{
 \dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
-get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
+clusts <- get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
 }
 }

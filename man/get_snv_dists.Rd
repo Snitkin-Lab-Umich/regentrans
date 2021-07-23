@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_snv_dists.R
 \name{get_snv_dists}
 \alias{get_snv_dists}
-\title{Get matrix of inter- and intra-facility pariwise snv distances}
+\title{Get data frame of inter- and intra-facility pariwise SNV distances}
 \usage{
 get_snv_dists(dists, locs)
 }
@@ -12,10 +12,10 @@ get_snv_dists(dists, locs)
 \item{locs}{a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID}
 }
 \value{
-a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs. If pt_trans_net provided will return both direct transfer and indirect flow metric for each facility pair.
+a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs.
 }
 \description{
-Get matrix of inter- and intra-facility pariwise snv distances
+Get data frame of inter- and intra-facility pariwise SNV distances
 }
 \examples{
 \dontrun{

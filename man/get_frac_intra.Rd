@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_frac_intra.R
 \name{get_frac_intra}
 \alias{get_frac_intra}
-\title{Get fraction of intra-facility pairs for different snv thresholds}
+\title{Get fraction of intra-facility pairs for different SNV thresholds}
 \usage{
 get_frac_intra(snv_dists)
 }
@@ -10,14 +10,15 @@ get_frac_intra(snv_dists)
 \item{snv_dists}{the output object of the get_snv_dists function}
 }
 \value{
-fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data
+fraction of intra-facility pairs for each SNV distance in dataset
 }
 \description{
-Get fraction of intra-facility pairs for different snv thresholds
+Get fraction of intra-facility pairs for different SNV thresholds
 }
 \examples{
 \dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
-get_frac_intra(dists = dists, locs = locs)
+snv_dists <- get_snv_dists(dists, locs)
+get_frac_intra(snv_dists)
 }
 }

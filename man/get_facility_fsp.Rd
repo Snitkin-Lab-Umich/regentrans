@@ -2,26 +2,32 @@
 % Please edit documentation in R/get_facility_fsp.R
 \name{get_facility_fsp}
 \alias{get_facility_fsp}
-\title{Make facility x facility matrix with Fsp values. Calculates fst as described in Donker et al. 2017}
+\title{Calculate gene flow (Fsp)}
 \usage{
-get_facility_fsp(fasta, locs, form = "matrix")
+get_facility_fsp(fasta, locs, matrix = TRUE)
 }
 \arguments{
 \item{fasta}{ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta}
 
-\item{locs}{locations names for pairwise comparison}
+\item{locs}{a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID}
 
-\item{form}{can be "long" or "matrix", default is matrix. Determines output format}
+\item{matrix}{whether to output symmetric matrix (TRUE; default) or long form (FALSE)}
 }
 \value{
-matrix of facility x facility matrix with Fsp values. Only bi-allelic sites. Fsp values bween 0 (HP=HS) and 1 (Hp = 0)
+facility x facility matrix with Fsp values
 }
 \description{
-Make facility x facility matrix with Fsp values. Calculates fst as described in Donker et al. 2017
+Calculate gene flow (Fsp)
+}
+\details{
+Fsp is described in Donker et al. 2017
+(mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113).
+Only bi-allelic sites are included when computing Fsp.
+The Fsp values are between 0 and 1 where lower values indicate more similar populations.
 }
 \examples{
 \dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
-get_facility_fsp(aln, locs, form = "matrix")
+facil_fsp <- get_facility_fsp(aln, locs, matrix = TRUE)
 }
 }

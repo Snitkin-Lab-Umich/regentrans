@@ -702,14 +702,14 @@ check_summarize_pairs_input <- function(snv_dists, summary_fns, threshs){
 #' @noRd
 #'
 check_merge_inter_summaries_input <-
-  function(patient_flow = patient_flow, inter_pair_summary = inter_pair_summary, fsp_long = fsp_long){
+  function(patient_flow = patient_flow, isolate_pair_summary = isolate_pair_summary, fsp_long = fsp_long){
     # check patient flow
     if(!'data.frame' %in% class(patient_flow) & !is.null(patient_flow)){
       stop(paste('patient_flow must be a data.frame but you provided', class(patient_flow)))
     }
     # check inter pair summary
-    if(!'data.frame' %in% class(inter_pair_summary) & !is.null(inter_pair_summary)){
-      stop(paste('inter_pair_summary must be a data.frame but you provided', class(inter_pair_summary)))
+    if(!'data.frame' %in% class(isolate_pair_summary) & !is.null(isolate_pair_summary)){
+      stop(paste('isolate_pair_summary must be a data.frame but you provided', class(isolate_pair_summary)))
     }
     # check fsp
     if(!'data.frame' %in% class(fsp_long) & !is.null(fsp_long)){
@@ -717,9 +717,9 @@ check_merge_inter_summaries_input <-
     }
     # check all
     if(is.null(patient_flow)) patient_flow <- data.frame(loc1=character(), loc2=character())
-    if(is.null(inter_pair_summary)) inter_pair_summary <- data.frame(loc1=character(), loc2=character())
+    if(is.null(isolate_pair_summary)) isolate_pair_summary <- data.frame(loc1=character(), loc2=character())
     if(is.null(fsp_long)) fsp_long <- data.frame(loc1=character(), loc2=character())
-    if(length(intersect(intersect(colnames(patient_flow), colnames(inter_pair_summary)), colnames(fsp_long))) == 0){
+    if(length(intersect(intersect(colnames(patient_flow), colnames(isolate_pair_summary)), colnames(fsp_long))) == 0){
       stop('There must be at least one column in common between all inputs.')
     }
 }

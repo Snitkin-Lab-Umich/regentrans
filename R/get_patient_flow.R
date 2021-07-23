@@ -6,11 +6,14 @@
 #'
 #' @return the number of direct patient transfers and indirect flow metrics between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
 #' @export
+#' @description Summarize inter-facility patient transfer network from an edge list. Direct and indirect patient flow metrics are calculated.
+#' @details For more details on how patient flow is calculated, see: https://aac.asm.org/content/63/11/e01622-19.
 #'
 #' @examples
 #' get_patient_flow(edge_df = pt_trans_df)
 get_patient_flow <- function(edge_df, paths = FALSE){
   #run checks
+  # could make this more general by defining column names in function, regardless of what they originally were
   check_get_patient_flow_input(edge_df = edge_df, paths = paths)
 
   #make pt_trans_net not factors

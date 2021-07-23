@@ -11,8 +11,8 @@ A data frame with 413 rows and 413 columns.
 fsp
 }
 \description{
-Gene flow (Fsp) between facilities for Klebsiella pneumoniae ST258 isolates.
-Isolates were collected from long-term acute care hospitals across the US.
+Gene flow (fsp) between facilities for Klebsiella pneumoniae ST258 isolates.
+samples were collected from long-term acute care hospitals across the US.
 Corresponding manuscript: https://aac.asm.org/content/63/11/e01622-19
 }
 \keyword{datasets}

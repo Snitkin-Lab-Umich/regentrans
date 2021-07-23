@@ -1,8 +1,8 @@
-#' Get fraction of intra-facility pairs for different snv thresholds
+#' Get fraction of intra-facility pairs for different SNV thresholds
 #'
 #' @param snv_dists the output object of the get_snv_dists function
 #'
-#' @return fraction of intra-facility pairs for different snv thresholds, lowest threshold represents lowest snv_dist in your data
+#' @return fraction of intra-facility pairs for each SNV distance in dataset
 #' @export
 #'
 #' @examples

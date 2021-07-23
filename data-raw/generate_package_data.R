@@ -94,8 +94,9 @@ diag(pt_flow) <- NA
 usethis::use_data(pt_flow, overwrite = TRUE)
 
 #made up patient flow as example (using real data as template)
-pt_trans_df <- round(pt_flow * 1e6) %>% reshape2::melt() %>% dplyr::filter(!is.na(value)) %>%
-  dplyr::rename(source_facil = Var1, dest_facil = Var2, n_transfers = value)
+pt_trans_df <- round(pt_flow * 1e6) %>%
+  make_long_form(col_names = c('source_facil','dest_facil','n_transfers')) %>%
+  dplyr::filter(!is.na(n_transfers))
 
 # save made up patient transfer dataframe to package
 usethis::use_data(pt_trans_df, overwrite = TRUE)
