@@ -9,7 +9,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+#' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
 #' summarize_pairs(snv_dists = snv_dists)
 #' }
@@ -55,7 +55,7 @@ summarize_pairs <- function(snv_dists, summary_fns = c("min"), threshs = seq(5,2
 #'
 #' @examples
 #' \dontrun{
-#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+#' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
 #' isolate_pair_summary <- summarize_pairs(snv_dists)
 #' patient_flow <- get_patient_flow(edge_df = pt_trans_df)

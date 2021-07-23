@@ -8,7 +8,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+#' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
 #' }
 get_snv_dists <- function(dists, locs){
@@ -36,7 +36,7 @@ get_snv_dists <- function(dists, locs){
 
   snp_facility_pairs <- dplyr::bind_cols(
     snps %>% dplyr::filter(sample1 != sample2) %>%
-      dplyr::mutate(pair_type=ifelse(loc1==loc2,'intra-facility pair','inter-facility pair')))
+      dplyr::mutate(pair_type=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
 
   ## should probably make this into a separate function (alphabetize loc1 and loc2)
   facil_pairs <- sapply(1:nrow(snp_facility_pairs), function(x)
@@ -63,7 +63,7 @@ get_snv_dists <- function(dists, locs){
 #'
 #' @examples
 #' \dontrun{
-#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+#' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
 #' subset_pairs(bind_rows(snv_dists,snv_dists))
 #' }

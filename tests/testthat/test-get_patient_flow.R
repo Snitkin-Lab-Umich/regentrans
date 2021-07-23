@@ -1,6 +1,6 @@
 #tests for patient transfer
 #make a source destination pair test matrix
-locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
 
 mat <- data.frame(matrix(data = c(0, 20, 12,
                         20, 0, 26,

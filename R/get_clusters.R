@@ -14,7 +14,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+#' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
 #' clusts <- get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
 #' }
 get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){
@@ -30,16 +30,16 @@ get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){
 
   subtrs_sub <- ape::subtrees(tr)
   pure_subtrees <- get_largest_subtree(subtrs = subtrs_sub, isolate_labels = locs_sub, bootstrap = bootstrap, pureness = pureness)
-  pure_subtr_info <- dplyr::bind_cols(loc_id=locs_sub,
+  pure_subtr_info <- dplyr::bind_cols(loc=locs_sub,
                                subtr_size=unlist(pure_subtrees$largest_st),
                                index=unlist(pure_subtrees$largest_st_i),
-                               isolate_name=names(locs_sub))
+                               sample_id=names(locs_sub))
   # change singletons from 0 to 1
   pure_subtr_info <- pure_subtr_info %>% dplyr::mutate(subtr_size=ifelse(subtr_size==0 & index == 1, 1, subtr_size))
   # change index from 1 to NA
   pure_subtr_info <- pure_subtr_info %>% dplyr::mutate(index=ifelse(index==1, NA, index))
   #add a column to indicate the isolate name if the index = NA
-  pure_subtr_info <- pure_subtr_info %>% dplyr::mutate(isolate_name=ifelse(is.na(index), isolate_name, NA))
+  pure_subtr_info <- pure_subtr_info %>% dplyr::mutate(sample_id=ifelse(is.na(index), sample_id, NA))
   # remove duplicates (singletons aren't duplicates)
   pure_subtr_info <- pure_subtr_info[!duplicated(pure_subtr_info$index) | pure_subtr_info$subtr_size == 1,]
 

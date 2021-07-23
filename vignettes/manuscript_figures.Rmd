@@ -60,7 +60,7 @@ dists <- dists[isolate_subset,isolate_subset]
 
 ```
 
-# Choosing a pairwise SNV distance thresholds
+# Choosing a pairwise SNV distance threshold
 
 ## Method 1: Use reference genome length and mutation rate
 
@@ -116,7 +116,7 @@ subtrees <- clusters$subtrees
 cluster_plot <- ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size, color = f_id)) + 
   geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.5) + 
   scale_color_manual(values = cols) +
-  labs(y = "Number of Isolates in \nPhylogenetic Cluster", x = "", color = 'Facility') +
+  labs(y = "Number of isolates in \nphylogenetic cluster", x = "", color = 'Facility') +
   ylim(c(0,12.5)) +
   coord_flip()
 # cluster_plot 

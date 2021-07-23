@@ -1,6 +1,6 @@
 ###################################test data######################################
-locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
+locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
+pt <- metadata %>% dplyr::select(sample_id, patient_id) %>% tibble::deframe()
 
 test_locs <- locs[1:4]
 test_locs_2 <- locs[5:8]

@@ -1,5 +1,5 @@
 #tests for get_frac_intra output
-locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
 
 test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]

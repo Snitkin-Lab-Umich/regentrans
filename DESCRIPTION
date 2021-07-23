@@ -52,7 +52,8 @@ Suggests:
     pheatmap,
     gridExtra,
     cowplot,
-    scales
+    scales,
+    readr
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
