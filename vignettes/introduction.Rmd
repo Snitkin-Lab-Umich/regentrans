@@ -1,5 +1,5 @@
 ---
-title: "Regentrans Vignette"
+title: "Introduction to `regentrans`"
 author: "Sophie Hoffman"
 date: "3/29/2021"
 output: 
@@ -8,12 +8,18 @@ output:
   
 ---
 
-The goal of `regentrans` is to give users a framework for using genomics to study regional pathogen transmission. 
+The goal of `regentrans` is to give users a framework and corresponding package for using genomics to study regional pathogen transmission. 
 
-To install the package from github, use the command
+To install the package from GitHub, use the command:
 
 ```{r, eval=FALSE, message = FALSE}
+# install devtools if you don't already have it installed
+# install.packages('devtools') 
+
+# install regentrans
 devtools::install_github('Snitkin-Lab-Umich/regentrans')
+
+# load regentrans
 library(regentrans)
 ```
 
@@ -25,276 +31,606 @@ Other packages you'll need to load to run this tutorial include:
 
 ```{r setup,echo=TRUE,message=FALSE}
 library(ape)
-library(dplyr)
+library(tidyverse)
 library(devtools)
 library(ggtree)
 library(pheatmap)
-library(ggplot2)
 library(phytools)
 library(gridExtra)
+library(cowplot)
 
-#set theme 
+# set theme for plots 
 theme_set(theme_bw() + theme(strip.background = element_rect(fill="white",linetype='blank'), text=element_text(size=15)))
 ```
 
-# Data Prep
+# A note on population genomics
 
-In order to use the regentrans package, you will need your data in a certain format. It is important to ensure that you have all relevant information for all of the isolates of interest for your analysis. Each isolate should be represented in each metadata named list as well as in the fasta file of variants and phylogenetic tree. 
+It is outside the scope of this framework and corresponding package to discuss population genomic analysis more generally. We direct you to this review for more information on what to consider when developing and executing a population genomics study: 
+[Best Practice for Population Genetic Analysis](https://pubmed.ncbi.nlm.nih.gov/28513284/).
 
-Below are examples of how you can read in your data. 
+# Data prep
+
+To use `regentrans`, you will need your data in a certain format. It is important to ensure that you have all relevant information for all of the isolates of interest for your analysis. Each isolate should be represented in the metadata as well as in the fasta file of variants and phylogenetic tree. `regentrans` functions will subset the data for you to include only ones present in all of the required function inputs.  
+
+First, we provide examples of how you can read in your data. Then, we describe the built-in data that we use here in the vignette and that you can use to test out the package. 
+
+## How to read in your own data 
+
+Note that this code will not run successfully unless you change the paths to be correct. 
 
 ### Metadata
 
-Each metadata category should appear as a named list where the names correspond to the isolate IDs and the items in the list reflect the category of the isolate. locations for each isolate are required, while patient information, collection dates and sequence types are all optional inputs. 
-
-To create named vectors from a data.frame, you can do the following:
+The only required metadata is location, but additional information can also be incorporated into the analysis including patient, sequence type, and collection date. 
 
 ```{r, eval = FALSE, message=FALSE}
-locs <- metadata$locations
-names(locs) <- metadata$isolate_ID
+# this is if your metadata is in a csv file
+metadata <- readr::read_csv("/path/to/metadata.csv")
 ```
 
-### Fasta file of variants
+### Genomic data
 
-A fasta file of variants. Can be read in to R using the following command:
+Either a variant alignment or a phylogenetic tree are required for most functions in `regentrans`. 
+
+#### Variant alignment
+
+The variant alignment can be read in to R using the following command:
 
 ```{r, eval = FALSE, message=FALSE}
-fasta <- ape::read.dna("/path/to/data.fasta",format = "fasta")
-
+# this is if your alignment is in a fasta file
+aln <- ape::read.dna("/path/to/aln.fasta",
+                     format = "fasta")
 ```
 
-### SNV distance matrix
+#### Pairwise SNV distance matrix
 
-A pairwise SNV distance matrix. Can be created using the fasta file:
+Some `regentrans` functions require a genomic distance matrix as input. A pairwise single nucleotide variant (SNV) distance matrix can be created using the fasta file:
 
 ```{r, eval = FALSE, message=FALSE}
-dists <- ape::dist.dna(x = fasta, as.matrix = TRUE, model = "N", pairwise.deletion = TRUE)
+dists <- ape::dist.dna(x = aln, # DNAbin object as read in above
+                       as.matrix = TRUE, # return as matrix
+                       model = "N", # count pairwise distances
+                       pairwise.deletion = TRUE # delete sites with missing data in a pairwise way
+                       )
 ```
 
-### Phylogenetic tree
+#### Phylogenetic tree
 
-A phylogenetic tree in Newick format. Can be read in to R using the following command:
+We recommend using [IQ-TREE](http://www.iqtree.org/) to generate a maximum likelihood phylogenetic tree for your dataset. However, there are also ways to make simple phylogenies in R using a variant alignment. 
+
+A phylogenetic tree in Newick format can be read into R using the following command:
 
 ```{r, eval = FALSE, message=FALSE}
-tree <- ape::read.tree("path/to/data.treefile")
+# this is if the tree is in Newick format
+tr <- ape::read.tree("path/to/data.treefile")
 ```
 
 ### Patient transfer network
 
 A patient transfer network representing facilities that isolates came from represented by a data.frame with three columns: `source_facil`, `dest_facil` and `n_transfers`. 
 
-### Input your data
+```{r, eval = FALSE, message=FALSE}
+# this is if your patient transfer network is in a csv file
+pt_trans_df <- readr::read_csv("/path/to/pt_trans_net.csv")
+```
+
+## Input data format (& using the built-in `regentrans` data)
+
+The example data from the package uses carbapenem-resistant _Klebsiella pneumoniae_ (CRKP) sequence type (ST) 258 whole-genome sequencing data from [Han et al. 2019](https://aac.asm.org/content/63/11/e01622-19). This data is a comprehensive collection of clinical CRKP isolates collected from long-term acute care hospitals across the U.S. over the course of a year. 
+The data was processed as in [Lapp et al. 2021](https://www.medrxiv.org/content/10.1101/2021.06.11.21258758v1).
 
 If you want to use your own data as input to the functions in the vignette, format your data according to the instructions above and set the following objects equal to your data. If you will not be using any of the optional data, make sure to assign those objects to `NULL`. 
 
-```{r, message=FALSE}
-#named vector of locations
-locs <- metadata %>% select(isolate_id, facility) %>% deframe()
-#named vector of patient IDs
-pt <- metadata %>% select(isolate_id, patient_id) %>% deframe()
-#named vector of isolate collection dates
-dates <- metadata %>% select(isolate_id, collection_date) %>% deframe()
-#fasta file 
-fasta <- aln
-#SNV distance matrix 
-dists <- dists
-#phylogenetic tree
-tree <- tr
-#patient transfer network
-pt_flow <- pt_flow
-#fsp
-fsp <- fsp
-```
+### Metadata
 
-### Subsetting to one isolate per patient per facility
-
-If you have patient data for your isolates, it is a good idea to subset to one isolate from each patient per facility to avoid overestimating transmission. 
+The `regentrans` metadata is in the `metadata` object. We have information on the sample ID, patient ID, facility, and collection date:
 
 ```{r}
-isolate_subset <- cbind(locs, pt) %>% unique() %>% rownames()
-locs <- locs[isolate_subset]
-dates <- dates[isolate_subset]
-# st <- st[isolate_subset]
-fasta <- fasta[isolate_subset, ]
-dists <- dists[isolate_subset, isolate_subset]
-tree <- keep.tip(tree, isolate_subset)
+metadata
 ```
 
-# How do you choose pairwise SNV distance thresholds?
+### Variant alignment
 
-`get_frac_intra()` TODO add more here!
+The variant alignment is a DNAbin object that we can use to calculate the pairwise SNV distances between our samples:
 
-# Is transmission occurring within and/or between locations?
+```{r}
+class(aln)
+aln
+```
 
-To explore this question we can leverage our WGS data in the form of the phylogenetic tree using the `get_clusters()` function and the SNV distance matrix using the `get_snv_dists()`. 
+### Pairwise SNV distance matrix
+
+We have provided the pairwise SNV distance matrix as part of the package as it is a bit timely to compute, but it can also easily be generated using the alignment we provideusing the command described above. Here is a subset of the distance matrix:
+
+```{r}
+dists[1:5,1:5]
+```
+
+The row and column names are the names of the samples and the values in the matrix are the pairwise SNV distances between each isolate pair. Note that this is a symmetric matrix. 
+
+### Phylogenetic tree
+
+We also provide a maximum likelihood phylogenetic tree that was generated using [IQ-TREE](http://www.iqtree.org/):
+
+```{r}
+tr
+```
+
+### Patient transfer network
+
+While we are not able to provide the true patient transfer network related to the example dataset, we have generated a simulated patient transfer network that we have included here:
+
+```{r}
+pt_trans_df
+```
+
+This data frame contains three columns: 
+
+1. `source_facil`: The source facility.
+1. `dest_facil`: The destination facility.
+1. `n_transfers`: The number of patient transfers between source and destination facility over some length of time (e.g. 1 day, 1 month, or 1 year).
+
+
+## Subsetting to one isolate per patient per facility
+
+As we have multiple samples from some patients, we first subset to the first isolate from each patient per facility to avoid overestimating transmission. We can do this in R as follows:
+
+```{r}
+# subset metadata to include the first isolate from each patient per facility
+metadata <- metadata %>% arrange(collection_date) %>% filter(!duplicated(patient_id, facility))
+
+# isolate subset
+isolate_subset <- metadata$sample_id
+
+# subset alignment
+aln <- aln[isolate_subset,]
+
+# subset tree
+tr <- keep.tip(tr, isolate_subset)
+
+# subset distance matrix
+dists <- dists[isolate_subset, isolate_subset]
+```
+
+## Extracting location as a vector
+
+For many of the `regentrans` functions, the required location input is a named vector where the elements are locations (e.g. facility) and the names are the sample ID. To get the location information from the built-in metadata, we can run this command: 
+
+```{r}
+# named vector of locations
+locs <- metadata %>% select(sample_id, facility) %>% deframe()
+head(locs)
+```
+
+The sample names are PCMP_H1, PCMP_H2, etc. And the facilities are A, B, etc.
+
+# Overview of questions
+
+In the following vignette, we go over the following questions and how `regentrans` can be used to investigate them:
+
+0. How do you choose pairwise SNV distance thresholds?
+1. Is transmission occurring within and/or between facilities?
+2. What facilities is transmission occurring within/between?
+3. Have transmission dynamics changed over time?
+4. Is transmission occurring along paths of higher patient/person flow?
+5. Are there any observable geographic trends in prevalence/transmission?
+
+
+# 0. How do you choose pairwise SNV distance thresholds?
+
+While some of the methods we present here are threshold-free, some require you to choose a pairwise SNV distance threshold. We highly recommend doing a sensitivity analysis with several thresholds to see how robust the results are to different thresholds. 
+
+To help you choose reasonable pairwise SNV distance thresholds for a sensitivity analysis, we describe two methods below. 
+
+## Method 1: Use reference genome length and mutation rate
+
+One way to choose a pairwise SNV distance threshold is to use the estimated mutation rate of the organism you are studying. Here is an example for our dataset (_K. pneumoniae_ ST258):
+
+```{r}
+ref_genome_length <- 5394056
+mutation_rate <- 1.03e-6 # estimated from a K. pneumoniae ST258 time tree
+round(2*ref_genome_length*mutation_rate)
+```
+
+This value means that, over the course of a year, each ST258 strain is expected to gain about 5.5 mutations. This gives us a parwise SNV distance threshold of $5.5*2 = 11$, as our isolates were collected over a year-long period. 
+
+## Method 2: Visualizing intra-facility pair fraction distribution with help from `get_frac_intra()`
+
+Sometimes it is difficult to calculate a mutation rate for a given organism, or the mutation rate might be variable even within a clonal lineage. 
+Therefore, we also recommend using the data to identify potential pairwise SNV distance thresholds.
+Here, we use the assumption that intra-facility transmission is more common than inter-facility transmission to identify reasonable thresholds by looking for drops in the fraction of isolate pairs that are intra-facility pairs compared to inter-facility pairs for various SNV distances. Note that not all datasets will drop off, so this method may not work for some datasets.
+
+We can use `get_snv_dists()` to get the pair types for each isolate pair (intra- or inter-facility) and `get_frac_intra()` to calculate the fraction of intra-facility pairs for different SNV distances:
+
+```{r}
+# get pair types for pairwise SNV distances (intra vs. inter)
+snv_dists <- get_snv_dists(dists = dists, locs = locs)
+
+# get fraction of intra-facility pairs for each SNV distance
+frac_intra <- get_frac_intra(snv_dists = snv_dists)
+```
+
+The output of `get_snv_dists()` includes information about each isolate pair including the pairwise distance, location of each isolate in the pair, and the type of pair (intra- or inter-facility): 
+
+```{r}
+snv_dists
+```
+
+
+Each row of the `get_frac_intra()` output is a different pairwise distance and the columns include the number and fraction of intra- and inter-facility pairs for each pairwise distance:  
+
+```{r}
+frac_intra
+```
+
+Below we plot the fraction of intra-facility pairs for pairwise SNV distance up to 50. We have highlighted two drops in fraction of intra-facility pairs, which may be indicative of potential reasonable pairwise SNV distance thresholds. 
+On of these (11) matches with Method 1. 
+We also use 7 as a more conservative distance threshold for our sensitivity analysis.
+
+```{r}
+# plot fraction of intra-facility pairs for each SNV distance
+frac_intra %>% 
+  mutate(under = ifelse(pairwise_dist < 11, '< 11 SNVs','Over threshold'), under = ifelse(pairwise_dist < 7, '< 7 SNVs',under),
+         under = factor(under, levels = c('< 7 SNVs', '< 11 SNVs','Over threshold'))) %>% 
+  ggplot(aes(x = pairwise_dist, y = frac_intra, fill = under)) + 
+  geom_bar(stat = "identity", alpha = 0.5) + 
+  scale_fill_grey() + 
+  labs(x = "Pairwise SNV distance", y = "Fraction of intra-facility pairs", fill = 'Possible SNV\nthresholds') + 
+  ylim(0, 1) + xlim(-1,51) 
+```
+
+Our dataset is extremely comprehensive and the isolates are all very closely related. 
+However, if this is not the case in your dataset, you may want to bin the x axis into groups of pairwise SNV distances:
+
+```{r}
+frac_intra_bin <- frac_intra %>% 
+  filter(pairwise_dist < 50) %>% 
+  mutate(bin = cut(pairwise_dist, seq(0, max(pairwise_dist) + 5, 5), right = FALSE)) %>% 
+  group_by(bin) %>% 
+  summarise(n_intra = sum(n_intra), n_inter = sum(n_inter)) %>% 
+  mutate(frac_intra = ifelse(n_intra != 0,
+                             n_intra/(n_intra+n_inter), 0))
+
+
+frac_intra_bin %>% 
+  ggplot(aes(x = bin, y = frac_intra)) + 
+  geom_bar(stat = "identity", alpha = 0.5) + 
+  scale_fill_grey() + 
+  labs(x = "Pairwise SNV distance", y = "Fraction of intra-facility pairs") + 
+  ylim(0, 1) 
+```
+
+In this case, we might have chosen a pairwise SNV distance of 10, or tried plotting the data with other bins to get a more nuanced understanding of how the fraction changes, if we have enough data to do so. 
+
+
+# 1. Is transmission occurring within and/or between locations?
+
+To explore this question we can leverage our whole-genome sequencing data in the form of the phylogenetic tree using the `get_clusters()` function and the SNV distance matrix using the `get_snv_dists()`. 
 
 ## Threshold-free phylogenetic approach
 
-### Visualize the Phylogenetic Tree Annotated by location
+### Visualize the phylogenetic tree annotated by location
 
-It is useful to first visualize the extent of clustering on the phylogeny. To do this, you can plot the tree using ggtree:
+It is useful to first visualize the extent of clustering on the phylogeny. To do this, we can plot the tree using ggtree:
 
 ```{r, message=FALSE}
-tr_sub <- ape::keep.tip(tr, names(locs))
-mpr_tree = midpoint.root(tr_sub)
-gheatmap(ggtree(mpr_tree, layout = "circular"),as.data.frame(locs), color = NA)
+# pick prettier colors than the default
+cols <- c('#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#000000')
+names(cols) <- unique(locs)
+
+# create vector for plotting location as colors
+locs_tip <- c(locs[tr$tip.label], rep(NA, Nnode(tr)))
+
+# plot tree
+ggtree(tr) + geom_tippoint(aes(col = locs_tip)) + 
+  scale_color_manual(values = cols) +
+  labs(col = 'Facility') 
 ```
 
-### get_clusters()
+As we can see here, isolates from some facilities tend to cluster on the phylogeny (e.g. facilities D and E), which suggests that intra-facility transmission may be occurrring. 
+
+### Quantify clusters using `get_clusters()`
 
 It is also useful to quantify the size of phylogenetic clusters from the same facility. Larger clusters indicate more within-facility transmission while smaller clusters or singletons indicate more importation. When working with the `get_clusters()` function, you may perform analyses with various cluster pureness levels. The default pureness value is 1. Lower values will allow clusters to be identified that have some "contamination" with other facilities.
 
 ```{r, message=FALSE}
+# get clusters (note this takes some time to run, but not too long for the test dataset!)
 clusters <- get_clusters(tr,locs, pureness = 1)
-#dissect output
+```
+
+The output of `get_clusters()` is a list including a data frame of information about the pure subtrees identifed and a list of the subtrees themselves:
+
+```{r}
+# dissect output
 pure_subtree_info <- clusters$pure_subtree_info
 subtrees <- clusters$subtrees
-
-ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of samples in \nPhylogenetic Cluster", x = "Facility ID", title = "Pure Subtree Information")
+pure_subtree_info
 ```
 
-## SNV threshold approach
+The data frame includes the location, the size of the subtree (i.e. cluster), the index of the subtree in the list of subtrees, and the isolate ID if it is a singleton. 
 
-Another way to explore this question is to leverage our WGS data in the form of the SNV distance matrix and the `get_snv_dists()` function. 
+We can plot the size of these clusters to visualize the output:
+
+```{r}
+ggplot(data = pure_subtree_info, aes(x = loc_id, y = subtr_size, color = loc_id)) + 
+  geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.5) + 
+  scale_color_manual(values = cols) +
+  labs(y = "Number of isolates in \nphylogenetic cluster", x = "", color = 'Facility') +
+  ylim(c(0,12.5)) +
+  coord_flip()
+```
+
+Here, we confirm what we saw visually - that some facilities have large pure clusters of isolates, suggesting intra-facility transmission. 
+
+## Pairwise SNV distance approach
+
+Even if isolates from the same facility cluster on the phylogeny, they may still be distantly related to each other. To see how closely related isolate pairs are, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and the `get_snv_dists()` function. We already identified intra- and inter-facility pairs above using `get_snv_dists()`, so we won't re-compute them here. 
+
+Below we plot the intra- and inter-facility pairwise SNV distances as a histogram. The grey line is a pairwise SNV distance of 11. We can see that there are closely related intra- and inter-facility isolate pairs, with an enrichment in intra-facility pairs. 
 
 ```{r, message=FALSE}
-snv_dists <- get_snv_dists(dists = dists, locs = locs) 
+snv_hist <- snv_dists %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
+  geom_vline(xintercept = 11, col = 'darkgrey', size = 1) +
+  theme(legend.justification = "top", 
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank())
+snv_hist
 ```
 
-To subset to one representation of each isolate-isolate pair (undirected), use the `subset_pairs()` function with the `snv_dists` object as input. 
+
+We can also take a closer look at the closely related pairs by zooming into the left side of the histogram, further highlighting the enrichment in intra-facility pairs at small pairwise SNV distances:
 
 ```{r, message=FALSE}
-ggplot() + 
-  geom_histogram(data = subset(snv_dists,pair_type == "inter-facility pair"), mapping = aes(x = pairwise_dist, fill = "inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists,pair_type == "intra-facility pair"), mapping = aes(x = pairwise_dist, fill = "intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs")
+snv_hist + xlim(c(0,50))
 ```
 
-- This plot can give you an idea of the population structure of your isolates. 
+#### Is transmission occurring between different sample sources?
 
-We can also take a closer look at the closely related pairs which can give us information about how transmission is occurring in the population.
+If your dataset includes environmental samples and, you could also explore whether transmission is occurring between different sample sources by considering each environmental source a location. You could then determine what fraction of your isolate pairs are patient-patient pairs vs. patient-environment pairs vs. environment-environment pairs with the code below. 
 
-```{r, message=FALSE}
-ggplot() + 
-  geom_histogram(data = subset(snv_dists,pair_type == "inter-facility pair" & pairwise_dist < 20), mapping = aes(x = pairwise_dist, fill = "inter-facility pair"), alpha = 0.2, binwidth = 1) + 
-  geom_histogram(data = subset(snv_dists,pair_type == "intra-facility pair" & pairwise_dist < 20), mapping = aes(x = pairwise_dist, fill = "intra-facility pair"), alpha = 0.4, binwidth = 1) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \n< 20 SNV Distance")
+Note that this is a **toy example** as this sample data only includes patient samples.  
+
+If your samples are labeled differently (i.e. patient samples are labeled with PT_... and environmental samples are labeled with EN_...) you may want to use a function like `grepl` to differentiate between sample types. 
+
+Note that this is one of many ways in which the functions provided in `regentrans` can be used to ask questions about transmission that we do not directly discuss here. Other examples include looking at transmission between zip codes or wards/rooms in a facility. 
+
+```{r, message = FALSE}
+# create toy data
+# each patient and each environment is a different location
+# get patients 
+pts <- unique(locs)[1:round(length(unique(locs))/2)]
+# get environments
+envs <- unique(locs)[(round(length(unique(locs))/2)+1):length(unique(locs))]
+snv_dists %>% mutate(src1 = ifelse(loc1 %in% pts, 'pt','env'),
+                     src2 = ifelse(loc2 %in% pts, 'pt','env')) %>% 
+  ggplot(aes(x = pairwise_dist, fill = paste(src1, src2))) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
+  geom_vline(xintercept = 11, col = 'darkgrey', size = 1)
 ```
 
+# 2. What locations is transmission occurring within/between?
 
-### get_frac_intra()
+We can use threshold-free or SNV threshold-based approaches to investigate what locations transmission is occurring within or between. 
 
-```{r, message=FALSE}
-frac_intra <- get_frac_intra(snv_dists = snv_dists)
+### Gene flow (Fsp)
 
-ggplot(data = frac_intra, aes(x = pairwise_dist, y = frac_intra)) + geom_bar(stat = "identity", fill = "blue", alpha = 0.5) + labs(x = "SNV Distance Threshold", y = "fraction of intra-Facility Pairs") +  ggtitle("fraction of sample Pairs from the Same \nFacility at Each SNV Distance Threshold") + ylim(0, 1) 
+To determine the extent of gene flow between two facilities, we can calculate Fsp ([Donker et al., 2017](mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113)) as a measure of similarity between populations at different facilities. A value of 0 indicates that the populations are identical, while value of 1 indicates that the populations are completely different. The fsp function outputs a symmetric matrix of fsp values for each facility pair. The row and column names are the facilities and the values are fsp:
+
+```{r}
+fsp[1:4,1:4]
 ```
 
+We can plot the fsp values as a heatmap to visualze the extent of similarity between strains from different facility pairs:
 
-# What locations is transmission occurring within/between?
+```{r, eval=FALSE, message=FALSE}
+# this takes a while to run, so we've pre-computed it and included it in the package
+# fsp <- get_facility_fsp(aln, locs)
+pheatmap(fsp)
+```
+
+Here we can see that some facilities have more similar CRKP populations than others, suggesting that there is more transmission between those facilities. 
+
+One way to determine whether fsp values are significant is to use permutation ([Donker et al., 2017](mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113)). 
+
 
 ### SNV distances 
 
-Choose and SNV cutoff (it is recommended to perform a sensitivity analysis by choosing several different SNV thresholds and seeing how robust the results are to these changes). 
-
-- One way to find an initial SNV cutoff for your data is to look at the `fraction of sample Pairs from the Same Facility at Each SNV Distance Threshold` plot where the fraction of intra-facility pairs drops off. *Note:* Not all datasets will drop off, use this method only if your plot has a similar shape to the vignette data.
-
-- Other suggestions about how to choose a SNV cutoff can be found in the regentrans manuscript. 
-
-Using this cutoff, the number of closely related pairs within and between facilities can be determined and used to identify facilities and facility pairs with more putative spread. 
-
+We can also look at the number of closely related pairs of isolates at different facility pairs to get a sense of the extent of potential recent transmission and identify facilities and facility pairs with more putative spread. 
+For this, we must choose a SNV threshold. 
+Therefore, we recommend performing a sensitivity analysis by choosing several different SNV thresholds and seeing how robust the results are to these changes. 
 
 ```{r, message=FALSE}
-cutoff <- 10 #adjust according to your own analysis!
-snv_dists %>% filter(pairwise_dist <= cutoff) %>% group_by(loc1, pair_type) %>% summarize(n = n()) %>% ggplot(aes(x = loc1, y = n, fill = pair_type)) + geom_bar(position = "dodge", stat = "identity") + labs(y = "Number of Closely Related sample Pairs", x = "Facility ID", title = "Number of Closely Related sample Pairs \nby Facility")
+close_pair_dat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', snv_dists %>% filter(pairwise_dist < 7) %>%
+                     mutate(loc1=factor(loc1), pair_type=factor(pair_type)) %>%
+                     group_by(loc1, pair_type) %>% summarize(n = n())
+                     %>% tidyr::complete(loc1, pair_type)),
+                    bind_cols(snvthresh = '< 11 SNVs', snv_dists %>% filter(pairwise_dist < 11) %>%
+                     mutate(loc1=factor(loc1), pair_type=factor(pair_type)) %>%
+                     group_by(loc1, pair_type) %>% summarize(n = n())
+                     %>% tidyr::complete(loc1, pair_type)))
 
+close_pair_dat %>% mutate(pair_type = factor(pair_type, levels = c('intra-facility pair', 'inter-facility pair'))) %>%
+  ggplot(aes(x = reorder(loc1, -n, median), y = n, fill = pair_type)) +
+  geom_col(position = 'dodge') +
+       scale_fill_manual(values=c("cadetblue", "salmon")) + 
+         labs(y = "Number of closely related \nisolate pairs", x = "Facility", fill = '', color = '') +
+  facet_grid(factor(snvthresh, levels = c('< 7 SNVs','< 11 SNVs'))~.)
 ```
 
+Here we see that there is a large number of closely related isolates at certain facilities (e.g. D) and very few at others. We also see that, while most facilities have more closely related intra-facility pairs than inter-facility pairs, this observation does not hold for facilities C and F, which has more closely related intra-facility pairs than inter-facility pairs. 
+
+Furthermore, the results vary somewhat between the two different SNV thresholds, but are relatively consistent. 
+
+
+# 3. Have transmission dynamics changed over time or across species?
+
+To investigate whether transmission dynamics have changed over time or differ across groups (such as sequence type or species) we can "facet" on those variables. Here is an example of faceting on date:
 
 ```{r, message=FALSE}
-snv_dists %>% filter(pairwise_dist <= cutoff) %>% group_by(loc1, loc2) %>% summarize(n = n()) %>% filter(loc1 != loc2) %>% mutate(Facil_Pair = paste(loc1, loc2)) %>% filter(n >=  mean(n)) %>% ggplot(aes(x = Facil_Pair, y = n)) + geom_bar(position = "dodge", stat = "identity", fill = "salmon") + labs(y = "Number of Closely Related sample Pairs", x = "Facility Pair", title = "Number of Closely Related sample Pairs \nby Facility Pair") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+# get dates 
+dates <- metadata %>% select(sample_id, collection_date) %>% deframe()
 
+time1 <- snv_dists %>% 
+  mutate(date1 = dates[sample1], date2 = dates[sample2]) %>% 
+  filter(date1 == date2) %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
+  facet_grid(~date1) + 
+  theme(legend.justification = "top", 
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank())
+
+time2 <- snv_dists %>% 
+  mutate(date1 = dates[sample1], date2 = dates[sample2]) %>% 
+  filter(date1 == date2) %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
+  geom_histogram(position = position_fill(), alpha = 0.4, bins = 30) +
+  # xlim(0,20) +
+  labs(x = "Pairwise SNV distance", y = "Fraction", fill = "") +
+  facet_grid(~date1) + 
+  theme(legend.justification = "top", 
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank())
+
+plot_grid(time1, time2, nrow = 2, labels = 'AUTO')
 ```
 
-### fsp
+The first row of plots show histograms of the raw counts while the second row of plots shows the fraction of isolates at that pairwise SNV distance. 
+We don't observe many differences over time, except that there are more isolate pairs in 2015 compared to 2014. 
+This is not unexpected given that the dataset we are using is from an endemic setting.
+If the dataset is from an outbreak setting, you may expect changes in closely related intra- and inter-facility pairs over time. For example, an increase in intra-facility transmission followed by an increase in inter-facility transmission as it disseminates across the healthcare network. 
 
-fsp is a measure of similarity between populations at different facilities. Value of 0 indicates that the populations are identical, while value of 1 indicates that the populations are completely different. 
+# 4. Is transmission occurring along paths of higher patient flow? 
 
-```{r, eval=FALSE, message=FALSE}
-fsp <- get_facility_fsp(fasta, locs)
-pheatmap(fsp)
-```
+To explore this question, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and/or Fsp matrix along with the patient transfer network using the `get_patient_flow()`, `summarize_pairs()`, and `merge_inter_summaries()` functions.
 
-```{r, echo=FALSE, message=FALSE}
-pheatmap(fsp)
-```
+*Note:* If you do not have a patient transfer network, you could use geographic distances between facilities as a proxy for patient transfer because they are often correlated. 
 
-One way to determine whether fsp values are significant is to use permutation (Donker et al. 2017). 
+**Remember that choosing pairwise SNV distance threshold(s) based on your dataset is very important, avoid using the default values for your own dataset.**
 
-### Is transmission occurring between different sample sources?
-
-If your dataset includes environmental samples and, you could utilize the `pt` input to the `get_snv_dists()` function to explore whether transmission is occurring between different sample sources by considering each environmental source a "patient". You could then determine what fraction of your isolate pairs are patient-patient pairs vs. patient-environment pairs vs. environment-environment pairs with the code below. 
-
-- This will be a **toy example** as this sample data only includes patient samples. For this example case we will say that any patient ID > 300 is an environmental source. 
-
-- If your samples are labeled differently (i.e. patient samples are labeled with PT_... and environmental samples are labeled with EN_...) you may want to use a function like `grepl` to differentiate between sample types. 
-
-- It is important to consider whether you have subsetted to one sample per "patient" (or sample) source per location before performing this analysis. 
-
-```{r, message = FALSE}
-# thresh = 10 
-# 
-# snv_dists %>% filter(pair_type == "intra-facility pair") %>% mutate(Pt_pair_type = ifelse(Patient1 < 300 & Patient2 < 300, "pt-pt", ifelse(Patient1 > 300 & Patient2 > 300, "env-env", "pt-env"))) %>% filter(pairwise_dist <= thresh) %>% group_by(Pt_pair_type) %>% summarize(n = n()) %>% ggplot() + geom_bar(mapping = aes(x = Pt_pair_type, y = n), stat = "Identity", fill = "salmon") + labs(y = "Number of Closely Related sample Pairs", x = "Sample Pair Type", title = "Number of Closely Related sample Pairs \nby Sample Pair Type")
-```
-
-# Have transmission dynamics changed over time or across species?
-
-In order to investigate whether transmission dynamics have changed over time or differ across groups (such as sequence type or species) we can "facet" on those variables. Here is an example of faceting on date:
+First, we can summarize the pairwise SNV distance information using the `summarize_pairs()` function:
 
 ```{r, message=FALSE}
-snv_dists_dates <- snv_dists %>% left_join(bind_cols(names(dates), dates), by = c("sample1" = "...1")) %>% rename("date" = "...2") 
-
-ggplot() + 
-  geom_histogram(data = subset(snv_dists_dates,pair_type == "inter-facility pair"), mapping = aes(x = pairwise_dist, fill = "inter-facility pair"), alpha = 0.2) + 
-  geom_histogram(data = subset(snv_dists_dates,pair_type == "intra-facility pair"), mapping = aes(x = pairwise_dist, fill = "intra-facility pair"), alpha = 0.4) + labs(x = "Pairwise SNV Distance", y = "Count", fill = "Legend") +  ggtitle("SNV distances of intra- and inter- facility pairs \nby Date of sample Collection") + facet_wrap(~date)
+# get summary of pairwise SNV distance data
+snv_summary <- summarize_pairs(snv_dists,summary_fns = c('min'), threshs = c(7, 11)) %>% filter(loc1 != loc2)
+snv_summary
 ```
 
-# Is transmission occurring along paths of higher patient flow? 
+The output is a summary of the isolate pairs for different facility pairs. 
+Here, we also filtered out intra-facility pairs, as we are most interested in inter-facility transmission as compared to patient transfer.
+The function allows you to input a vector of whatever summary functions you'd like, as well as pairwise SNV distance thresholds to compute the number of closely related pairs for each facility pair under that threshold. 
 
-In order to explore this question, we can leverage our WGS data in the form of the SNV distance matrix along with the patient flow network using the `get_patient_transfers()` function.
+We can also get the direct and indirect patient flow between facilities (see [Han et al. 2019](https://aac.asm.org/content/63/11/e01622-19) for details on how indirect flow is calculated.) using `get_patinet_flow()`. The input to this is a data frame with three columns:
 
-*Note:* If you do not have a patient transfer network, you could use geographic distances between facilities as a proxy for patient transfer because they have been shown to correlate. 
+1. `source_facil`: the source facility
+1. `dest_facil`: the destination facility
+1. `n_transfers`: the number of transfers from source facility to destination facility over a certain amount of time (e.g. 1 month, 1 year, etc.)
 
-**Choosing a pairwise SNV distance threshold based on your dataset is very important, avoid using the default value**
+Here is a toy example that we generated for the vignette:
 
-```{r, message=FALSE}
-# get summary ofpairwise SNV distance data
-snv_summary <- summarize_pairs(snv_dists, threshs = c(7, 11)) %>% filter(loc1 != loc2)
+```{r}
+pt_trans_df
+```
 
+Here is the output of `get_patinet_flow()`:
+
+```{r}
 pt_trans <- get_patient_flow(edge_df = pt_trans_df)
+pt_trans
+```
 
-merge_inter_summaries(pt_trans, snv_summary) %>% ggplot(mapping = aes(x = sum_transfers, y = under_7)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related sample Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related sample Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+The `get_patient_flow()` function outputs several columns: 
+
+- The facility pair (`loc1` and `loc2`)
+- The number of transfers from facility 1 to 2 (`n_transfers_f12`), and facility 2 to 1 (`n_transfers_f21`)
+- The indirect flow metrics from facility 1 to 2 (`pt_trans_metric_f12`), and facility 2 to 1 (`pt_trans_metric_f21`)
+- Undirected transfer and flow metrics that are the sum of the two direct metrics (`sum_transfers` and `sum_pt_trans_metric`). This is useful for comparing to the undirected pairwise SNV distance summary and Fsp.
+
+
+Next, we can merge the patient flow, pairwise SNV distance, and fsp summaries (note that there are a lot of NA values here because we do not have patient flow information for all facilities):
+
+```{r}
+# have to convert fsp matrix to long form first
+fsp_long <- make_long_form(fsp)
+
+pair_info <- merge_inter_summaries(pt_trans, snv_summary, fsp_long) 
+pair_info
+
+#%>% ggplot(mapping = aes(x = sum_transfers, y = under_7)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related sample Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related sample Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+
 
 ```
 
-*Note:* This data is simulated
+Now we're ready to plot patient flow vs. various genomic metrics of similarity between facilities:
 
-```{r, message=FALSE}
-fsp %>% make_long_form() %>% left_join(pt_trans, by = c("loc1", "loc2")) %>% ggplot(mapping = aes(x = sum_transfers, y = fsp)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "fsp (population-level similarity)", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. fsp (population-level similarity) between Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
+We see a negative correlation between patient flow and Fsp, suggesting that facilities connected by more patient transfer are more likely to have similar populations, indicative of more transmission (Remember that fsp values closer to 0 indicate more closely related populations):
 
+```{r}
+pair_info %>% 
+  ggplot(aes(x=sum_pt_trans_metric,y=fsp)) +
+  geom_point() + geom_smooth(method='lm') + scale_x_log10() +
+  labs(x = 'Patient flow', y = 'Fsp') 
 ```
 
-fsp values closer to 0 indicate more closely related populations.
+These observations are corroborated by the positive relationship between patient transfer and number of closely related isolate pairs for a given facility pair:
+
+```{r}
+pair_info %>% 
+  ggplot(aes(x=sum_pt_trans_metric,y=under_7)) +
+  geom_point() + geom_smooth(method='lm') + scale_x_log10() +
+  labs(x = 'Patient flow', y = '# closely related\npairs (< 7 SNVs)') 
+```
+
 
 # Are there any observable geographic trends in prevalence/transmission?
 
-In order to evaluate whether there are any observable geographic trends in prevalence or transmission, we will need geographic information (latitude and longitude) for each facility. The data.frame should look like this, and be called `facil_coord`
+To evaluate whether there are any observable geographic trends in prevalence or transmission, we will need geographic information (latitude and longitude) for each facility. Here we've de-identified the facility geographies as an example:
 
-```{r, echo = FALSE, message=FALSE}
-cities <- force(us.cities) %>% filter(!country.etc %in% c("HI", "AK"))
-facilities <- unique(locs)
-cities_sub <- cities[1:length(facilities),4:5]
-facil_coord <- as.data.frame(cbind(facilities, cities_sub))
-head(facil_coord)
+```{r}
+facil_geo
 ```
+
+This data frame contains the facility ID, longitude, and latitude. 
+
+We can use this to plot the facilities on a map and connect them by closely related pairs:
+
+```{r}
+
+
+snv_geo <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists < 7)) %>% dplyr::filter(Loc1 != Loc2, n_closely_related_pairs > 0) %>%
+  left_join(facil_geo, by = c("Loc1" = "facil")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facil")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+
+geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +
+  geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
+                 alpha = n_closely_related_pairs),
+             data = snv_geo, curvature = 0.33) +
+  geom_point(aes(size=n), alpha=1, color = "lightblue") + 
+  theme_map() + 
+  labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (< 7 SNVs)')
+
+
+geo_dat <- left_join(pair_info, facil_geo, by = c('Loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
+  select(-n) %>% left_join(., facil_geo, by = c('Loc2' = 'facil')) %>% rename(facil_2_long = long, facil_2_lat = lat) %>% 
+  select(-n) %>% 
+  mutate(geo_dist = sqrt((facil_1_long-facil_2_long)^2+(facil_1_lat-facil_2_lat)^2))
+
+
+geo_fsp <- geo_dat %>% 
+  ggplot(aes(x = geo_dist, y = fsp)) +
+  geom_point() + geom_smooth(method = 'lm') +
+  labs(x = 'Physical distance between facilities', y = 'Fsp')
+
+geo_snv <- geo_dat %>% 
+  ggplot(aes(x = geo_dist, y = n_closely_related_pairs)) + geom_point() + geom_smooth(method = 'lm') +
+  labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(< 7 SNVs)')
+```
+
+
+
 Previous studies have found that there is a strong relationship between extent of patient transfer and geographic distance (Wang J et al. 2020). Thus, geographic distance can be used as a proxy for patient transfer if it is not available. 
 
 We can combine this data with our `locs` data, `fsp` data and `pt_trans` network to create a geographic map where point size represents number of isolates collected from a facility and line width represents fsp value (population similarity between facilities).

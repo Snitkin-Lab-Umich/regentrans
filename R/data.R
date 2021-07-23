@@ -100,4 +100,10 @@
 "dists_mini"
 
 
+#' Deidentified facility longitude and latitude
+#'
+#' Deidentified facility longitude and latitude for plotting
+#'
+#' @format A data frame.
+"facil_geo"
 

@@ -21,16 +21,17 @@ st258_ids <- read.delim(system.file("data-raw", "kp_st.csv", package = "regentra
 st258_ids <- st258_ids[st258_ids %in% rownames(kp_aln)]
 
 # subset to ST258
-metadata <- kp_metadata %>% dplyr::filter(isolate_id %in% st258_ids)
+metadata <- kp_metadata %>% dplyr::filter(isolate_id %in% st258_ids) %>%
+  dplyr::rename(sample_id = isolate_id)
 aln <- kp_aln[st258_ids,]
 tr <- ape::keep.tip(kp_tr, st258_ids)
 dists <- kp_dists[st258_ids, st258_ids]
 
 # create mini dataset
 metadata_mini <- metadata[1:10,]
-aln_mini <- aln[metadata_mini$isolate_id,]
-tr_mini <- ape::keep.tip(tr, metadata_mini$isolate_id)
-dists_mini <- dists[metadata_mini$isolate_id, metadata_mini$isolate_id]
+aln_mini <- aln[metadata_mini$sample_id,]
+tr_mini <- ape::keep.tip(tr, metadata_mini$sample_id)
+dists_mini <- dists[metadata_mini$sample_id, metadata_mini$sample_id]
 
 # save data to package
 usethis::use_data(metadata, overwrite = TRUE)
@@ -44,7 +45,8 @@ usethis::use_data(tr_mini, overwrite = TRUE)
 usethis::use_data(dists_mini, overwrite = TRUE)
 
 # include example Fsp (because it takes a while to run)
-fsp <- read.delim(system.file("data-raw", "kp_fsp.csv", package = "regentrans"), sep = ",", row.names = 1)
+fsp <- get_facility_fsp(aln, locs)
+  #read.delim(system.file("data-raw", "kp_fsp.csv", package = "regentrans"), sep = ",", row.names = 1)
 
 # save fsp to package
 usethis::use_data(fsp, overwrite = TRUE)
@@ -101,3 +103,27 @@ pt_trans_df <- round(pt_flow * 1e6) %>%
 # save made up patient transfer dataframe to package
 usethis::use_data(pt_trans_df, overwrite = TRUE)
 
+# deidentified longitude and latitude
+# these are deidentified
+longs <- c(A = NA, B = NA, C = -930605.082601, D = -930605.009738, E = -930604.936812,
+           F = -930604.912683, G = -930604.930899, H = -930605.236274, I = -930605.065595,
+           J = NA, K = NA, L = NA, M = -930605.109771, N = NA, O = -930605.187588,
+           P = -930604.896185, Q = NA, R = NA, S = NA, T = -930605.237532,
+           U = NA)
+lats <- c(A = NA, B = NA, C = -740730.013261, D = -740730.378523, E = -740729.967478,
+          F = -740729.917235, G = -740729.643727, H = -740729.995281, I = -740729.894068,
+          J = NA, K = NA, L = NA, M = -740730.297362, N = NA, O = -740729.22271,
+          P = -740729.566327, Q = NA, R = NA, S = NA, T = -740729.891502,
+          U = NA)
+
+# make longitude/latitude data frame
+facil_coord <- bind_cols(facil=names(longs), long=longs, lat=lats)
+
+# get locations
+loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facil", "n"))
+
+# merge longitude/latitude with locations
+facil_geo <- facil_coord %>% left_join(loc_n)
+
+# save deidentified longitude and latitude to package
+usethis::use_data(facil_geo, overwrite = TRUE)
