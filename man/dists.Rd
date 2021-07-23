@@ -13,7 +13,7 @@ dists
 \description{
 Pairwise single nucleotide variant (SNV) distance matrix for
 Klebsiella pneumoniae ST258 isolates in the study.
-Isolates were collected from long-term acute care hospitals across the US.
+samples were collected from long-term acute care hospitals across the US.
 Corresponding manuscript: https://aac.asm.org/content/63/11/e01622-19
 }
 \keyword{datasets}

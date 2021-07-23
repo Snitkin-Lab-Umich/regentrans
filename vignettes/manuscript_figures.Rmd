@@ -274,7 +274,7 @@ f8
 
 ```{r}
 # read_tsv('~/Desktop/isolate_info.tsv') %>% select(isolate_no, clades) %>% mutate(date = dates[isolate_no]) %>% select(clades, date) %>% 
-#   table() %>% data.frame() %>% pivot_wider(names_from = date, values_from = Freq) %>% 
+#   table() %>% data.frame() %>% pivot_wider(names_from = date, values_from = freq) %>% 
 #   mutate(frac_2015 = `2015`/(`2014`+`2015`))
 ```
 

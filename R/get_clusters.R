@@ -1,11 +1,15 @@
-#' Get facility clusters on phylogeny
+#' Get facility clusters on the phylogeny
 #'
+#' @inheritParams get_snv_dists
 #' @param tr a tree object returned by the read.tree function from the ape package
-#' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID found in the tree
 #' @param pureness how pure each cluster should be (must be > 0.5) (optional, defauly = 1)
 #' @param bootstrap Bootstrap support to use to filter unconfident tree edges (optional, default = NULL)
 #'
-#' @return list where pure_subtree_info is a data.frame of facility clusters on phylogeny, index indicates which element that cluster is in the list of subtrees, NA indicates it is not part of a subtree; subtrees is an object of the actual subtrees (can be used for plotting);cluster_pureness is the purness of each cluster
+#' @return list where pure_subtree_info is a data.frame of facility clusters on phylogeny,
+#' index indicates which element that cluster is in the list of subtrees,
+#' NA indicates it is not part of a subtree;
+#' subtrees is an object of the actual subtrees (can be used for plotting);
+#' cluster_pureness is the purness of each cluster
 #' @export
 #'
 #' @examples

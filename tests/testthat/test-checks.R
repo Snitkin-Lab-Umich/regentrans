@@ -39,7 +39,7 @@ ls_2 <- list(list(a = 2, b = 3), list(c = "a", d = "b"), "x")
 test_subtr <- ape::subtrees(test_tr)
 test_subtr_2 <- ape::subtrees(test_tr_2)
 test_pt_flow <- pt_trans_df %>% dplyr::filter(source_facil %in% c('C','D','E') & dest_facil %in% c('C','D','E')) %>% get_patient_flow()
-test_inter_pair_summary <- summarize_pairs(test_snv_dists)
+test_isolate_pair_summary <- summarize_pairs(test_snv_dists)
 test_fsp_long <- make_long_form(fsp)
 
 mat <- data.frame(matrix(data = c(0, 20, 30, 40,
@@ -576,17 +576,17 @@ test_that("check_summarize_pairs_input works", {
 # check_merge_inter_summaries_input
 
 test_that("check_merge_inter_summaries_input works", {
-  expect_null(check_merge_inter_summaries_input(test_pt_flow, test_inter_pair_summary, test_fsp_long))
-  expect_null(check_merge_inter_summaries_input(test_pt_flow, test_inter_pair_summary, NULL))
+  expect_null(check_merge_inter_summaries_input(test_pt_flow, test_isolate_pair_summary, test_fsp_long))
+  expect_null(check_merge_inter_summaries_input(test_pt_flow, test_isolate_pair_summary, NULL))
   expect_null(check_merge_inter_summaries_input(test_pt_flow, NULL, test_fsp_long))
-  expect_null(check_merge_inter_summaries_input(NULL, test_inter_pair_summary, test_fsp_long))
+  expect_null(check_merge_inter_summaries_input(NULL, test_isolate_pair_summary, test_fsp_long))
   expect_null(check_merge_inter_summaries_input(NULL, NULL, NULL))
-  expect_error(check_merge_inter_summaries_input('test_pt_flow', test_inter_pair_summary, test_fsp_long),
+  expect_error(check_merge_inter_summaries_input('test_pt_flow', test_isolate_pair_summary, test_fsp_long),
                "patient_flow must be a data.frame but you provided character")
-  expect_error(check_merge_inter_summaries_input(test_pt_flow, 'test_inter_pair_summary', test_fsp_long),
-               "inter_pair_summary must be a data.frame but you provided character")
-  expect_error(check_merge_inter_summaries_input(test_pt_flow, test_inter_pair_summary, 'test_fsp_long'),
+  expect_error(check_merge_inter_summaries_input(test_pt_flow, 'test_isolate_pair_summary', test_fsp_long),
+               "isolate_pair_summary must be a data.frame but you provided character")
+  expect_error(check_merge_inter_summaries_input(test_pt_flow, test_isolate_pair_summary, 'test_fsp_long'),
                "fsp_long must be a data.frame but you provided character")
-  expect_error(check_merge_inter_summaries_input(test_pt_flow[,3:5], test_inter_pair_summary, test_fsp_long),
+  expect_error(check_merge_inter_summaries_input(test_pt_flow[,3:5], test_isolate_pair_summary, test_fsp_long),
                "There must be at least one column in common between all inputs.")
 })

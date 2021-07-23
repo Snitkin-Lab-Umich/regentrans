@@ -1,9 +1,9 @@
-#' Get matrix of inter- and intra-facility pariwise snv distances
+#' Get data frame of inter- and intra-facility pariwise SNV distances
 #'
 #' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
 #' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
 #'
-#' @return a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs. If pt_trans_net provided will return both direct transfer and indirect flow metric for each facility pair.
+#' @return a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs.
 #' @export
 #'
 #' @examples
@@ -46,8 +46,6 @@ get_snv_dists <- function(dists, locs){
   snp_facility_pairs$loc2 <- sapply(facil_pairs, function(x) substring(x, 2, 2))
   ##
 
-
-
   # subset to include only one of each pair
   snp_facility_pairs <- subset_pairs(snp_facility_pairs)
 
@@ -67,7 +65,7 @@ get_snv_dists <- function(dists, locs){
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
-#' subset_pairs(snv_dists)
+#' subset_pairs(bind_rows(snv_dists,snv_dists))
 #' }
 subset_pairs <- function(snv_dists){
   #check that it is a data.frame object

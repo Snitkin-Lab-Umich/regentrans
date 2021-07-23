@@ -1,11 +1,15 @@
-#' Make facility x facility matrix with fsp values. Calculates fst as described in Donker et al. 2017
+#' Calculate gene flow (Fsp)
 #'
+#' @inheritParams get_snv_dists
 #' @param fasta ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
-#' @param locs locations names for pairwise comparison
 #' @param matrix whether to output symmetric matrix (TRUE; default) or long form (FALSE)
 #'
-#' @return matrix of facility x facility matrix with fsp values. Only bi-allelic sites. fsp values bween 0 (HP=HS) and 1 (Hp = 0)
+#' @return facility x facility matrix with Fsp values
 #' @export
+#' @details Fsp is described in Donker et al. 2017
+#' (mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113).
+#' Only bi-allelic sites are included when computing Fsp.
+#' The Fsp values are between 0 and 1 where lower values indicate more similar populations.
 #'
 #' @examples
 #' \dontrun{
@@ -123,30 +127,3 @@ get_within_pop_var <- function(subset_snp_mat, subset){
   })
   return(sum(within_f))
 }
-
-#' Make symmetric matrix long-form where each row represents a cell in the matrix
-#'
-#' @param facil_dist symmetric matrix that you want to convert to long form
-#'
-#' @return long form data where each row represents a cell in the matrix (rowname, column name, value)
-#' @export
-#'
-#' @examples
-#' make_long_form(fsp)
-make_long_form <- function(facil_dist, col_names = c('loc1', 'loc2', 'fsp')){
-  #check that it is a symmetric matrix
-  check_long_form_input(facil_dist, col_names)
-  #change to longform
-  facil_dist_long <- stats::na.omit(data.frame(as.table(as.matrix(facil_dist)))) %>% dplyr::filter(Freq != 0)
-  colnames(facil_dist_long) <- col_names
-
-  facil_pairs <- sapply(1:nrow(facil_dist_long), function(x)
-    paste0(sort(c(as.character(facil_dist_long$loc1[x]), as.character(facil_dist_long$loc2[x]))), collapse = ''))
-
-  facil_dist_long$loc1 <- sapply(facil_pairs, function(x) substring(x, 1, 1))
-  facil_dist_long$loc2 <- sapply(facil_pairs, function(x) substring(x, 2, 2))
-
-  return(subset_pairs(facil_dist_long))
-}
-
-

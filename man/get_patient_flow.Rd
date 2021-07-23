@@ -15,7 +15,10 @@ get_patient_flow(edge_df, paths = FALSE)
 the number of direct patient transfers and indirect flow metrics between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
 }
 \description{
-Summarize inter-facility patient transfer network
+Summarize inter-facility patient transfer network from an edge list. Direct and indirect patient flow metrics are calculated.
+}
+\details{
+For more details on how patient flow is calculated, see: https://aac.asm.org/content/63/11/e01622-19.
 }
 \examples{
 get_patient_flow(edge_df = pt_trans_df)
