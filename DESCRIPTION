@@ -1,27 +1,27 @@
 Package: regentrans
 Title: A framework and R package for using genomics to study regional pathogen transmission
 Version: 0.0.0.9000
-Authors@R: 
+Authors@R: c( 
     person(given = "Sophie",
            family = "Hoffman",
            role = c("aut", "cre"),
            email = "shoffm@umich.edu",
-           comment = c(ORCID = "0000-0003-2518-6422"))
+           comment = c(ORCID = "0000-0003-2518-6422")),
     person(given = "Zena",
            family = "Lapp",
            role = c("aut"),
            email = "zenalapp@umich.edu",
-           comment = c(ORCID = "0000-0003-4674-2176"))
+           comment = c(ORCID = "0000-0003-4674-2176")),
     person(given = "Joyce",
            family = "Wang",
            role = c("aut"),
            email = "wangjoy@umich.edu",
-           comment = c(ORCID = "0000-0002-8674-1015"))
+           comment = c(ORCID = "0000-0002-8674-1015")),
     person(given = "Evan",
            family = "Snitkin",
            role = c("aut"),
            email = "esnitkin@umich.edu",
-           comment = c(ORCID = "0000-0001-8409-278X"))
+           comment = c(ORCID = "0000-0001-8409-278X")))
 URL: https://github.com/Snitkin-Lab-Umich/regentrans
 BugReports: https://github.com/Snitkin-Lab-Umich/regentrans/issues
 Description: Tools and framework for studying regional pathogen transmission using genomic data.
