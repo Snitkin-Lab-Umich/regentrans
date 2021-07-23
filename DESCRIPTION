@@ -1,5 +1,5 @@
 Package: regentrans
-Title: Studying Regional Pathogen Transmission Using Genomics
+Title: A framework and R package for using genomics to study regional pathogen transmission
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Sophie",
@@ -7,7 +7,26 @@ Authors@R:
            role = c("aut", "cre"),
            email = "shoffm@umich.edu",
            comment = c(ORCID = "0000-0003-2518-6422"))
+    person(given = "Zena",
+           family = "Lapp",
+           role = c("aut"),
+           email = "zenalapp@umich.edu",
+           comment = c(ORCID = "0000-0003-4674-2176"))
+    person(given = "Joyce",
+           family = "Wang",
+           role = c("aut"),
+           email = "wangjoy@umich.edu",
+           comment = c(ORCID = "0000-0002-8674-1015"))
+    person(given = "Evan",
+           family = "Snitkin",
+           role = c("aut"),
+           email = "esnitkin@umich.edu",
+           comment = c(ORCID = "0000-0001-8409-278X"))
+URL: https://github.com/Snitkin-Lab-Umich/regentrans
+BugReports: https://github.com/Snitkin-Lab-Umich/regentrans/issues
 Description: Tools and framework for studying regional pathogen transmission using genomic data.
+    See the GitHub page <https://github.com/Snitkin-Lab-Umich/regentrans> 
+    for more information, documentation, and examples
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -18,12 +37,23 @@ Imports:
     ape,
     phytools, 
     tidyr, 
-    igraph, 
-    future.apply
+    igraph,
+    stats,
+    future.apply,
+    purrr,
+    tibble 
 Suggests:
     testthat,
-    tibble,
-    utils,
-    purrr
+    devtools,
+    tidyr,
+    knitr,
+    ggplot2,
+    ggtree,
+    pheatmap,
+    phytools,
+    gridExtra,
+    cowplot,
+    scales
+VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
