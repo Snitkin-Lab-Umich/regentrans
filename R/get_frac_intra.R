@@ -19,20 +19,20 @@ get_frac_intra <- function(snv_dists){
   # get intra-facility count and fraction for each pairwise SNV distance in the dataset
   intra_cts <- snv_dists %>%
     dplyr::group_by(pair_type, pairwise_dist) %>%
-    dplyr::mutate(pair_type = factor(pair_type, levels = c('intra-facility pair','inter-facility pair'))) %>%
+    dplyr::mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair','Inter-facility pair'))) %>%
     dplyr::count(.drop = FALSE) %>%
     tidyr::pivot_wider(names_from = pair_type, values_from = n) %>%
-    dplyr::mutate(`intra-facility pair` = ifelse('intra-facility pair' %in% colnames(.),
-                                                 as.numeric(`intra-facility pair`), 0.0),
-                  `inter-facility pair` = ifelse('inter-facility pair' %in% colnames(.),
-                                                 as.numeric(`inter-facility pair`), 0.0),
-                  frac_intra = ifelse(`intra-facility pair` != 0,
-                                        `intra-facility pair`/(`intra-facility pair`+`inter-facility pair`),
+    dplyr::mutate(`Intra-facility pair` = ifelse('Intra-facility pair' %in% colnames(.),
+                                                 as.numeric(`Intra-facility pair`), 0.0),
+                  `Inter-facility pair` = ifelse('Inter-facility pair' %in% colnames(.),
+                                                 as.numeric(`Inter-facility pair`), 0.0),
+                  frac_intra = ifelse(`Intra-facility pair` != 0,
+                                        `Intra-facility pair`/(`Intra-facility pair`+`Inter-facility pair`),
                                       0),
                   frac_inter = 1 - frac_intra
                   ) %>%
-    dplyr::select(pairwise_dist, `intra-facility pair`, `inter-facility pair`, frac_intra, frac_inter) %>%
-    dplyr::rename(n_intra = `intra-facility pair`, n_inter = `inter-facility pair`)
+    dplyr::select(pairwise_dist, `Intra-facility pair`, `Inter-facility pair`, frac_intra, frac_inter) %>%
+    dplyr::rename(n_intra = `Intra-facility pair`, n_inter = `Inter-facility pair`)
   # intra_cts
 
   #remove all of the rows that have NaN as the fraction

@@ -44,9 +44,11 @@ usethis::use_data(aln_mini, overwrite = TRUE)
 usethis::use_data(tr_mini, overwrite = TRUE)
 usethis::use_data(dists_mini, overwrite = TRUE)
 
-# include example Fsp (because it takes a while to run)
-fsp <- get_facility_fsp(aln, locs)
-  #read.delim(system.file("data-raw", "kp_fsp.csv", package = "regentrans"), sep = ",", row.names = 1)
+# include example fsp (because it takes a while to run)
+# run these 2 lines if need to update fsp
+# fsp <- get_facility_fsp(aln, locs)
+# write.csv(fsp, 'data-raw/kp_fsp.csv', quote = FALSE)
+fsp <- read.delim(system.file("data-raw", "kp_fsp.csv", package = "regentrans"), sep = ",", row.names = 1)
 
 # save fsp to package
 usethis::use_data(fsp, overwrite = TRUE)
@@ -117,13 +119,8 @@ lats <- c(A = NA, B = NA, C = -740730.013261, D = -740730.378523, E = -740729.96
           U = NA)
 
 # make longitude/latitude data frame
-facil_coord <- bind_cols(facil=names(longs), long=longs, lat=lats)
-
-# get locations
-loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facil", "n"))
-
-# merge longitude/latitude with locations
-facil_geo <- facil_coord %>% left_join(loc_n)
+facil_coord <- bind_cols(facil=names(longs), long=longs, lat=lats) %>%
+  filter(!is.na(long) & !is.na(lat))
 
 # save deidentified longitude and latitude to package
-usethis::use_data(facil_geo, overwrite = TRUE)
+usethis::use_data(facil_coord, overwrite = TRUE)

@@ -1,11 +1,14 @@
 ---
-title: "Introduction to `regentrans`"
-author: "Sophie Hoffman"
-date: "3/29/2021"
+title: "Introduction"
 output: 
-  html_document:
-    toc: true
-  
+  rmarkdown::html_vignette:
+    fig_width: 5
+    fig_height: 4
+    fig_align: "center"
+vignette: >
+  %\VignetteIndexEntry{introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 The goal of `regentrans` is to give users a framework and corresponding package for using genomics to study regional pathogen transmission. 
@@ -29,7 +32,7 @@ devtools::load_all()
 
 Other packages you'll need to load to run this tutorial include:
 
-```{r setup,echo=TRUE,message=FALSE}
+```{r setup,echo=TRUE, message=FALSE}
 library(ape)
 library(tidyverse)
 library(devtools)
@@ -50,7 +53,11 @@ It is outside the scope of this framework and corresponding package to discuss p
 
 # Data prep
 
-To use `regentrans`, you will need your data in a certain format. It is important to ensure that you have all relevant information for all of the isolates of interest for your analysis. Each isolate should be represented in the metadata as well as in the fasta file of variants and phylogenetic tree. `regentrans` functions will subset the data for you to include only ones present in all of the required function inputs.  
+In general, the data pre-processing pipeline is described in this figure:
+
+![`regentrans` pre-processing workflow.](manuscript_figures/Fig1.png){width=75%}
+
+More specifically, to use `regentrans`, you will need your data in a certain format. It is important to ensure that you have all relevant information for all of the isolates of interest for your analysis. Each isolate should be represented in the metadata as well as in the fasta file of variants and phylogenetic tree. `regentrans` functions will subset the data for you to include only ones present in all of the required function inputs.  
 
 First, we provide examples of how you can read in your data. Then, we describe the built-in data that we use here in the vignette and that you can use to test out the package. 
 
@@ -125,7 +132,7 @@ If you want to use your own data as input to the functions in the vignette, form
 The `regentrans` metadata is in the `metadata` object. We have information on the sample ID, patient ID, facility, and collection date:
 
 ```{r}
-metadata
+head(metadata)
 ```
 
 ### Variant alignment
@@ -160,7 +167,7 @@ tr
 While we are not able to provide the true patient transfer network related to the example dataset, we have generated a simulated patient transfer network that we have included here:
 
 ```{r}
-pt_trans_df
+head(pt_trans_df)
 ```
 
 This data frame contains three columns: 
@@ -252,14 +259,14 @@ frac_intra <- get_frac_intra(snv_dists = snv_dists)
 The output of `get_snv_dists()` includes information about each isolate pair including the pairwise distance, location of each isolate in the pair, and the type of pair (intra- or inter-facility): 
 
 ```{r}
-snv_dists
+head(snv_dists)
 ```
 
 
 Each row of the `get_frac_intra()` output is a different pairwise distance and the columns include the number and fraction of intra- and inter-facility pairs for each pairwise distance:  
 
 ```{r}
-frac_intra
+head(frac_intra)
 ```
 
 Below we plot the fraction of intra-facility pairs for pairwise SNV distance up to 50. We have highlighted two drops in fraction of intra-facility pairs, which may be indicative of potential reasonable pairwise SNV distance thresholds. 
@@ -300,7 +307,6 @@ frac_intra_bin %>%
 ```
 
 In this case, we might have chosen a pairwise SNV distance of 10, or tried plotting the data with other bins to get a more nuanced understanding of how the fraction changes, if we have enough data to do so. 
-
 
 # 1. Is transmission occurring within and/or between locations?
 
@@ -351,7 +357,7 @@ The data frame includes the location, the size of the subtree (i.e. cluster), th
 We can plot the size of these clusters to visualize the output:
 
 ```{r}
-ggplot(data = pure_subtree_info, aes(x = loc_id, y = subtr_size, color = loc_id)) + 
+ggplot(data = pure_subtree_info, aes(x = loc, y = subtr_size, color = loc)) + 
   geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.5) + 
   scale_color_manual(values = cols) +
   labs(y = "Number of isolates in \nphylogenetic cluster", x = "", color = 'Facility') +
@@ -360,6 +366,47 @@ ggplot(data = pure_subtree_info, aes(x = loc_id, y = subtr_size, color = loc_id)
 ```
 
 Here, we confirm what we saw visually - that some facilities have large pure clusters of isolates, suggesting intra-facility transmission. 
+
+
+### Assign each isolate to a cluster
+
+Sometimes it's useful to know which cluster each isolate belongs to. To do this, you can use the following code:
+
+```{r}
+# get ids of isolates in each cluster
+isolates_clusters <- sapply(1:nrow(pure_subtree_info), function(x){
+  i <- pure_subtree_info$index[x]
+  name <- pure_subtree_info$sample_id[x]
+  if(!is.na(i)){
+    name <- subtrees[[i]]$tip.label
+  }
+  name
+})
+
+# get unique cluster names
+facil_clusters <- sapply(unique(locs), function(x){
+  clusts <- isolates_clusters[pure_subtree_info$loc == x]
+  names(clusts) <- paste0(x, 1:length(clusts))
+  cluster_nums <- unlist(sapply(names(clusts), function(x){
+  rep(x, length(clusts[[x]]))
+  }))
+  names(cluster_nums) <- unlist(clusts)
+  cluster_nums
+}) %>% unname() %>% unlist()
+
+head(facil_clusters)
+```
+
+`facil_clusters` is a named list where the names are the isolate id and the elements are the cluster that it belongs to, named by facility followed by cluster number for that facility. 
+
+With this many groups, it's kind of crazy to visualize on the phylogeny, but it could be useful if you have fewer: 
+
+```{r}
+clust_tips <- c(facil_clusters[tr$tip.label], rep(NA, Nnode(tr)))
+ggtree(tr) + geom_tippoint(aes(col = clust_tips)) + 
+  theme(legend.position = 'none') 
+```
+
 
 ## Pairwise SNV distance approach
 
@@ -452,7 +499,7 @@ close_pair_dat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', snv_dists %>% filt
                      group_by(loc1, pair_type) %>% summarize(n = n())
                      %>% tidyr::complete(loc1, pair_type)))
 
-close_pair_dat %>% mutate(pair_type = factor(pair_type, levels = c('intra-facility pair', 'inter-facility pair'))) %>%
+close_pair_dat %>% mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair', 'Inter-facility pair'))) %>%
   ggplot(aes(x = reorder(loc1, -n, median), y = n, fill = pair_type)) +
   geom_col(position = 'dodge') +
        scale_fill_manual(values=c("cadetblue", "salmon")) + 
@@ -522,7 +569,7 @@ snv_summary
 
 The output is a summary of the isolate pairs for different facility pairs. 
 Here, we also filtered out intra-facility pairs, as we are most interested in inter-facility transmission as compared to patient transfer.
-The function allows you to input a vector of whatever summary functions you'd like, as well as pairwise SNV distance thresholds to compute the number of closely related pairs for each facility pair under that threshold. 
+The function allows you to input a vector of whatever summary functions you'd like (default is minimum pairwise SNV distance), as well as pairwise SNV distance thresholds to compute the number of closely related pairs for each facility pair under that threshold. 
 
 We can also get the direct and indirect patient flow between facilities (see [Han et al. 2019](https://aac.asm.org/content/63/11/e01622-19) for details on how indirect flow is calculated.) using `get_patinet_flow()`. The input to this is a data frame with three columns:
 
@@ -533,14 +580,14 @@ We can also get the direct and indirect patient flow between facilities (see [Ha
 Here is a toy example that we generated for the vignette:
 
 ```{r}
-pt_trans_df
+head(pt_trans_df)
 ```
 
 Here is the output of `get_patinet_flow()`:
 
 ```{r}
 pt_trans <- get_patient_flow(edge_df = pt_trans_df)
-pt_trans
+head(pt_trans)
 ```
 
 The `get_patient_flow()` function outputs several columns: 
@@ -580,105 +627,98 @@ These observations are corroborated by the positive relationship between patient
 
 ```{r}
 pair_info %>% 
-  ggplot(aes(x=sum_pt_trans_metric,y=under_7)) +
+  ggplot(aes(x=sum_pt_trans_metric,y=under_11)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
-  labs(x = 'Patient flow', y = '# closely related\npairs (< 7 SNVs)') 
+  labs(x = 'Patient flow', y = '# closely related\npairs (< 11 SNVs)') 
 ```
 
 
 # Are there any observable geographic trends in prevalence/transmission?
 
-To evaluate whether there are any observable geographic trends in prevalence or transmission, we will need geographic information (latitude and longitude) for each facility. Here we've de-identified the facility geographies as an example:
+To evaluate whether there are any observable geographic trends in prevalence or transmission, we will need geographic information (latitude and longitude) for each facility. Here we've de-identified the facility geographies as an example. Note that we don't have geographic information for all facility pairs. 
 
 ```{r}
+facil_coord
+```
+
+This data frame contains the facility ID, longitude, latitude. 
+
+We can also add information about the number of isolates from each facility to include as point size on our map:
+
+```{r}
+# get counts for each location
+loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facil", "n_isolates"))
+
+# merge longitude/latitude with locations
+facil_geo <- facil_coord %>% left_join(loc_n, by = 'facil')
 facil_geo
 ```
 
-This data frame contains the facility ID, longitude, and latitude. 
 
-We can use this to plot the facilities on a map and connect them by closely related pairs:
+We can use this to plot the facilities on a map and connect them by closely related pairs (here we use the under 7 threshold for visualization purposes). Point size represents number of isolates collected from a facility and transparency represents the number of closely related isolate pairs.
 
 ```{r}
+# merge facil_info and facil_geo
+snv_geo <- pair_info %>% 
+  left_join(facil_geo, by = c("loc1" = "facil")) %>% 
+  rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n_isolates) %>% 
+  left_join(facil_geo, by = c("loc2" = "facil")) %>% 
+  rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n_isolates) %>% 
+  filter(!is.na(facil_1_lat) & !is.na(facil_2_lat))
 
+# filter to not plot zeros
+snv_geo_thresh <- snv_geo %>% filter(under_7 > 0) 
 
-snv_geo <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists < 7)) %>% dplyr::filter(Loc1 != Loc2, n_closely_related_pairs > 0) %>%
-  left_join(facil_geo, by = c("Loc1" = "facil")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facil")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
-
-geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +
+facil_geo %>% 
+  ggplot(aes(x=long, y=lat)) +
   geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
-                 alpha = n_closely_related_pairs),
-             data = snv_geo, curvature = 0.33) +
-  geom_point(aes(size=n), alpha=1, color = "lightblue") + 
+                 alpha = under_7),
+             data = snv_geo_thresh, curvature = 0.33) +
+  geom_point(aes(size=n_isolates), alpha=1, color = "lightblue") + 
   theme_map() + 
   labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (< 7 SNVs)')
+```
 
 
-geo_dat <- left_join(pair_info, facil_geo, by = c('Loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
-  select(-n) %>% left_join(., facil_geo, by = c('Loc2' = 'facil')) %>% rename(facil_2_long = long, facil_2_lat = lat) %>% 
-  select(-n) %>% 
+We can also look at the relationship between physical distance between facilities and number of closely related pairs. First, we have to get the physical distance between facilities:
+
+```{r}
+snv_geo <- snv_geo %>% 
   mutate(geo_dist = sqrt((facil_1_long-facil_2_long)^2+(facil_1_lat-facil_2_lat)^2))
-
-
-geo_fsp <- geo_dat %>% 
-  ggplot(aes(x = geo_dist, y = fsp)) +
-  geom_point() + geom_smooth(method = 'lm') +
-  labs(x = 'Physical distance between facilities', y = 'Fsp')
-
-geo_snv <- geo_dat %>% 
-  ggplot(aes(x = geo_dist, y = n_closely_related_pairs)) + geom_point() + geom_smooth(method = 'lm') +
-  labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(< 7 SNVs)')
 ```
 
+Then we can plot the relationship between physical distance and summary metrics. Here is an example using the number of pairs under a pairwise SNV distance of 11 between facility pairs: 
 
-
-Previous studies have found that there is a strong relationship between extent of patient transfer and geographic distance (Wang J et al. 2020). Thus, geographic distance can be used as a proxy for patient transfer if it is not available. 
-
-We can combine this data with our `locs` data, `fsp` data and `pt_trans` network to create a geographic map where point size represents number of isolates collected from a facility and line width represents fsp value (population similarity between facilities).
-
-```{r, message=FALSE}
-loc_n <- locs %>% table() %>% as.data.frame() %>% `colnames<-`(c("facilities", "n"))
-
-facil_geo <- facil_coord %>% left_join(loc_n)
-
-fsp_geo <- fsp %>% make_long_form() %>% left_join(facil_geo, by = c("loc1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("loc2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
-
-facil_geo %>% ggplot(aes(x=long, y=lat)) +
-  geom_point(aes(size=n), alpha=0.5, color = "blue") + 
-  borders("state") +
-  coord_quickmap() +
-  geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
-                 alpha = (1/fsp)),
-             data = fsp_geo, curvature = 0.33) +
-  theme_void() + theme(legend.position = "none") 
-
-
+```{r}
+snv_geo %>% 
+  ggplot(aes(x = geo_dist, y = under_11)) + geom_point() + geom_smooth(method = 'lm') +
+  labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(< 11 SNVs)')
 ```
 
-*Note:* This location data is simulated
+# A note on additional metadata
 
-Another way to quantify closely related populations is by the number of isolate pairs between them that are below a SNV distance threshold. 
+Sometimes it's useful to make plots faceted or subsetted based on various information from metadata such as collection date, sequence type, etc. To do this, you can merge the `snv_dists` object with the `metadata` object as follows (modifying the code as fit for your dataset):
 
-**Choosing a pairwise SNV distance threshold based on your dataset is very important, avoid using the default value**
-
-```{r, message=FALSE}
-thresh = 10
-
-snv_dist_summary <- snv_dists %>% dplyr::group_by(loc1, loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(pairwise_dist <= thresh)) %>% dplyr::filter(loc1 != loc2)
-
-snv_geo <- snv_dists %>% dplyr::group_by(loc1, loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(pairwise_dist <= thresh)) %>% dplyr::filter(loc1 != loc2) %>% left_join(facil_geo, by = c("loc1" = "facilities")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("loc2" = "facilities")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
-
-facil_geo %>% ggplot(aes(x=long, y=lat)) +
-  geom_point(aes(size=n), alpha=0.5, color = "blue") + 
-  borders("state") +
-  coord_quickmap() +
-  geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
-                 alpha = n_closely_related_pairs),
-             data = snv_geo, curvature = 0.33) +
-  theme_void() + theme(legend.position = "none") 
-
+```{r}
+# merge snv_dists and metadata, and find time difference
+snv_and_metadat <- left_join(snv_dists, metadata, by = c('sample1' = 'sample_id')) %>% 
+  rename(patient_id_1 = patient_id, collection_date_1 = collection_date) %>% 
+  left_join(metadata, by = c('sample2' = 'sample_id')) 
+head(snv_and_metadat)
 ```
 
-*Note:* This location data is simulated
+# Making your code run faster
 
-These are just two examples of how to plot the geographic, but there may be other proxies for patient transfer that work better for your analysis. 
+For some functions, we have used `future.apply()` to enable you to make it run faster. Currently, this is only an option for `get_clusters()`, but we plan to implement it for `get_facility_fsp()` as well, and possibly others. To decrease runtime in this way, you have to register a future plan prior to calling the function. This code says to use a multisession plan to split the work across 4 cores, instead of the deafult of 1. You can look at the [`future` documentation](https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html) to figure out what plan is best for what you're doing. Note that only multisession works for RStudio, but multicore might work better for some purposes, such as working on a computing cluster. After registering a future plan, you can call `get_clusters()` like normal and it should run faster!
+
+```{r, eval = FALSE}
+doFuture::registerDoFuture()
+future::plan(future::multisession, workers = 4)
+
+clusters <- get_clusters(tr, locs)
+```
+
+# Conclusion
+
+This vignette includes only some of the ways that the functions in `regentrans` can be used. Be creative and have fun with how use use these functions to probe pathogen transmission, but always remember to think about the specifics of your dataset and the questions you're asking and what that means about interpreting your results!
 

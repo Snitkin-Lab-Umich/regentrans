@@ -2,3 +2,6 @@
 .Rhistory
 extras/.Rhistory
 extras/.DS_Store
+inst/doc
+/doc/
+/Meta/
