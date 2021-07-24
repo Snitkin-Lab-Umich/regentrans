@@ -1,7 +1,7 @@
 #tests for get_frac_intra output
 locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
 
-test_locs <- locs[1:3]
+test_locs <- locs[c(3,7:10)]
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs)
 test_snv_df <- structure(list(sample1 = "MN_CRE202", sample2 = "MN_CRE17",

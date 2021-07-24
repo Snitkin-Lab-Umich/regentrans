@@ -9,10 +9,11 @@
 #' @details Fsp is described in Donker et al. 2017
 #' (mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113).
 #' Only bi-allelic sites are included when computing Fsp.
-#' The Fsp values are between 0 and 1 where lower values indicate more similar populations.
+#' The Fsp values are between 0 and 1 where lower values indicate more similar populations. Note that the current implementation of this function is fairly slow.
 #'
 #' @examples
 #' \dontrun{
+#' # This takes a long time to run right now!
 #' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
 #' facil_fsp <- get_facility_fsp(aln, locs, matrix = TRUE)
 #' }

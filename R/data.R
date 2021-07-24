@@ -105,5 +105,5 @@
 #' Deidentified facility longitude and latitude for plotting
 #'
 #' @format A data frame.
-"facil_geo"
+"facil_coord"
 

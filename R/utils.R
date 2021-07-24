@@ -7,12 +7,12 @@ dplyr::`%>%`
 ## make R CMD CHECK shut up about the dot `.``; this alone isn't working so also added names
 ## See: \url{https://github.com/tidyverse/magrittr/issues/29}
 utils::globalVariables(c(".","subtr_size","index","isolate_name","pair_type","pairwise_dist",
-                         "n","intra-facility pair","inter-facility pair","frac_intra",
+                         "n","Intra-facility pair","Inter-facility pair","frac_intra",
                          "frac_inter","source_facil","n_transfers","freq","Freq","dest_facil",
                          "loc1","loc2","pairwise_dist","Patient1","Patient2","sample1",
                          "sample2","n_closely_related_pairs", "n_transfers_f12",
                          "n_transfers_f21", "pt_trans_metric",
-                         "pt_trans_metric_f12", "pt_trans_metric_f21"))
+                         "pt_trans_metric_f12", "pt_trans_metric_f21","sample_id"))
 
 
 #' Make matrix long-form where each row represents a cell in the matrix
