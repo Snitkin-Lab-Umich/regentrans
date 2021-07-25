@@ -22,7 +22,7 @@ Authors@R: c(
            role = c("aut"),
            email = "esnitkin@umich.edu",
            comment = c(ORCID = "0000-0001-8409-278X")))
-URL: https://github.com/Snitkin-Lab-Umich/regentrans
+URL: https://snitkin-lab-umich.github.io/regentrans/index.html 
 BugReports: https://github.com/Snitkin-Lab-Umich/regentrans/issues
 Description: Tools and framework for studying regional pathogen transmission using genomic data.
     See the GitHub page <https://github.com/Snitkin-Lab-Umich/regentrans> 
