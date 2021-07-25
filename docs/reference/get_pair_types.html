@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • regentrans</title>
+<title>Get data frame of inter- and intra-facility pariwise SNV distances — get_pair_types • regentrans</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,8 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Get data frame of inter- and intra-facility pariwise SNV distances — get_pair_types" />
+<meta property="og:description" content="Get data frame of inter- and intra-facility pariwise SNV distances" />
 
 
 
@@ -58,7 +59,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -117,156 +118,43 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Get data frame of inter- and intra-facility pariwise SNV distances</h1>
+    <small class="dont-index">Source: <a href='https://github.com/Snitkin-Lab-Umich/regentrans/blob/master/R/get_pair_types.R'><code>R/get_pair_types.R</code></a></small>
+    <div class="hidden name"><code>get_pair_types.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Get data frame of inter- and intra-facility pariwise SNV distances</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>get_pair_types</span><span class='op'>(</span><span class='va'>dists</span>, <span class='va'>locs</span><span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="aln.html">aln</a></code> </p>
-        </td>
-        <td><p>Klebiella pneumoniae ST258 isolate variant alignment</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="aln_mini.html">aln_mini</a></code> </p>
-        </td>
-        <td><p>Subsetted alignment</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="dists.html">dists</a></code> </p>
-        </td>
-        <td><p>Klebiella pneumoniae ST258 isolate pairwise SNV distance</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="dists_mini.html">dists_mini</a></code> </p>
-        </td>
-        <td><p>Subsetted pairwise SNV distances</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="facil_coord.html">facil_coord</a></code> </p>
-        </td>
-        <td><p>Deidentified facility longitude and latitude</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="fsp.html">fsp</a></code> </p>
-        </td>
-        <td><p>Klebiella pneumoniae ST258 gene flow</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_clusters.html">get_clusters()</a></code> </p>
-        </td>
-        <td><p>Get facility clusters on the phylogeny</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_facility_fsp.html">get_facility_fsp()</a></code> </p>
-        </td>
-        <td><p>Calculate gene flow (Fsp)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_frac_intra.html">get_frac_intra()</a></code> </p>
-        </td>
-        <td><p>Get fraction of intra-facility pairs for different SNV thresholds</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_pair_types.html">get_pair_types()</a></code> </p>
-        </td>
-        <td><p>Get data frame of inter- and intra-facility pariwise SNV distances</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_patient_flow.html">get_patient_flow()</a></code> </p>
-        </td>
-        <td><p>Summarize inter-facility patient transfer network</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="make_long_form.html">make_long_form()</a></code> </p>
-        </td>
-        <td><p>Make matrix long-form where each row represents a cell in the matrix</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="merge_inter_summaries.html">merge_inter_summaries()</a></code> </p>
-        </td>
-        <td><p>Merge summarized data about facility pairs</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="metadata.html">metadata</a></code> </p>
-        </td>
-        <td><p>Klebiella pneumoniae ST258 isolate metadata</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="metadata_mini.html">metadata_mini</a></code> <code><a href="metadata_mini.html">metadata_mini</a></code> </p>
-        </td>
-        <td><p>Subsetted metadata</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="pt_flow.html">pt_flow</a></code> </p>
-        </td>
-        <td><p>Patient flow between facilities</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="pt_trans_df.html">pt_trans_df</a></code> </p>
-        </td>
-        <td><p>Made up patient transfer dataframe between facilities</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="summarize_pairs.html">summarize_pairs()</a></code> </p>
-        </td>
-        <td><p>Summarize extent of relatedness of intra- and inter-facility pairs by facility pair</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="tr.html">tr</a></code> </p>
-        </td>
-        <td><p>Klebiella pneumoniae ST258 isolate phylogenetic tree</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="tr_mini.html">tr_mini</a></code> </p>
-        </td>
-        <td><p>Subsetted tree</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>dists</th>
+      <td><p>a SNV distance matrix returned by the dist.dna function from the ape package</p></td>
+    </tr>
+    <tr>
+      <th>locs</th>
+      <td><p>a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs.</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='va'>locs</span> <span class='op'>&lt;-</span> <span class='va'>metadata</span> <span class='op'>%&gt;%</span> <span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>isolate_id</span>, <span class='va'>facility</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>tibble</span><span class='fu'>::</span><span class='fu'><a href='https://tibble.tidyverse.org/reference/enframe.html'>deframe</a></span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>pair_types</span> <span class='op'>&lt;-</span> <span class='fu'>get_pair_types</span><span class='op'>(</span><span class='va'>dists</span>, <span class='va'>locs</span><span class='op'>)</span>
+<span class='op'>}</span>
+</div></pre>
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
