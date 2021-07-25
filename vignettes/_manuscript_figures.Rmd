@@ -90,7 +90,7 @@ f2 <- frac_intra %>%
   ylim(0, 1) + xlim(-1,51) #+
   #theme(legend.position = 'none')
 
-ggsave('manuscript_figures/Fig2.png', f2)
+ggsave('manuscript_figures/Fig2.png', f2, width = 7, height = 5)
 f2
 ```
 
@@ -244,7 +244,7 @@ flow_snv_plot <- pair_info %>%
   ggplot(aes(x=pt_flow,y=leq_10)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
   labs(x = 'Patient flow', y = '# closely related\npairs (≤ 10 SNVs)') + 
-  annotate('text', x = 0.005, y = 4.5, 
+  annotate('text', x = 0.005, y = 6.5, 
            label = paste(paste('Spearman rho =', round(flow_snv_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(flow_snv_spear$p.value, 1)))) #+ ylim(c(0,100))
 
@@ -320,7 +320,7 @@ geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +
              data = snv_geo, curvature = 0.33) +
   geom_point(aes(size=n), alpha=1, color = "lightblue") + 
   theme_map() + #theme(legend.position = "none") 
-  labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (≤ 7 SNVs)')
+  labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (≤ 6 SNVs)')
 
 
 geo_dat <- left_join(pair_info, facil_geo, by = c('loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
