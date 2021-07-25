@@ -5,3 +5,6 @@
 ^doc$
 ^Meta$
 ^vignettes/manuscript_figures.Rmd$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
