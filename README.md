@@ -1,12 +1,12 @@
 # regentrans: R package for investigating regional pathogen transmission using genomic data
 
-<img src = "vignettes/regentrans_logo.png" width = "200">
+<img src="man/figures/regentrans_logo.png"  width = "200" />
 
 Regentrans is a work in progress. 
 
 It can be installed using the command `devtools::install_github('Snitkin-Lab-Umich/regentrans')` in R 
 
-An introductory vignette can be found [here](doc/Introduction.html).
+An introductory vignette can be found [here](articles/Introduction.html).
 
 Questions regentrans can help investigate:
 
