@@ -21,8 +21,7 @@ st258_ids <- read.delim(system.file("data-raw", "kp_st.csv", package = "regentra
 st258_ids <- st258_ids[st258_ids %in% rownames(kp_aln)]
 
 # subset to ST258
-metadata <- kp_metadata %>% dplyr::filter(isolate_id %in% st258_ids) %>%
-  dplyr::rename(sample_id = isolate_id)
+metadata <- kp_metadata %>% dplyr::filter(isolate_id %in% st258_ids)
 aln <- kp_aln[st258_ids,]
 tr <- ape::keep.tip(kp_tr, st258_ids)
 dists <- kp_dists[st258_ids, st258_ids]

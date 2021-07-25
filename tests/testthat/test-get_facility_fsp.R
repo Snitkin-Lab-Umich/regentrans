@@ -1,5 +1,5 @@
 #get_facility_fsp output
-locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
+locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 
 test_locs_5 <- locs[locs %in% c("A", "F", "H")]
 test_fasta_2 <- aln[names(test_locs_5),]

@@ -7,7 +7,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
+#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
 #' get_frac_intra(snv_dists)
 #' }

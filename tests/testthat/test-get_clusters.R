@@ -1,5 +1,5 @@
 #test get_clusters output
-locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
+locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 
 test_locs <- locs[1:10]
 test_tr <- ape::keep.tip(tr,names(test_locs))
@@ -10,7 +10,7 @@ test_cluster_pureness <- test_clusters$cluster_pureness
 test_first_subtr <- test_subtrees[1][[1]]
 st_tiplabs <- sapply(1:nrow(test_clusters$pure_subtree_info), function(x){
   i <- test_clusters$pure_subtree_info$index[x]
-  name <- test_clusters$pure_subtree_info$sample_id[x]
+  name <- test_clusters$pure_subtree_info$isolate_id[x]
   if(!is.na(i)){
     name <- test_clusters$subtrees[[i]]$tip.label
   }
@@ -29,15 +29,15 @@ test_that("get_snv_dists works", {
   #check test_pure_subtree info ncol
   expect_true(ncol(test_pure_subtree_info) == 4)
   #colnames
-  expect_true(all(colnames(test_pure_subtree_info) == c("loc", "subtr_size", "index", "sample_id")))
+  expect_true(all(colnames(test_pure_subtree_info) == c("loc", "subtr_size", "index", "isolate_id")))
   #nrow, at most one for each isolate, at least one (if they are all in the same subtree)
   expect_true((nrow(test_pure_subtree_info) <= length(test_locs)) & (nrow(test_pure_subtree_info) >= 1))
   #check column types
   expect_true(all(sapply(test_pure_subtree_info, class) == c("character", "numeric", "integer", "character")))
   #make sure if there is an index there is no isolate name
-  expect_true(all(is.na(dplyr::filter(test_pure_subtree_info, !is.na(test_pure_subtree_info$index))$sample_id)))
+  expect_true(all(is.na(dplyr::filter(test_pure_subtree_info, !is.na(test_pure_subtree_info$index))$isolate_id)))
   #make sure if there is.na(index) size == 1 and isolate name != " "
-  expect_true(all(dplyr::filter(test_pure_subtree_info, is.na(test_pure_subtree_info$index))$sample_id != " ") &
+  expect_true(all(dplyr::filter(test_pure_subtree_info, is.na(test_pure_subtree_info$index))$isolate_id != " ") &
                 all(dplyr::filter(test_pure_subtree_info, is.na(test_pure_subtree_info$index))$subtr_size == 1))
   #make sure all of the fids exist in the test_locs
   #this might break down when we add tree pruning??

@@ -186,7 +186,7 @@ As we have multiple samples from some patients, we first subset to the first iso
 metadata <- metadata %>% arrange(collection_date) %>% filter(!duplicated(patient_id, facility))
 
 # isolate subset
-isolate_subset <- metadata$sample_id
+isolate_subset <- metadata$isolate_id
 
 # subset alignment
 aln <- aln[isolate_subset,]
@@ -204,7 +204,7 @@ For many of the `regentrans` functions, the required location input is a named v
 
 ```{r}
 # named vector of locations
-locs <- metadata %>% select(sample_id, facility) %>% deframe()
+locs <- metadata %>% select(isolate_id, facility) %>% deframe()
 head(locs)
 ```
 
@@ -376,7 +376,7 @@ Sometimes it's useful to know which cluster each isolate belongs to. To do this,
 # get ids of isolates in each cluster
 isolates_clusters <- sapply(1:nrow(pure_subtree_info), function(x){
   i <- pure_subtree_info$index[x]
-  name <- pure_subtree_info$sample_id[x]
+  name <- pure_subtree_info$isolate_id[x]
   if(!is.na(i)){
     name <- subtrees[[i]]$tip.label
   }
@@ -518,7 +518,7 @@ To investigate whether transmission dynamics have changed over time or differ ac
 
 ```{r, message=FALSE}
 # get dates 
-dates <- metadata %>% select(sample_id, collection_date) %>% deframe()
+dates <- metadata %>% select(isolate_id, collection_date) %>% deframe()
 
 time1 <- snv_dists %>% 
   mutate(date1 = dates[sample1], date2 = dates[sample2]) %>% 
@@ -701,9 +701,9 @@ Sometimes it's useful to make plots faceted or subsetted based on various inform
 
 ```{r}
 # merge snv_dists and metadata, and find time difference
-snv_and_metadat <- left_join(snv_dists, metadata, by = c('sample1' = 'sample_id')) %>% 
+snv_and_metadat <- left_join(snv_dists, metadata, by = c('sample1' = 'isolate_id')) %>% 
   rename(patient_id_1 = patient_id, collection_date_1 = collection_date) %>% 
-  left_join(metadata, by = c('sample2' = 'sample_id')) 
+  left_join(metadata, by = c('sample2' = 'isolate_id')) 
 head(snv_and_metadat)
 ```
 
