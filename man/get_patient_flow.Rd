@@ -4,10 +4,10 @@
 \alias{get_patient_flow}
 \title{Summarize inter-facility patient transfer network}
 \usage{
-get_patient_flow(edge_df, paths = FALSE)
+get_patient_flow(pt_trans_df, paths = FALSE)
 }
 \arguments{
-\item{edge_df}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)}
+\item{pt_trans_df}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)}
 
 \item{paths}{boolean value, TRUE if you want the shortest paths returned, FALSE if you don't}
 }
@@ -21,5 +21,5 @@ Summarize inter-facility patient transfer network from an edge list. Direct and 
 For more details on how patient flow is calculated, see: https://aac.asm.org/content/63/11/e01622-19.
 }
 \examples{
-get_patient_flow(edge_df = pt_trans_df)
+get_patient_flow(pt_trans_df = pt_trans_df)
 }

@@ -86,36 +86,36 @@ check_dists_vs_locs <- function(dists, locs){
 #'
 #' @noRd
 #'
-check_edge_df <- function(edge_df){
+check_pt_trans_df <- function(pt_trans_df){
   #default is null
-  if(!is.null(edge_df)){
+  if(!is.null(pt_trans_df)){
     #make sure it is a dataframe of three columns, source, dest, n_transfers
-    if(!(any(class(edge_df) == "data.frame") || any(class(edge_df) == "matrix"))){
-      stop(paste("The edge_df object must be a data.frame or matrix, you provided a ",
-                 class(edge_df)))
+    if(!(any(class(pt_trans_df) == "data.frame") || any(class(pt_trans_df) == "matrix"))){
+      stop(paste("The pt_trans_df object must be a data.frame or matrix, you provided a ",
+                 class(pt_trans_df)))
     }
     #make sure three cols
-    if(ncol(edge_df) != 3){
-      stop(paste("The edge_df object must be a data.frame or matrix with 3 columns, you provided ",
-                 ncol(edge_df)))
+    if(ncol(pt_trans_df) != 3){
+      stop(paste("The pt_trans_df object must be a data.frame or matrix with 3 columns, you provided ",
+                 ncol(pt_trans_df)))
     }
     #make sure cols have correct names
-    if(!all(colnames(edge_df) == c("source_facil", "dest_facil", "n_transfers" ))){
-      stop(paste("The edge_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided ",
-                 paste(colnames(edge_df), sep = " ", collapse = " ")))
+    if(!all(colnames(pt_trans_df) == c("source_facil", "dest_facil", "n_transfers" ))){
+      stop(paste("The pt_trans_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided ",
+                 paste(colnames(pt_trans_df), sep = " ", collapse = " ")))
     }
     #make sure the column types are good
-    if(!(all(lapply(edge_df, class) == c("factor", "factor", "numeric")) || all(lapply(edge_df, class) == c("character", "character", "numeric")))){
-      stop(paste("The edge_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided ",
-                 paste(lapply(edge_df, class), sep = " ", collapse = " ")))
+    if(!(all(lapply(pt_trans_df, class) == c("factor", "factor", "numeric")) || all(lapply(pt_trans_df, class) == c("character", "character", "numeric")))){
+      stop(paste("The pt_trans_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided ",
+                 paste(lapply(pt_trans_df, class), sep = " ", collapse = " ")))
     }
     # MOVE THIS TO OTHER FUNCTION
     # #if not all in common warn you will subset
-    # !setequal(unique(c(as.character(edge_df$source_facil), as.character(edge_df$dest_facil))), unique(locs))
-    # if(!setequal(unique(c(as.character(edge_df$source_facil), as.character(edge_df$dest_facil))), unique(locs))){
-    #   warning(paste("Not all of the locations you have provided between locs and the edge_df match. Will subset. "))
+    # !setequal(unique(c(as.character(pt_trans_df$source_facil), as.character(pt_trans_df$dest_facil))), unique(locs))
+    # if(!setequal(unique(c(as.character(pt_trans_df$source_facil), as.character(pt_trans_df$dest_facil))), unique(locs))){
+    #   warning(paste("Not all of the locations you have provided between locs and the pt_trans_df match. Will subset. "))
     # }
-    if(length(paste(edge_df$source_facil, edge_df$dest_facil)) != length(unique(paste(edge_df$source_facil, edge_df$dest_facil)))){
+    if(length(paste(pt_trans_df$source_facil, pt_trans_df$dest_facil)) != length(unique(paste(pt_trans_df$source_facil, pt_trans_df$dest_facil)))){
       stop(paste("Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs."))
     }
   }
@@ -178,13 +178,13 @@ check_pair_types <- function(pair_types){
   }
   #check the colnames
   if(!((ncol(pair_types) == 8 &&
-        all(colnames(pair_types) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
+        all(colnames(pair_types) == c("isolate1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
        (ncol(pair_types) == 12 &&
-        all(colnames(pair_types) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+        all(colnames(pair_types) == c("isolate1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
        (ncol(pair_types) == 10 &&
-        all(colnames(pair_types) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+        all(colnames(pair_types) == c("isolate1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
        (ncol(pair_types) == 6 &&
-        all(colnames(pair_types) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
+        all(colnames(pair_types) == c("isolate1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
     stop(paste("The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has ",
                ncol(pair_types), " columns that are not the output columns needed."))
   }
@@ -649,9 +649,9 @@ check_paths <- function(paths){
 #'
 #' @noRd
 #'
-check_get_patient_flow_input <- function(edge_df, paths){
-  #check the edge_df input
-  check_edge_df(edge_df)
+check_get_patient_flow_input <- function(pt_trans_df, paths){
+  #check the pt_trans_df input
+  check_pt_trans_df(pt_trans_df)
   #check the paths input
   check_paths(paths)
 }

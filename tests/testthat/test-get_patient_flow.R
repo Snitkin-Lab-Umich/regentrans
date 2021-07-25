@@ -17,7 +17,7 @@ test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs)
 #one without paths returned
-test_pt_trans <- get_patient_flow(edge_df = pat_flow)
+test_pt_trans <- get_patient_flow(pt_trans_df = pat_flow)
 #one with paths returned
 test_pt_trans_paths <- get_patient_flow(pat_flow, paths = TRUE)
 
@@ -49,12 +49,10 @@ test_that("get_patient_flow works", {
   expect_error(get_patient_flow(dplyr::bind_rows(pat_flow,pat_flow),test_pair_types),
                "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.")
   # missing patient transfers for some facilities
-  expect_warning(expect_equal(get_patient_flow(pt_flow_sub),
-               structure(list(loc1 = c("A", "A", "B"), loc2 = c("B", "C", "C"),
-               n_transfers_f12 = c(NA_real_, NA_real_, NA_real_),
-               pt_trans_metric_f12 = c(0, 0, 0), n_transfers_f21 = c(20, 12, NA),
-               pt_trans_metric_f21 = c(1, 1, 0), sum_transfers = c(NA_real_, NA_real_, NA_real_),
-               sum_pt_trans_metric = c(1, 1, 0)), row.names = c(NA, -3L), class = "data.frame")))
+  expect_warning(
+    expect_equal(get_patient_flow(pt_flow_sub),
+                 structure(list(loc1 = c("A", "A", "A", "A", "B", "B"), loc2 = c("B", "C", "B", "C", "C", "C"), n_transfers_f12 = c(NA_real_, NA_real_, NA_real_, NA_real_, NA_real_, NA_real_), pt_trans_metric_f12 = c(0, 0, 0, 0, 0, 0), n_transfers_f21 = c(20, 12, 20, 12, NA, NA), pt_trans_metric_f21 = c(1, 1, 1, 1, 0, 0), sum_transfers = c(NA_real_, NA_real_, NA_real_, NA_real_, NA_real_, NA_real_), sum_pt_trans_metric = c(1, 1, 1, 1, 0, 0)), row.names = c(NA, -6L), class = "data.frame")
+                 ), "At structural_properties.c:4597 :Couldn't reach some vertices")
   })
 
 
