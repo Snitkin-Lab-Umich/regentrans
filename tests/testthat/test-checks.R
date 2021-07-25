@@ -22,13 +22,13 @@ test_dists_3 <- test_dists_2
 test_dists_3[2] <- -1
 test_dists_4 <- test_dists_2
 test_dists_4[,1] <- as.character(test_dists_4[,1])
-test_snv_dists <- get_pair_types(dists = test_dists, locs = test_locs)
-test_snv_dists_2 <- test_snv_dists[,2:ncol(test_snv_dists)]
-test_snv_dists_3 <- test_snv_dists
-colnames(test_snv_dists_3) <- c("A", "B", "C", "D", "E", "F")
-test_snv_dists_4 <- test_snv_dists
-test_snv_dists_4$pairwise_dist <- as.character(test_snv_dists_4$pairwise_dist)
-test_snv_dists_5 <- test_snv_dists %>% tibble::tibble() %>% dplyr::filter(sample1 == 'a') %>% data.frame()
+test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs)
+test_pair_types_2 <- test_pair_types[,2:ncol(test_pair_types)]
+test_pair_types_3 <- test_pair_types
+colnames(test_pair_types_3) <- c("A", "B", "C", "D", "E", "F")
+test_pair_types_4 <- test_pair_types
+test_pair_types_4$pairwise_dist <- as.character(test_pair_types_4$pairwise_dist)
+test_pair_types_5 <- test_pair_types %>% tibble::tibble() %>% dplyr::filter(sample1 == 'a') %>% data.frame()
 test_tr <- ape::keep.tip(tr,names(test_locs))
 test_tr_2 <- ape::keep.tip(tr,names(test_locs_3))
 test_fasta <- aln[names(test_locs),]
@@ -39,7 +39,7 @@ ls_2 <- list(list(a = 2, b = 3), list(c = "a", d = "b"), "x")
 test_subtr <- ape::subtrees(test_tr)
 test_subtr_2 <- ape::subtrees(test_tr_2)
 test_pt_flow <- pt_trans_df %>% dplyr::filter(source_facil %in% c('C','D','E') & dest_facil %in% c('C','D','E')) %>% get_patient_flow()
-test_isolate_pair_summary <- summarize_pairs(test_snv_dists)
+test_isolate_pair_summary <- summarize_pairs(test_pair_types)
 test_fsp_long <- make_long_form(fsp)
 
 mat <- data.frame(matrix(data = c(0, 20, 30, 40,
@@ -59,7 +59,7 @@ test_pt_trans_net_4 <- test_pt_trans_net
 test_pt_trans_net_4$n_transfers <- as.character(test_pt_trans_net_4$n_transfers)
 test_pt_trans_net_5 <- test_pt_trans_net %>% dplyr::filter(source_facil == "A", dest_facil == "A")
 
-test_snv_dists_pt_trans <- get_pair_types(dists = test_dists, locs = test_locs)
+test_pair_types_pt_trans <- get_pair_types(dists = test_dists, locs = test_locs)
 
 mat2 <- data.frame(matrix(data = c(0, 20, 12,
                                   20, 0, 26,
@@ -153,14 +153,14 @@ test_that("check_dists works", {
                "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided an object that does not contain only numeric data, it includes type: character")
 })
 
-# check_snv_dists
-test_that("check_snv_dists works", {
-  expect_error(check_snv_dists(data.frame(x = 1)),
-               "The snv_dists object")
-  expect_error(check_snv_dists(test_snv_dists_5),
-               "Your snv_dists input has  ")
-  expect_error(check_snv_dists('test_snv_dists'),
-               "The snv_dists object must be the output of the get_pair_types() function, but you provided:  character", fixed = TRUE)
+# check_pair_types
+test_that("check_pair_types works", {
+  expect_error(check_pair_types(data.frame(x = 1)),
+               "The pair_types object")
+  expect_error(check_pair_types(test_pair_types_5),
+               "Your pair_types input has  ")
+  expect_error(check_pair_types('test_pair_types'),
+               "The pair_types object must be the output of the get_pair_types() function, but you provided:  character", fixed = TRUE)
 })
 
 #test check_subset_pairs_input works
@@ -174,31 +174,31 @@ test_that("check_subset_pairs_input works", {
 })
 ##################################test get_frac_intra#####################################
 test_that("check_get_frac_intra_input works", {
-  #normal one that works with snv_dists input
-  expect_null(check_get_frac_intra_input(snv_dists = test_snv_dists))
-  #one that's input isn't snv_dists input at all
+  #normal one that works with pair_types input
+  expect_null(check_get_frac_intra_input(pair_types = test_pair_types))
+  #one that's input isn't pair_types input at all
   #one that's input is similar but wrong # cols
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists_2),
-    "The snv_dists object must be the output of the get_pair_types() function, but you provided a data.frame with  5  columns.",
+    check_get_frac_intra_input(pair_types = test_pair_types_2),
+    "The pair_types object must be the output of the get_pair_types() function, but you provided a data.frame with  5  columns.",
     fixed = TRUE
   )
   #one that's input is similar but not correct rownames
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists_3),
-    "The snv_dists object must be the output of the get_pair_types() function, but the data.frame you provided has  6  columns that are not the output columns needed.",
+    check_get_frac_intra_input(pair_types = test_pair_types_3),
+    "The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has  6  columns that are not the output columns needed.",
     fixed = TRUE
   )
   #one that's input is similar but not numeric dist col
   expect_error(
-    check_get_frac_intra_input(snv_dists = test_snv_dists_4),
-    "Your snv_dists input does not have numeric pairwise distances, you supplied one with type character",
+    check_get_frac_intra_input(pair_types = test_pair_types_4),
+    "Your pair_types input does not have numeric pairwise distances, you supplied one with type character",
     fixed = TRUE
   )
-  #one with patient transfer network snv_dists
-  expect_null(check_get_frac_intra_input(snv_dists = test_snv_dists_pt_trans))
+  #one with patient transfer network pair_types
+  expect_null(check_get_frac_intra_input(pair_types = test_pair_types_pt_trans))
   # all null
-  expect_error(check_get_frac_intra_input(snv_dists = NULL),
+  expect_error(check_get_frac_intra_input(pair_types = NULL),
                "Please provide the output from.")
 })
 
@@ -505,7 +505,7 @@ test_that("check_get_largest_subtree_input works", {
 
 ##################################test patient_flow#####################################
 test_that("check_get_patient_flow_input works", {
-  #one that works with snv_dists
+  #one that works with pair_types
   expect_null(check_get_patient_flow_input(edge_df = test_pt_trans_net, paths = FALSE))
   #one where edge_df is wrong
   expect_error(check_get_patient_flow_input(edge_df = "test_pt_trans_net", paths = FALSE),
@@ -557,18 +557,18 @@ test_that("check_paths works", {
 # check_summarize_pairs_input
 
 test_that("check_summarize_pairs_input works", {
-  expect_null(check_summarize_pairs_input(test_snv_dists, 'min', 5))
-  expect_null(check_summarize_pairs_input(test_snv_dists, c('min', 'median'), 5))
-  expect_null(check_summarize_pairs_input(test_snv_dists, 'min', c(5, 10)))
-  expect_null(check_summarize_pairs_input(test_snv_dists, NULL, 5))
-  expect_null(check_summarize_pairs_input(test_snv_dists, 'min', NULL))
-  expect_error(check_summarize_pairs_input('test_snv_dists', min, 5),
-               "The snv_dists object must be the output of the get_pair_types() function, but you provided:  character", fixed = TRUE)
-  expect_error(check_summarize_pairs_input(test_snv_dists, min, 5),
+  expect_null(check_summarize_pairs_input(test_pair_types, 'min', 5))
+  expect_null(check_summarize_pairs_input(test_pair_types, c('min', 'median'), 5))
+  expect_null(check_summarize_pairs_input(test_pair_types, 'min', c(5, 10)))
+  expect_null(check_summarize_pairs_input(test_pair_types, NULL, 5))
+  expect_null(check_summarize_pairs_input(test_pair_types, 'min', NULL))
+  expect_error(check_summarize_pairs_input('test_pair_types', min, 5),
+               "The pair_types object must be the output of the get_pair_types() function, but you provided:  character", fixed = TRUE)
+  expect_error(check_summarize_pairs_input(test_pair_types, min, 5),
                "The summary_fns argment must either be `NULL` or a character vector of function names you wish to use to summarize inter-facility pariwise distances. You have provided function")
-  expect_error(check_summarize_pairs_input(test_snv_dists, c('min','asd'), 5),
+  expect_error(check_summarize_pairs_input(test_pair_types, c('min','asd'), 5),
                "The summary_fns argment must either be `NULL` or a character vector of function names you wish to use to summarize inter-facility pairwise distances. You have provided at least one element that is not a function:")
-  expect_error(check_summarize_pairs_input(test_snv_dists, 'min', '5'),
+  expect_error(check_summarize_pairs_input(test_pair_types, 'min', '5'),
                "The threshs argment must either be `NULL` or a numeric vector of the pairwise SNV distance thresholds you wish to use to summarize inter-facility pairs. You have provided character")
 
 })

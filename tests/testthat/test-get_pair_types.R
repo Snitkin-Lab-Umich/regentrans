@@ -2,7 +2,7 @@
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_snv_dists <- get_pair_types(dists = test_dists, locs = test_locs)
+test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs)
 
 
 mat <- data.frame(matrix(data = c(0, 20, 12,
@@ -13,20 +13,20 @@ colnames(mat) <- c("A", "B", "C")
 
 test_that("get_pair_types works", {
   # check number of columns
-  expect_true(ncol(test_snv_dists) == 6)
+  expect_true(ncol(test_pair_types) == 6)
   #check row #s
-  expect_true(nrow(test_snv_dists) == (length(test_locs)^2-length(test_locs))/2)
+  expect_true(nrow(test_pair_types) == (length(test_locs)^2-length(test_locs))/2)
   #check colnames
-  expect_true(all(colnames(test_snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type")))
+  expect_true(all(colnames(test_pair_types) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type")))
   #check col types
   #this won't be true when all of the patients IDs aren't numeric
-  expect_true(all(sapply(test_snv_dists, class) == c("factor", "factor", "numeric", "character", "character", "character")))
+  expect_true(all(sapply(test_pair_types, class) == c("factor", "factor", "numeric", "character", "character", "character")))
   #check isolates in both lists are in the locs names
-  expect_true(all(unique(c(as.character(test_snv_dists$sample1), as.character(test_snv_dists$sample2))) %in% names(test_locs)))
-  # expect_true(all(setequal(unique(test_snv_dists$sample1), unique(test_snv_dists$sample2)) & setequal(unique(test_snv_dists$sample2), unique(names(test_locs)))))
+  expect_true(all(unique(c(as.character(test_pair_types$sample1), as.character(test_pair_types$sample2))) %in% names(test_locs)))
+  # expect_true(all(setequal(unique(test_pair_types$sample1), unique(test_pair_types$sample2)) & setequal(unique(test_pair_types$sample2), unique(names(test_locs)))))
   #same with locs
-  expect_true(all(unique(c(as.character(test_snv_dists$loc1), as.character(test_snv_dists$loc2))) %in% test_locs))
-  # expect_true(all(setequal(unique(test_snv_dists$loc1), unique(test_snv_dists$loc2)) & setequal(unique(test_snv_dists$loc2), unique(test_locs))))
+  expect_true(all(unique(c(as.character(test_pair_types$loc1), as.character(test_pair_types$loc2))) %in% test_locs))
+  # expect_true(all(setequal(unique(test_pair_types$loc1), unique(test_pair_types$loc2)) & setequal(unique(test_pair_types$loc2), unique(test_locs))))
 
 })
 
@@ -35,7 +35,7 @@ test_that("get_pair_types works", {
 #test subset_pairs
 test_locs <- locs[1:4]
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_snv_dists_dup <-
+test_pair_types_dup <-
   structure(
     list(
       sample1 = structure(
@@ -81,11 +81,11 @@ test_snv_dists_dup <-
     class = "data.frame"
   )
 
-test_subset_pairs <- subset_pairs(test_snv_dists_dup)
+test_subset_pairs <- subset_pairs(test_pair_types_dup)
 
 test_that("subset_pairs works", {
   #check that there are half the number of isolates
-  expect_true(nrow(test_subset_pairs) == nrow(test_snv_dists_dup) * .5)
+  expect_true(nrow(test_subset_pairs) == nrow(test_pair_types_dup) * .5)
   #check number of locs vs. rows
   expect_true(nrow(test_subset_pairs) == sum(1:(length(test_locs) - 1)))
   #check that each isolate in locs is represented only length(locs)-1 times

@@ -122,7 +122,7 @@ check_edge_df <- function(edge_df){
 }
 
 
-#' Check input to snv_dists
+#' Check input to pair_types
 #'
 #' @inheritParams get_pair_types
 #'
@@ -144,10 +144,10 @@ check_get_pair_types_input <- function(dists, locs){
 #'
 #' @noRd
 #'
-check_subset_pairs_input <- function(snv_dists){
-  if(!(any(class(snv_dists) == "matrix") || any(class(snv_dists) == "data.frame"))){
+check_subset_pairs_input <- function(pair_types){
+  if(!(any(class(pair_types) == "matrix") || any(class(pair_types) == "data.frame"))){
     stop(paste("The dists object must be a data.frame, but you provided:",
-               class(snv_dists)))
+               class(pair_types)))
   }
 }
 
@@ -165,37 +165,37 @@ check_subset_pairs_input <- function(snv_dists){
 #'
 #' @noRd
 #'
-check_snv_dists <- function(snv_dists){
+check_pair_types <- function(pair_types){
   #check the type
-  if(!(class(snv_dists) == "data.frame")){
-    stop(paste("The snv_dists object must be the output of the get_pair_types() function, but you provided: ",
-               class(snv_dists)))
+  if(!(class(pair_types) == "data.frame")){
+    stop(paste("The pair_types object must be the output of the get_pair_types() function, but you provided: ",
+               class(pair_types)))
   }
   #check the number of columns
-  if(!(ncol(snv_dists) %in% 6:12)){
-    stop(paste("The snv_dists object must be the output of the get_pair_types() function, but you provided a data.frame with ",
-               ncol(snv_dists), " columns."))
+  if(!(ncol(pair_types) %in% 6:12)){
+    stop(paste("The pair_types object must be the output of the get_pair_types() function, but you provided a data.frame with ",
+               ncol(pair_types), " columns."))
   }
   #check the colnames
-  if(!((ncol(snv_dists) == 8 &&
-        all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
-       (ncol(snv_dists) == 12 &&
-        all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
-       (ncol(snv_dists) == 10 &&
-        all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
-       (ncol(snv_dists) == 6 &&
-        all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
-    stop(paste("The snv_dists object must be the output of the get_pair_types() function, but the data.frame you provided has ",
-               ncol(snv_dists), " columns that are not the output columns needed."))
+  if(!((ncol(pair_types) == 8 &&
+        all(colnames(pair_types) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
+       (ncol(pair_types) == 12 &&
+        all(colnames(pair_types) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+       (ncol(pair_types) == 10 &&
+        all(colnames(pair_types) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+       (ncol(pair_types) == 6 &&
+        all(colnames(pair_types) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
+    stop(paste("The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has ",
+               ncol(pair_types), " columns that are not the output columns needed."))
   }
   #check that there is at least one row
-  if(nrow(snv_dists) < 1){
-      stop(paste("Your snv_dists input has ", nrow(snv_dists), " facility pairs. Please use an snv_dists input that has 1 or more pairs (rows)"))
+  if(nrow(pair_types) < 1){
+      stop(paste("Your pair_types input has ", nrow(pair_types), " facility pairs. Please use an pair_types input that has 1 or more pairs (rows)"))
   }
   #check pairwise dist column is numeric
-  if(!class(snv_dists$pairwise_dist) == "numeric"){
-    stop(paste("Your snv_dists input does not have numeric pairwise distances, you supplied one with type",
-               class(snv_dists$pairwise_dist)))
+  if(!class(pair_types$pairwise_dist) == "numeric"){
+    stop(paste("Your pair_types input does not have numeric pairwise distances, you supplied one with type",
+               class(pair_types$pairwise_dist)))
   }
 
 }
@@ -206,15 +206,15 @@ check_snv_dists <- function(snv_dists){
 #'
 #' @noRd
 #'
-check_get_frac_intra_input <- function(snv_dists){
+check_get_frac_intra_input <- function(pair_types){
   #if SNV_dists doesnt exist and they didn't input locs and dists
-  if(is.null(snv_dists)){
+  if(is.null(pair_types)){
     stop("Please provide the output from `get_pair_types()` to this function.")
   }
   #make the SNV dists object if it needs to be made
-  #checks snv_dists input
-  check_snv_dists(snv_dists)
-  #return the snv_dists made
+  #checks pair_types input
+  check_pair_types(pair_types)
+  #return the pair_types made
 }
 
 #*******************************************************************************************************************************************#
@@ -669,10 +669,10 @@ check_get_patient_flow_input <- function(edge_df, paths){
 #'
 #' @noRd
 #'
-check_summarize_pairs_input <- function(snv_dists, summary_fns, threshs){
+check_summarize_pairs_input <- function(pair_types, summary_fns, threshs){
 
-  # check snv_dists
-  check_snv_dists(snv_dists)
+  # check pair_types
+  check_pair_types(pair_types)
 
   # check summary_fns
   if(!is.character(summary_fns) & !is.null(summary_fns)){

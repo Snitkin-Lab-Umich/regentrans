@@ -9,7 +9,7 @@
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' snv_dists <- get_pair_types(dists, locs)
+#' pair_types <- get_pair_types(dists, locs)
 #' }
 get_pair_types <- function(dists, locs){
   #checks
@@ -56,7 +56,7 @@ get_pair_types <- function(dists, locs){
 
 #' Subset to unique isolate pairs from a directed list
 #'
-#' @param snv_dists the output object of the get_pair_types function
+#' @param pair_types the output object of the get_pair_types function
 #'
 #' @return a data.frame of isolate pairs subsetted to one row representing each pair
 #' @noRd
@@ -64,14 +64,14 @@ get_pair_types <- function(dists, locs){
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' snv_dists <- get_pair_types(dists, locs)
-#' subset_pairs(bind_rows(snv_dists,snv_dists))
+#' pair_types <- get_pair_types(dists, locs)
+#' subset_pairs(bind_rows(pair_types,pair_types))
 #' }
-subset_pairs <- function(snv_dists){
+subset_pairs <- function(pair_types){
   #check that it is a data.frame object
-  check_subset_pairs_input(snv_dists)
+  check_subset_pairs_input(pair_types)
   #subset to one of each pair
-  unique_rows <- snv_dists[!duplicated(t(apply(snv_dists, 1, sort))),]
+  unique_rows <- pair_types[!duplicated(t(apply(pair_types, 1, sort))),]
 
   #return new df
   return(unique_rows)

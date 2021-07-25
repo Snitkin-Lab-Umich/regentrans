@@ -15,7 +15,7 @@ pt_flow_sub <- pat_flow[1:3,]
 
 test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_snv_dists <- get_pair_types(dists = test_dists, locs = test_locs)
+test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs)
 #one without paths returned
 test_pt_trans <- get_patient_flow(edge_df = pat_flow)
 #one with paths returned
@@ -46,7 +46,7 @@ test_that("get_patient_flow works", {
   #list types
   expect_true(all(sapply(test_pt_trans_paths, class) == c("data.frame", "list")))
   # duplicate source/destination facility rows returns error
-  expect_error(get_patient_flow(dplyr::bind_rows(pat_flow,pat_flow),test_snv_dists),
+  expect_error(get_patient_flow(dplyr::bind_rows(pat_flow,pat_flow),test_pair_types),
                "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.")
   # missing patient transfers for some facilities
   expect_warning(expect_equal(get_patient_flow(pt_flow_sub),

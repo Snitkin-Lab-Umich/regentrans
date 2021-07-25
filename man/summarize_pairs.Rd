@@ -4,10 +4,10 @@
 \alias{summarize_pairs}
 \title{Summarize extent of relatedness of intra- and inter-facility pairs by facility pair}
 \usage{
-summarize_pairs(snv_dists, summary_fns = c("min"), threshs = seq(5, 20, 5))
+summarize_pairs(pair_types, summary_fns = c("min"), threshs = seq(5, 20, 5))
 }
 \arguments{
-\item{snv_dists}{the output object of the get_pair_types function}
+\item{pair_types}{the output object of the get_pair_types function}
 
 \item{summary_fns}{vector of summary functions for pairwise distances as character strings (default: c("min"))}
 
@@ -22,7 +22,7 @@ Summarize extent of relatedness of intra- and inter-facility pairs by facility p
 \examples{
 \dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
-snv_dists <- get_pair_types(dists, locs)
-summarize_pairs(snv_dists = snv_dists)
+pair_types <- get_pair_types(dists, locs)
+summarize_pairs(pair_types = pair_types)
 }
 }

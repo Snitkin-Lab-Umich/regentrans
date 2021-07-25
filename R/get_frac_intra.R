@@ -1,6 +1,6 @@
 #' Get fraction of intra-facility pairs for different SNV thresholds
 #'
-#' @param snv_dists the output object of the get_pair_types function
+#' @param pair_types the output object of the get_pair_types function
 #'
 #' @return fraction of intra-facility pairs for each SNV distance in dataset
 #' @export
@@ -8,16 +8,16 @@
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' snv_dists <- get_pair_types(dists, locs)
-#' get_frac_intra(snv_dists)
+#' pair_types <- get_pair_types(dists, locs)
+#' get_frac_intra(pair_types)
 #' }
-get_frac_intra <- function(snv_dists){
+get_frac_intra <- function(pair_types){
 
   #make one check
-  check_get_frac_intra_input(snv_dists = snv_dists)
+  check_get_frac_intra_input(pair_types = pair_types)
 
   # get intra-facility count and fraction for each pairwise SNV distance in the dataset
-  intra_cts <- snv_dists %>%
+  intra_cts <- pair_types %>%
     dplyr::group_by(pair_type, pairwise_dist) %>%
     dplyr::mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair','Inter-facility pair'))) %>%
     dplyr::count(.drop = FALSE) %>%
