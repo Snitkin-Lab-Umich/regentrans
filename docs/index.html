@@ -84,9 +84,8 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#regentrans-r-package-for-investigating-regional-pathogen-transmission-using-genomic-data" class="anchor"></a>regentrans: R package for investigating regional pathogen transmission using genomic data</h1></div>
 <p><img src="reference/figures/regentrans_logo.png" width="200"></p>
-<p>Regentrans is a work in progress.</p>
-<p>It can be installed using the command <code><a href="https://devtools.r-lib.org//reference/remote-reexports.html">devtools::install_github('Snitkin-Lab-Umich/regentrans')</a></code> in R</p>
-<p>An introductory vignette can be found <a href="articles/Introduction.html">here</a>.</p>
+<p><code>regentrans</code> can be installed using the command <code><a href="https://devtools.r-lib.org//reference/remote-reexports.html">devtools::install_github('Snitkin-Lab-Umich/regentrans')</a></code> in R</p>
+<p>Examples of how to interrogate all of the questions in the table below can be found in the <a href="articles/Introduction.html">introductory vignette</a>.</p>
 <p>Questions regentrans can help investigate:</p>
 <table class="table">
 <colgroup>
@@ -105,11 +104,12 @@
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Is transmission occurring in the region of interest?</td>
-<td>Pairwise SNV distances</td>
-<td><code><a href="reference/get_snv_dists.html">get_snv_dists()</a></code></td>
-<td>A pairwise SNV distance matrix (can be created using <code><a href="https://rdrr.io/pkg/ape/man/dist.dna.html">ape::dist.dna()</a></code> on fasta file of variants), isolate location information</td>
-<td>Isolate patient information, patient transfer network</td>
+<td>How do you choose pairwise SNV distance thresholds?</td>
+<td>Fraction of intra-facility pairs for different pairwise SNV distances</td>
+<td><code><a href="reference/get_frac_intra.html">get_frac_intra()</a></code></td>
+<td>output of <code><a href="reference/get_pair_types.html">get_pair_types()</a></code>
+</td>
+<td></td>
 </tr>
 <tr class="even">
 <td>Is transmission occurring within and/or between locations?</td>
@@ -121,60 +121,52 @@
 <tr class="odd">
 <td></td>
 <td>Pairwise SNV distances within and between facilities</td>
-<td><code><a href="reference/get_snv_dists.html">get_snv_dists()</a></code></td>
+<td><code><a href="reference/get_pair_types.html">get_pair_types()</a></code></td>
 <td>A pairwise SNV distance matrix (can be created using <code><a href="https://rdrr.io/pkg/ape/man/dist.dna.html">ape::dist.dna()</a></code> on fasta file of variants), isolate location information</td>
-<td>Isolate patient information, patient transfer network</td>
+<td></td>
 </tr>
 <tr class="even">
-<td></td>
-<td>Fraction of intra-facility pairs for different pairwise SNV distance thresholds</td>
-<td><code><a href="reference/get_frac_intra.html">get_frac_intra()</a></code></td>
-<td>A pairwise SNV distance matrix (can be created using <code><a href="https://rdrr.io/pkg/ape/man/dist.dna.html">ape::dist.dna()</a></code> on fasta file of variants), isolate location information</td>
-<td>Isolate patient information, patient transfer network</td>
-</tr>
-<tr class="odd">
 <td>What locations is transmission occurring within/between?</td>
-<td>Closely related pairs within and between facilities</td>
-<td><code><a href="reference/get_snv_dists.html">get_snv_dists()</a></code></td>
-<td>A pairwise SNV distance matrix (can be created using <code><a href="https://rdrr.io/pkg/ape/man/dist.dna.html">ape::dist.dna()</a></code> on fasta file of variants), isolate location information</td>
-<td>Isolate patient information, patient transfer network</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>Population-level similarity between locations</td>
+<td>Population-level similarity between locations (Fsp)</td>
 <td><code><a href="reference/get_facility_fsp.html">get_facility_fsp()</a></code></td>
 <td>Fasta file of variants, isolate location information</td>
 <td></td>
 </tr>
 <tr class="odd">
+<td></td>
+<td>Number of closely related pairs within and between facilities</td>
+<td>Plot code in vignette</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
 <td>Have transmission dynamics changed over time?</td>
 <td>Methods above but split over time</td>
 <td></td>
 <td></td>
 <td></td>
 </tr>
-<tr class="even">
-<td>Is transmission occurring along paths of higher patient/person flow?</td>
-<td>Compare patient/person flow between locations to inter-location pairwise SNV distances</td>
-<td><code>patient_transfer()</code></td>
-<td>Patient transfer network, a pairwise SNV distance matrix (can be created using <code><a href="https://rdrr.io/pkg/ape/man/dist.dna.html">ape::dist.dna()</a></code> on fasta file of variants), isolate location information</td>
-<td>Isolate patient information</td>
-</tr>
 <tr class="odd">
+<td>Is transmission occurring along paths of higher patient/person flow?</td>
+<td>Compare patient/person flow between locations to inter-location pairwise SNV distances or Fsp</td>
+<td><code><a href="reference/get_patient_flow.html">get_patient_flow()</a></code></td>
+<td>Patient transfer network edge matrix</td>
 <td></td>
-<td>Compare patient/person flow between locations to populatopn-level similarity between locations</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Compare patient/person flow between locations to populatoin-level similarity between locations</td>
 <td>
-<code>patient_transfer()</code>, <code><a href="reference/get_facility_fsp.html">get_facility_fsp()</a></code>
+<code><a href="reference/get_patient_flow.html">get_patient_flow()</a></code>, <code><a href="reference/get_facility_fsp.html">get_facility_fsp()</a></code>
 </td>
 <td>Patient transfer network, fasta file of variants, isolate location information</td>
 <td></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Are there any observable geographic trends in prevalence/transmission?</td>
-<td>Visualize prevalence and closely related pairs over time</td>
-<td>Plot code in vignette, <code>patient_transfer()</code> <em>or</em> <code><a href="reference/get_facility_fsp.html">get_facility_fsp()</a></code>
-</td>
-<td>Geographic locations of each facility, patient transfer network, fasta file of variants, isolate location information</td>
+<td>Visualize prevalence and closely related pairs or Fsp</td>
+<td>Plot code in vignette</td>
+<td>Geographic locations of each facility, patient transfer network, summary metric of genomic similarity</td>
 <td></td>
 </tr>
 </tbody>

@@ -99,7 +99,7 @@
 <span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">'Snitkin-Lab-Umich/regentrans'</span><span class="op">)</span>
 
 <span class="co"># load regentrans</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Snitkin-Lab-Umich/regentrans">regentrans</a></span><span class="op">)</span></code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://snitkin-lab-umich.github.io/regentrans/index.html">regentrans</a></span><span class="op">)</span></code></pre></div>
 <p>Other packages you’ll need to load to run this tutorial include:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://ape-package.ird.fr/">ape</a></span><span class="op">)</span>
@@ -193,13 +193,13 @@
 <p>The <code>regentrans</code> metadata is in the <code>metadata</code> object. We have information on the sample ID, patient ID, facility, and collection date:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">metadata</span><span class="op">)</span></code></pre></div>
-<pre><code>##   sample_id patient_id facility collection_date
-## 1   PCMP_H1         p1        A            2014
-## 2   PCMP_H2         p2        B            2014
-## 3   PCMP_H3         p3        C            2014
-## 4   PCMP_H4         p4        D            2014
-## 5   PCMP_H5         p5        E            2014
-## 6 PCMP_H223         p5        F            2015</code></pre>
+<pre><code>##   isolate_id patient_id facility collection_date
+## 1    PCMP_H1         p1        A            2014
+## 2    PCMP_H2         p2        B            2014
+## 3    PCMP_H3         p3        C            2014
+## 4    PCMP_H4         p4        D            2014
+## 5    PCMP_H5         p5        E            2014
+## 6  PCMP_H223         p5        F            2015</code></pre>
 </div>
 <div id="variant-alignment-1" class="section level3">
 <h3 class="hasAnchor">
@@ -289,7 +289,7 @@
 <span class="va">metadata</span> <span class="op">&lt;-</span> <span class="va">metadata</span> <span class="op">%&gt;%</span> <span class="fu">arrange</span><span class="op">(</span><span class="va">collection_date</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">duplicated</a></span><span class="op">(</span><span class="va">patient_id</span>, <span class="va">facility</span><span class="op">)</span><span class="op">)</span>
 
 <span class="co"># isolate subset</span>
-<span class="va">isolate_subset</span> <span class="op">&lt;-</span> <span class="va">metadata</span><span class="op">$</span><span class="va">sample_id</span>
+<span class="va">isolate_subset</span> <span class="op">&lt;-</span> <span class="va">metadata</span><span class="op">$</span><span class="va">isolate_id</span>
 
 <span class="co"># subset alignment</span>
 <span class="va">aln</span> <span class="op">&lt;-</span> <span class="va">aln</span><span class="op">[</span><span class="va">isolate_subset</span>,<span class="op">]</span>
@@ -306,7 +306,7 @@
 <p>For many of the <code>regentrans</code> functions, the required location input is a named vector where the elements are locations (e.g. facility) and the names are the sample ID. To get the location information from the built-in metadata, we can run this command:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># named vector of locations</span>
-<span class="va">locs</span> <span class="op">&lt;-</span> <span class="va">metadata</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">sample_id</span>, <span class="va">facility</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">deframe</span><span class="op">(</span><span class="op">)</span>
+<span class="va">locs</span> <span class="op">&lt;-</span> <span class="va">metadata</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">isolate_id</span>, <span class="va">facility</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">deframe</span><span class="op">(</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">locs</span><span class="op">)</span></code></pre></div>
 <pre><code>## PCMP_H1 PCMP_H2 PCMP_H3 PCMP_H4 PCMP_H5 PCMP_H7 
 ##     "A"     "B"     "C"     "D"     "E"     "G"</code></pre>
@@ -338,7 +338,7 @@
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">ref_genome_length</span> <span class="op">&lt;-</span> <span class="fl">5394056</span>
 <span class="va">mutation_rate</span> <span class="op">&lt;-</span> <span class="fl">1.03e-6</span> <span class="co"># estimated from a K. pneumoniae ST258 time tree</span>
-<span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">ref_genome_length</span><span class="op">*</span><span class="va">mutation_rate</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/Round.html">floor</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">ref_genome_length</span><span class="op">*</span><span class="va">mutation_rate</span><span class="op">)</span></code></pre></div>
 <pre><code>## [1] 11</code></pre>
 <p>This value means that, over the course of a year, each ST258 strain is expected to gain about 5.5 mutations. This gives us a parwise SNV distance threshold of <span class="math inline">\(5.5*2 = 11\)</span>, as our isolates were collected over a year-long period.</p>
 </div>
@@ -347,23 +347,23 @@
 <a href="#method-2-visualizing-intra-facility-pair-fraction-distribution-with-help-from-get_frac_intra" class="anchor"></a>Method 2: Visualizing intra-facility pair fraction distribution with help from <code>get_frac_intra()</code>
 </h2>
 <p>Sometimes it is difficult to calculate a mutation rate for a given organism, or the mutation rate might be variable even within a clonal lineage. Therefore, we also recommend using the data to identify potential pairwise SNV distance thresholds. Here, we use the assumption that intra-facility transmission is more common than inter-facility transmission to identify reasonable thresholds by looking for drops in the fraction of isolate pairs that are intra-facility pairs compared to inter-facility pairs for various SNV distances. Note that not all datasets will drop off, so this method may not work for some datasets.</p>
-<p>We can use <code><a href="../reference/get_snv_dists.html">get_snv_dists()</a></code> to get the pair types for each isolate pair (intra- or inter-facility) and <code><a href="../reference/get_frac_intra.html">get_frac_intra()</a></code> to calculate the fraction of intra-facility pairs for different SNV distances:</p>
+<p>We can use <code><a href="../reference/get_pair_types.html">get_pair_types()</a></code> to get the pair types for each isolate pair (intra- or inter-facility) and <code><a href="../reference/get_frac_intra.html">get_frac_intra()</a></code> to calculate the fraction of intra-facility pairs for different SNV distances:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># get pair types for pairwise SNV distances (intra vs. inter)</span>
-<span class="va">snv_dists</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_snv_dists.html">get_snv_dists</a></span><span class="op">(</span>dists <span class="op">=</span> <span class="va">dists</span>, locs <span class="op">=</span> <span class="va">locs</span><span class="op">)</span>
+<span class="va">pair_types</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_pair_types.html">get_pair_types</a></span><span class="op">(</span>dists <span class="op">=</span> <span class="va">dists</span>, locs <span class="op">=</span> <span class="va">locs</span><span class="op">)</span>
 
 <span class="co"># get fraction of intra-facility pairs for each SNV distance</span>
-<span class="va">frac_intra</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_frac_intra.html">get_frac_intra</a></span><span class="op">(</span>snv_dists <span class="op">=</span> <span class="va">snv_dists</span><span class="op">)</span></code></pre></div>
-<p>The output of <code><a href="../reference/get_snv_dists.html">get_snv_dists()</a></code> includes information about each isolate pair including the pairwise distance, location of each isolate in the pair, and the type of pair (intra- or inter-facility):</p>
+<span class="va">frac_intra</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_frac_intra.html">get_frac_intra</a></span><span class="op">(</span>pair_types <span class="op">=</span> <span class="va">pair_types</span><span class="op">)</span></code></pre></div>
+<p>The output of <code><a href="../reference/get_pair_types.html">get_pair_types()</a></code> includes information about each isolate pair including the pairwise distance, location of each isolate in the pair, and the type of pair (intra- or inter-facility):</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">snv_dists</span><span class="op">)</span></code></pre></div>
-<pre><code>##   sample1 sample2 pairwise_dist loc1 loc2           pair_type
-## 1 PCMP_H2 PCMP_H1            42    A    B Inter-facility pair
-## 2 PCMP_H3 PCMP_H1            91    A    C Inter-facility pair
-## 3 PCMP_H4 PCMP_H1            65    A    D Inter-facility pair
-## 4 PCMP_H5 PCMP_H1           148    A    E Inter-facility pair
-## 5 PCMP_H7 PCMP_H1            87    A    G Inter-facility pair
-## 6 PCMP_H8 PCMP_H1           201    A    H Inter-facility pair</code></pre>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">pair_types</span><span class="op">)</span></code></pre></div>
+<pre><code>##   isolate1 isolate2 pairwise_dist loc1 loc2           pair_type
+## 1  PCMP_H2  PCMP_H1            42    B    A Inter-facility pair
+## 2  PCMP_H3  PCMP_H1            91    C    A Inter-facility pair
+## 3  PCMP_H4  PCMP_H1            65    D    A Inter-facility pair
+## 4  PCMP_H5  PCMP_H1           148    E    A Inter-facility pair
+## 5  PCMP_H7  PCMP_H1            87    G    A Inter-facility pair
+## 6  PCMP_H8  PCMP_H1           201    H    A Inter-facility pair</code></pre>
 <p>Each row of the <code><a href="../reference/get_frac_intra.html">get_frac_intra()</a></code> output is a different pairwise distance and the columns include the number and fraction of intra- and inter-facility pairs for each pairwise distance:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">frac_intra</span><span class="op">)</span></code></pre></div>
@@ -377,12 +377,12 @@
 ## 4             3      23       4      0.852     0.148 
 ## 5             4      32       7      0.821     0.179 
 ## 6             5      34      10      0.773     0.227</code></pre>
-<p>Below we plot the fraction of intra-facility pairs for pairwise SNV distance up to 50. We have highlighted two drops in fraction of intra-facility pairs, which may be indicative of potential reasonable pairwise SNV distance thresholds. On of these (11) matches with Method 1. We also use 7 as a more conservative distance threshold for our sensitivity analysis.</p>
+<p>Below we plot the fraction of intra-facility pairs for pairwise SNV distance up to 50. We have highlighted two drops in fraction of intra-facility pairs, which may be indicative of potential reasonable pairwise SNV distance thresholds. On of these (≤ 10) matches closely with Method 1. Based on this data, we use thresholds of 10 and 6 for our sensitivity analysis.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># plot fraction of intra-facility pairs for each SNV distance</span>
 <span class="va">frac_intra</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>under <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">pairwise_dist</span> <span class="op">&lt;</span> <span class="fl">11</span>, <span class="st">'&lt; 11 SNVs'</span>,<span class="st">'Over threshold'</span><span class="op">)</span>, under <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">pairwise_dist</span> <span class="op">&lt;</span> <span class="fl">7</span>, <span class="st">'&lt; 7 SNVs'</span>,<span class="va">under</span><span class="op">)</span>,
-         under <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">under</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'&lt; 7 SNVs'</span>, <span class="st">'&lt; 11 SNVs'</span>,<span class="st">'Over threshold'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>under <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">pairwise_dist</span> <span class="op">&lt;=</span> <span class="fl">10</span>, <span class="st">'≤ 10 SNVs'</span>,<span class="st">'Over threshold'</span><span class="op">)</span>, under <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">pairwise_dist</span> <span class="op">&lt;=</span> <span class="fl">6</span>, <span class="st">'≤ 6 SNVs'</span>,<span class="va">under</span><span class="op">)</span>,
+         under <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">under</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'≤ 6 SNVs'</span>, <span class="st">'≤ 10 SNVs'</span>,<span class="st">'Over threshold'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pairwise_dist</span>, y <span class="op">=</span> <span class="va">frac_intra</span>, fill <span class="op">=</span> <span class="va">under</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu">geom_bar</span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu">scale_fill_grey</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> 
@@ -394,7 +394,7 @@
 <p>Our dataset is extremely comprehensive and the isolates are all very closely related. However, if this is not the case in your dataset, you may want to bin the x axis into groups of pairwise SNV distances:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">frac_intra_bin</span> <span class="op">&lt;-</span> <span class="va">frac_intra</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pairwise_dist</span> <span class="op">&lt;</span> <span class="fl">50</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pairwise_dist</span> <span class="op">&lt;=</span> <span class="fl">50</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">mutate</span><span class="op">(</span>bin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cut.html">cut</a></span><span class="op">(</span><span class="va">pairwise_dist</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">pairwise_dist</span><span class="op">)</span> <span class="op">+</span> <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span>, right <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">group_by</span><span class="op">(</span><span class="va">bin</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">summarise</span><span class="op">(</span>n_intra <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_intra</span><span class="op">)</span>, n_inter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_inter</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -415,7 +415,7 @@
 <div id="is-transmission-occurring-within-andor-between-locations" class="section level1">
 <h1 class="hasAnchor">
 <a href="#is-transmission-occurring-within-andor-between-locations" class="anchor"></a>1. Is transmission occurring within and/or between locations?</h1>
-<p>To explore this question we can leverage our whole-genome sequencing data in the form of the phylogenetic tree using the <code><a href="../reference/get_clusters.html">get_clusters()</a></code> function and the SNV distance matrix using the <code><a href="../reference/get_snv_dists.html">get_snv_dists()</a></code>.</p>
+<p>To explore this question we can leverage our whole-genome sequencing data in the form of the phylogenetic tree using the <code><a href="../reference/get_clusters.html">get_clusters()</a></code> function and the SNV distance matrix using the <code><a href="../reference/get_pair_types.html">get_pair_types()</a></code>.</p>
 <div id="threshold-free-phylogenetic-approach" class="section level2">
 <h2 class="hasAnchor">
 <a href="#threshold-free-phylogenetic-approach" class="anchor"></a>Threshold-free phylogenetic approach</h2>
@@ -453,18 +453,18 @@
 <span class="va">subtrees</span> <span class="op">&lt;-</span> <span class="va">clusters</span><span class="op">$</span><span class="va">subtrees</span>
 <span class="va">pure_subtree_info</span></code></pre></div>
 <pre><code>## # A tibble: 224 x 4
-##    loc   subtr_size index sample_id
-##    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;    
-##  1 D              1    NA PCMP_H100
-##  2 N              1    NA PCMP_H98 
-##  3 D              1    NA PCMP_H141
-##  4 D              3    10 &lt;NA&gt;     
-##  5 D              1    NA PCMP_H142
-##  6 E              6    17 &lt;NA&gt;     
-##  7 H              1    NA PCMP_H391
-##  8 D              1    NA PCMP_H93 
-##  9 H              1    NA PCMP_H138
-## 10 T              1    NA PCMP_H281
+##    loc   subtr_size index isolate_id
+##    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt; &lt;chr&gt;     
+##  1 D              1    NA PCMP_H100 
+##  2 N              1    NA PCMP_H98  
+##  3 D              1    NA PCMP_H141 
+##  4 D              3    10 &lt;NA&gt;      
+##  5 D              1    NA PCMP_H142 
+##  6 E              6    17 &lt;NA&gt;      
+##  7 H              1    NA PCMP_H391 
+##  8 D              1    NA PCMP_H93  
+##  9 H              1    NA PCMP_H138 
+## 10 T              1    NA PCMP_H281 
 ## # … with 214 more rows</code></pre>
 <p>The data frame includes the location, the size of the subtree (i.e. cluster), the index of the subtree in the list of subtrees, and the isolate ID if it is a singleton.</p>
 <p>We can plot the size of these clusters to visualize the output:</p>
@@ -486,7 +486,7 @@
 <code class="sourceCode R"><span class="co"># get ids of isolates in each cluster</span>
 <span class="va">isolates_clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">pure_subtree_info</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span>
   <span class="va">i</span> <span class="op">&lt;-</span> <span class="va">pure_subtree_info</span><span class="op">$</span><span class="va">index</span><span class="op">[</span><span class="va">x</span><span class="op">]</span>
-  <span class="va">name</span> <span class="op">&lt;-</span> <span class="va">pure_subtree_info</span><span class="op">$</span><span class="va">sample_id</span><span class="op">[</span><span class="va">x</span><span class="op">]</span>
+  <span class="va">name</span> <span class="op">&lt;-</span> <span class="va">pure_subtree_info</span><span class="op">$</span><span class="va">isolate_id</span><span class="op">[</span><span class="va">x</span><span class="op">]</span>
   <span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">i</span><span class="op">)</span><span class="op">)</span><span class="op">{</span>
     <span class="va">name</span> <span class="op">&lt;-</span> <span class="va">subtrees</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">tip.label</span>
   <span class="op">}</span>
@@ -519,10 +519,10 @@
 <div id="pairwise-snv-distance-approach" class="section level2">
 <h2 class="hasAnchor">
 <a href="#pairwise-snv-distance-approach" class="anchor"></a>Pairwise SNV distance approach</h2>
-<p>Even if isolates from the same facility cluster on the phylogeny, they may still be distantly related to each other. To see how closely related isolate pairs are, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and the <code><a href="../reference/get_snv_dists.html">get_snv_dists()</a></code> function. We already identified intra- and inter-facility pairs above using <code><a href="../reference/get_snv_dists.html">get_snv_dists()</a></code>, so we won’t re-compute them here.</p>
+<p>Even if isolates from the same facility cluster on the phylogeny, they may still be distantly related to each other. To see how closely related isolate pairs are, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and the <code><a href="../reference/get_pair_types.html">get_pair_types()</a></code> function. We already identified intra- and inter-facility pairs above using <code><a href="../reference/get_pair_types.html">get_pair_types()</a></code>, so we won’t re-compute them here.</p>
 <p>Below we plot the intra- and inter-facility pairwise SNV distances as a histogram. The grey line is a pairwise SNV distance of 11. We can see that there are closely related intra- and inter-facility isolate pairs, with an enrichment in intra-facility pairs.</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">snv_hist</span> <span class="op">&lt;-</span> <span class="va">snv_dists</span> <span class="op">%&gt;%</span> 
+<code class="sourceCode R"><span class="va">snv_hist</span> <span class="op">&lt;-</span> <span class="va">pair_types</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pairwise_dist</span>, fill <span class="op">=</span> <span class="va">pair_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu">geom_histogram</span><span class="op">(</span>position <span class="op">=</span> <span class="st">'identity'</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>, bins <span class="op">=</span> <span class="fl">30</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Pairwise SNV distance"</span>, y <span class="op">=</span> <span class="st">"Count"</span>, fill <span class="op">=</span> <span class="st">""</span><span class="op">)</span> <span class="op">+</span>
@@ -552,7 +552,7 @@
 <span class="va">pts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">locs</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">locs</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">]</span>
 <span class="co"># get environments</span>
 <span class="va">envs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">locs</span><span class="op">)</span><span class="op">[</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">locs</span><span class="op">)</span><span class="op">)</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">locs</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
-<span class="va">snv_dists</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span>src1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">loc1</span> <span class="op">%in%</span> <span class="va">pts</span>, <span class="st">'pt'</span>,<span class="st">'env'</span><span class="op">)</span>,
+<span class="va">pair_types</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span>src1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">loc1</span> <span class="op">%in%</span> <span class="va">pts</span>, <span class="st">'pt'</span>,<span class="st">'env'</span><span class="op">)</span>,
                      src2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">loc2</span> <span class="op">%in%</span> <span class="va">pts</span>, <span class="st">'pt'</span>,<span class="st">'env'</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pairwise_dist</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">src1</span>, <span class="va">src2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu">geom_histogram</span><span class="op">(</span>position <span class="op">=</span> <span class="st">'identity'</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>, bins <span class="op">=</span> <span class="fl">30</span><span class="op">)</span> <span class="op">+</span>
@@ -589,24 +589,50 @@
 <h3 class="hasAnchor">
 <a href="#snv-distances" class="anchor"></a>SNV distances</h3>
 <p>We can also look at the number of closely related pairs of isolates at different facility pairs to get a sense of the extent of potential recent transmission and identify facilities and facility pairs with more putative spread. For this, we must choose a SNV threshold. Therefore, we recommend performing a sensitivity analysis by choosing several different SNV thresholds and seeing how robust the results are to these changes.</p>
+<p>To do this, we can summarize the pairwise SNV distance information using the <code><a href="../reference/summarize_pairs.html">summarize_pairs()</a></code> function:</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">close_pair_dat</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="fu">bind_cols</span><span class="op">(</span>snvthresh <span class="op">=</span> <span class="st">'&lt; 7 SNVs'</span>, <span class="va">snv_dists</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pairwise_dist</span> <span class="op">&lt;</span> <span class="fl">7</span><span class="op">)</span> <span class="op">%&gt;%</span>
-                     <span class="fu">mutate</span><span class="op">(</span>loc1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">loc1</span><span class="op">)</span>, pair_type<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">pair_type</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-                     <span class="fu">group_by</span><span class="op">(</span><span class="va">loc1</span>, <span class="va">pair_type</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">summarize</span><span class="op">(</span>n <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-                     <span class="op">%&gt;%</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/complete.html">complete</a></span><span class="op">(</span><span class="va">loc1</span>, <span class="va">pair_type</span><span class="op">)</span><span class="op">)</span>,
-                    <span class="fu">bind_cols</span><span class="op">(</span>snvthresh <span class="op">=</span> <span class="st">'&lt; 11 SNVs'</span>, <span class="va">snv_dists</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pairwise_dist</span> <span class="op">&lt;</span> <span class="fl">11</span><span class="op">)</span> <span class="op">%&gt;%</span>
-                     <span class="fu">mutate</span><span class="op">(</span>loc1<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">loc1</span><span class="op">)</span>, pair_type<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">pair_type</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-                     <span class="fu">group_by</span><span class="op">(</span><span class="va">loc1</span>, <span class="va">pair_type</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">summarize</span><span class="op">(</span>n <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-                     <span class="op">%&gt;%</span> <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/complete.html">complete</a></span><span class="op">(</span><span class="va">loc1</span>, <span class="va">pair_type</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="co"># get summary of pairwise SNV distance data</span>
+<span class="va">snv_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_pairs.html">summarize_pairs</a></span><span class="op">(</span><span class="va">pair_types</span>,summary_fns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'min'</span><span class="op">)</span>, threshs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span> 
+<span class="va">snv_summary</span></code></pre></div>
+<pre><code>## # A tibble: 227 x 5
+## # Groups:   loc1, loc2 [227]
+##    loc1  loc2  dist_min leq_6 leq_10
+##    &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;int&gt;  &lt;int&gt;
+##  1 A     A            1     3      3
+##  2 A     B           19     0      0
+##  3 A     C           63     0      0
+##  4 A     D           36     0      0
+##  5 A     E           65     0      0
+##  6 A     F           70     0      0
+##  7 A     G           69     0      0
+##  8 A     H           71     0      0
+##  9 A     I           73     0      0
+## 10 A     J           42     0      0
+## # … with 217 more rows</code></pre>
+<p>The output is a summary of the isolate pairs for different facility pairs. Here, we also filtered out intra-facility pairs, as we are most interested in inter-facility transmission as compared to patient transfer. The function allows you to input a vector of whatever summary functions you’d like (default is minimum pairwise SNV distance), as well as pairwise SNV distance thresholds to compute the number of closely related pairs for each facility pair under that threshold.</p>
+<p>Now, we can plot that information to identify facilities with closely related intra- and inter-facility pairs:</p>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># get facility summary</span>
+<span class="va">facil_summary</span> <span class="op">&lt;-</span> <span class="va">snv_summary</span> <span class="op">%&gt;%</span> 
+    <span class="fu">mutate</span><span class="op">(</span>pair_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">loc1</span> <span class="op">==</span> <span class="va">loc2</span>, <span class="st">'Intra-facility pair'</span>, <span class="st">'Inter-facility pair'</span><span class="op">)</span>, 
+                            levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'Intra-facility pair'</span>, <span class="st">'Inter-facility pair'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">group_by</span><span class="op">(</span><span class="va">loc1</span>, <span class="va">pair_type</span>, <span class="va">leq_6</span>, <span class="va">leq_10</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">summarize</span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">pivot_longer</span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">leq_6</span>, <span class="va">leq_10</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">rename</span><span class="op">(</span>thresh <span class="op">=</span> <span class="va">name</span>, n_pairs <span class="op">=</span> <span class="va">value</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>thresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span><span class="st">'leq_'</span>,<span class="st">'≤ '</span>, <span class="va">thresh</span><span class="op">)</span>, <span class="st">'SNVs'</span><span class="op">)</span><span class="op">)</span> 
 
-<span class="va">close_pair_dat</span> <span class="op">%&gt;%</span> <span class="fu">mutate</span><span class="op">(</span>pair_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">pair_type</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'Intra-facility pair'</span>, <span class="st">'Inter-facility pair'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">loc1</span>, <span class="op">-</span><span class="va">n</span>, <span class="va">median</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span>, fill <span class="op">=</span> <span class="va">pair_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+<span class="co"># get locations to keep (at least 1 closely related pair)</span>
+<span class="va">keep_locs</span> <span class="op">&lt;-</span> <span class="va">facil_summary</span> <span class="op">%&gt;%</span> <span class="fu">group_by</span><span class="op">(</span><span class="va">loc1</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">summarize</span><span class="op">(</span>sum_all <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_pairs</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">sum_all</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">loc1</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">deframe</span><span class="op">(</span><span class="op">)</span>
+
+<span class="co"># plot</span>
+<span class="va">facil_summary</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">loc1</span> <span class="op">%in%</span> <span class="va">keep_locs</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/complete.html">complete</a></span><span class="op">(</span><span class="va">loc1</span>, <span class="va">pair_type</span>, <span class="va">thresh</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">loc1</span>, <span class="op">-</span><span class="va">n_pairs</span>, <span class="va">sum</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n_pairs</span>, fill <span class="op">=</span> <span class="va">pair_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_col</span><span class="op">(</span>position <span class="op">=</span> <span class="st">'dodge'</span><span class="op">)</span> <span class="op">+</span>
        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_fill_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"cadetblue"</span>, <span class="st">"salmon"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
          <span class="fu">labs</span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Number of closely related \nisolate pairs"</span>, x <span class="op">=</span> <span class="st">"Facility"</span>, fill <span class="op">=</span> <span class="st">''</span>, color <span class="op">=</span> <span class="st">''</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">facet_grid</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">snvthresh</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'&lt; 7 SNVs'</span>,<span class="st">'&lt; 11 SNVs'</span><span class="op">)</span><span class="op">)</span><span class="op">~</span><span class="va">.</span><span class="op">)</span></code></pre></div>
-<pre><code>## Warning: Removed 126 rows containing missing values (geom_col).</code></pre>
-<p><img src="Introduction_files/figure-html/unnamed-chunk-32-1.png" width="700"></p>
+  <span class="fu">facet_grid</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">thresh</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'≤ 6 SNVs'</span>,<span class="st">'≤ 10 SNVs'</span><span class="op">)</span><span class="op">)</span><span class="op">~</span><span class="va">.</span><span class="op">)</span></code></pre></div>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_col).</code></pre>
+<p><img src="Introduction_files/figure-html/unnamed-chunk-33-1.png" width="700"></p>
 <p>Here we see that there is a large number of closely related isolates at certain facilities (e.g. D) and very few at others. We also see that, while most facilities have more closely related intra-facility pairs than inter-facility pairs, this observation does not hold for facilities C and F, which has more closely related intra-facility pairs than inter-facility pairs.</p>
 <p>Furthermore, the results vary somewhat between the two different SNV thresholds, but are relatively consistent.</p>
 </div>
@@ -615,12 +641,12 @@
 <h1 class="hasAnchor">
 <a href="#have-transmission-dynamics-changed-over-time-or-across-species" class="anchor"></a>3. Have transmission dynamics changed over time or across species?</h1>
 <p>To investigate whether transmission dynamics have changed over time or differ across groups (such as sequence type or species) we can “facet” on those variables. Here is an example of faceting on date:</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># get dates </span>
-<span class="va">dates</span> <span class="op">&lt;-</span> <span class="va">metadata</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">sample_id</span>, <span class="va">collection_date</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">deframe</span><span class="op">(</span><span class="op">)</span>
+<span class="va">dates</span> <span class="op">&lt;-</span> <span class="va">metadata</span> <span class="op">%&gt;%</span> <span class="fu">select</span><span class="op">(</span><span class="va">isolate_id</span>, <span class="va">collection_date</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">deframe</span><span class="op">(</span><span class="op">)</span>
 
-<span class="va">time1</span> <span class="op">&lt;-</span> <span class="va">snv_dists</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>date1 <span class="op">=</span> <span class="va">dates</span><span class="op">[</span><span class="va">sample1</span><span class="op">]</span>, date2 <span class="op">=</span> <span class="va">dates</span><span class="op">[</span><span class="va">sample2</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<span class="va">time1</span> <span class="op">&lt;-</span> <span class="va">pair_types</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>date1 <span class="op">=</span> <span class="va">dates</span><span class="op">[</span><span class="va">isolate1</span><span class="op">]</span>, date2 <span class="op">=</span> <span class="va">dates</span><span class="op">[</span><span class="va">isolate2</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date1</span> <span class="op">==</span> <span class="va">date2</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pairwise_dist</span>, fill <span class="op">=</span> <span class="va">pair_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu">geom_histogram</span><span class="op">(</span>position <span class="op">=</span> <span class="st">'identity'</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>, bins <span class="op">=</span> <span class="fl">30</span><span class="op">)</span> <span class="op">+</span>
@@ -630,8 +656,8 @@
         axis.line <span class="op">=</span> <span class="fu">element_line</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span>,
         panel.border <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-<span class="va">time2</span> <span class="op">&lt;-</span> <span class="va">snv_dists</span> <span class="op">%&gt;%</span> 
-  <span class="fu">mutate</span><span class="op">(</span>date1 <span class="op">=</span> <span class="va">dates</span><span class="op">[</span><span class="va">sample1</span><span class="op">]</span>, date2 <span class="op">=</span> <span class="va">dates</span><span class="op">[</span><span class="va">sample2</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<span class="va">time2</span> <span class="op">&lt;-</span> <span class="va">pair_types</span> <span class="op">%&gt;%</span> 
+  <span class="fu">mutate</span><span class="op">(</span>date1 <span class="op">=</span> <span class="va">dates</span><span class="op">[</span><span class="va">isolate1</span><span class="op">]</span>, date2 <span class="op">=</span> <span class="va">dates</span><span class="op">[</span><span class="va">isolate2</span><span class="op">]</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">date1</span> <span class="op">==</span> <span class="va">date2</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pairwise_dist</span>, fill <span class="op">=</span> <span class="va">pair_type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu">geom_histogram</span><span class="op">(</span>position <span class="op">=</span> <span class="fu">position_fill</span><span class="op">(</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>, bins <span class="op">=</span> <span class="fl">30</span><span class="op">)</span> <span class="op">+</span>
@@ -644,36 +670,16 @@
 
 <span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span><span class="va">time1</span>, <span class="va">time2</span>, nrow <span class="op">=</span> <span class="fl">2</span>, labels <span class="op">=</span> <span class="st">'AUTO'</span><span class="op">)</span></code></pre></div>
 <pre><code>## Warning: Removed 8 rows containing missing values (geom_bar).</code></pre>
-<p><img src="Introduction_files/figure-html/unnamed-chunk-33-1.png" width="700"></p>
+<p><img src="Introduction_files/figure-html/unnamed-chunk-34-1.png" width="700"></p>
 <p>The first row of plots show histograms of the raw counts while the second row of plots shows the fraction of isolates at that pairwise SNV distance. We don’t observe many differences over time, except that there are more isolate pairs in 2015 compared to 2014. This is not unexpected given that the dataset we are using is from an endemic setting. If the dataset is from an outbreak setting, you may expect changes in closely related intra- and inter-facility pairs over time. For example, an increase in intra-facility transmission followed by an increase in inter-facility transmission as it disseminates across the healthcare network.</p>
 </div>
 <div id="is-transmission-occurring-along-paths-of-higher-patient-flow" class="section level1">
 <h1 class="hasAnchor">
 <a href="#is-transmission-occurring-along-paths-of-higher-patient-flow" class="anchor"></a>4. Is transmission occurring along paths of higher patient flow?</h1>
 <p>To explore this question, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and/or Fsp matrix along with the patient transfer network using the <code><a href="../reference/get_patient_flow.html">get_patient_flow()</a></code>, <code><a href="../reference/summarize_pairs.html">summarize_pairs()</a></code>, and <code><a href="../reference/merge_inter_summaries.html">merge_inter_summaries()</a></code> functions.</p>
-<p><em>Note:</em> If you do not have a patient transfer network, you could use geographic distances between facilities as a proxy for patient transfer because they are often correlated.</p>
+<p><em>Note:</em> If you do not have a patient transfer network, you may be able to use geographic distances between facilities as a proxy for patient transfer because they are often correlated.</p>
 <p><strong>Remember that choosing pairwise SNV distance threshold(s) based on your dataset is very important, avoid using the default values for your own dataset.</strong></p>
-<p>First, we can summarize the pairwise SNV distance information using the <code><a href="../reference/summarize_pairs.html">summarize_pairs()</a></code> function:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># get summary of pairwise SNV distance data</span>
-<span class="va">snv_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_pairs.html">summarize_pairs</a></span><span class="op">(</span><span class="va">snv_dists</span>,summary_fns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'min'</span><span class="op">)</span>, threshs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">11</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">loc1</span> <span class="op">!=</span> <span class="va">loc2</span><span class="op">)</span>
-<span class="va">snv_summary</span></code></pre></div>
-<pre><code>## # A tibble: 210 x 5
-## # Groups:   loc1, loc2 [210]
-##    loc1  loc2  dists_min under_7 under_11
-##    &lt;chr&gt; &lt;chr&gt;     &lt;dbl&gt;   &lt;int&gt;    &lt;int&gt;
-##  1 A     B            19       0        0
-##  2 A     C            63       0        0
-##  3 A     D            36       0        0
-##  4 A     E            65       0        0
-##  5 A     F            70       0        0
-##  6 A     G            69       0        0
-##  7 A     H            71       0        0
-##  8 A     I            73       0        0
-##  9 A     J            42       0        0
-## 10 A     K           102       0        0
-## # … with 200 more rows</code></pre>
-<p>The output is a summary of the isolate pairs for different facility pairs. Here, we also filtered out intra-facility pairs, as we are most interested in inter-facility transmission as compared to patient transfer. The function allows you to input a vector of whatever summary functions you’d like (default is minimum pairwise SNV distance), as well as pairwise SNV distance thresholds to compute the number of closely related pairs for each facility pair under that threshold.</p>
+<p>We already summarized the genomic data above using <code><a href="../reference/summarize_pairs.html">summarize_pairs()</a></code>.</p>
 <p>We can also get the direct and indirect patient flow between facilities (see <a href="https://aac.asm.org/content/63/11/e01622-19">Han et al. 2019</a> for details on how indirect flow is calculated.) using <code>get_patinet_flow()</code>. The input to this is a data frame with three columns:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -695,22 +701,22 @@
 ## 6            I          D          63</code></pre>
 <p>Here is the output of <code>get_patinet_flow()</code>:</p>
 <div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pt_trans</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_patient_flow.html">get_patient_flow</a></span><span class="op">(</span>edge_df <span class="op">=</span> <span class="va">pt_trans_df</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">pt_trans</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_patient_flow.html">get_patient_flow</a></span><span class="op">(</span>pt_trans_df <span class="op">=</span> <span class="va">pt_trans_df</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">pt_trans</span><span class="op">)</span></code></pre></div>
 <pre><code>##   loc1 loc2 n_transfers_f12 pt_trans_metric_f12 n_transfers_f21
-## 1    C    D             474          0.06218840            2660
-## 2    C    E            1718          0.22540016            1632
-## 3    C    F             563          0.17089210             832
-## 4    C    G              22          0.08213204             189
-## 5    C    H             492          0.11538578             655
-## 6    C    I            3206          0.42062451            2703
+## 1    D    H             260          0.04512957              17
+## 2    D    G               5          0.03212340              14
+## 3    C    D             474          0.06218840            2660
+## 4    D    T               8          0.02663025             182
+## 5    D    F              46          0.06683914              60
+## 6    D    I              12          0.16451422              63
 ##   pt_trans_metric_f21 sum_transfers sum_pt_trans_metric
-## 1           0.3911190          3134           0.4533074
-## 2           0.1754839          3350           0.4008840
-## 3           0.1387564          1395           0.3096485
-## 4           0.0207697           211           0.1029017
-## 5           0.1381857          1147           0.2535714
-## 6           0.3788898          5909           0.7995143</code></pre>
+## 1         0.019319187           277          0.06444875
+## 2         0.004199755            19          0.03632315
+## 3         0.391118953          3134          0.45330736
+## 4         0.032739701           190          0.05936995
+## 5         0.028057366           106          0.09489650
+## 6         0.023562553            75          0.18807677</code></pre>
 <p>The <code><a href="../reference/get_patient_flow.html">get_patient_flow()</a></code> function outputs several columns:</p>
 <ul>
 <li>The facility pair (<code>loc1</code> and <code>loc2</code>)</li>
@@ -723,30 +729,31 @@
 <code class="sourceCode R"><span class="co"># have to convert fsp matrix to long form first</span>
 <span class="va">fsp_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_long_form.html">make_long_form</a></span><span class="op">(</span><span class="va">fsp</span><span class="op">)</span>
 
-<span class="va">pair_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_inter_summaries.html">merge_inter_summaries</a></span><span class="op">(</span><span class="va">pt_trans</span>, <span class="va">snv_summary</span>, <span class="va">fsp_long</span><span class="op">)</span> 
+<span class="co"># only keep inter-facility info in snv_summary</span>
+<span class="va">inter_snv_summary</span> <span class="op">&lt;-</span> <span class="va">snv_summary</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">loc1</span> <span class="op">!=</span> <span class="va">loc2</span><span class="op">)</span>
+
+
+<span class="va">pair_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_inter_summaries.html">merge_inter_summaries</a></span><span class="op">(</span><span class="va">pt_trans</span>, <span class="va">inter_snv_summary</span>, <span class="va">fsp_long</span><span class="op">)</span> 
 <span class="va">pair_info</span></code></pre></div>
-<pre><code>## # A tibble: 210 x 12
+<pre><code>## # A tibble: 265 x 12
 ## # Groups:   loc1, loc2 [210]
-##    loc1  loc2  dists_min under_7 under_11    fsp n_transfers_f12
-##    &lt;chr&gt; &lt;chr&gt;     &lt;dbl&gt;   &lt;int&gt;    &lt;int&gt;  &lt;dbl&gt;           &lt;dbl&gt;
-##  1 A     B            19       0        0 NA                  NA
-##  2 A     C            63       0        0  0.768              NA
-##  3 A     D            36       0        0  0.747              NA
-##  4 A     E            65       0        0  0.820              NA
-##  5 A     F            70       0        0  0.739              NA
-##  6 A     G            69       0        0  0.732              NA
-##  7 A     H            71       0        0  0.844              NA
-##  8 A     I            73       0        0  0.868              NA
-##  9 A     J            42       0        0  0.974              NA
-## 10 A     K           102       0        0  0.948              NA
-## # … with 200 more rows, and 5 more variables: pt_trans_metric_f12 &lt;dbl&gt;,
-## #   n_transfers_f21 &lt;dbl&gt;, pt_trans_metric_f21 &lt;dbl&gt;, sum_transfers &lt;dbl&gt;,
-## #   sum_pt_trans_metric &lt;dbl&gt;</code></pre>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">#%&gt;% ggplot(mapping = aes(x = sum_transfers, y = under_7)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related sample Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related sample Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")</span></code></pre></div>
+##    loc1  loc2  dist_min leq_6 leq_10    fsp n_transfers_f12 pt_trans_metric_f12
+##    &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;int&gt;  &lt;int&gt;  &lt;dbl&gt;           &lt;dbl&gt;               &lt;dbl&gt;
+##  1 A     B           19     0      0 NA                  NA                  NA
+##  2 A     C           63     0      0  0.768              NA                  NA
+##  3 A     D           36     0      0  0.747              NA                  NA
+##  4 A     E           65     0      0  0.820              NA                  NA
+##  5 A     F           70     0      0  0.739              NA                  NA
+##  6 A     G           69     0      0  0.732              NA                  NA
+##  7 A     H           71     0      0  0.844              NA                  NA
+##  8 A     I           73     0      0  0.868              NA                  NA
+##  9 A     J           42     0      0  0.974              NA                  NA
+## 10 A     K          102     0      0  0.948              NA                  NA
+## # … with 255 more rows, and 4 more variables: n_transfers_f21 &lt;dbl&gt;,
+## #   pt_trans_metric_f21 &lt;dbl&gt;, sum_transfers &lt;dbl&gt;, sum_pt_trans_metric &lt;dbl&gt;</code></pre>
 <p>Now we’re ready to plot patient flow vs. various genomic metrics of similarity between facilities:</p>
 <p>We see a negative correlation between patient flow and Fsp, suggesting that facilities connected by more patient transfer are more likely to have similar populations, indicative of more transmission (Remember that fsp values closer to 0 indicate more closely related populations):</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pair_info</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">sum_pt_trans_metric</span>,y<span class="op">=</span><span class="va">fsp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_smooth</span><span class="op">(</span>method<span class="op">=</span><span class="st">'lm'</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_x_log10</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -756,11 +763,11 @@
 <pre><code>## Warning: Removed 155 rows containing missing values (geom_point).</code></pre>
 <p><img src="Introduction_files/figure-html/unnamed-chunk-38-1.png" width="700"></p>
 <p>These observations are corroborated by the positive relationship between patient transfer and number of closely related isolate pairs for a given facility pair:</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pair_info</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">sum_pt_trans_metric</span>,y<span class="op">=</span><span class="va">under_11</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">sum_pt_trans_metric</span>,y<span class="op">=</span><span class="va">leq_10</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_smooth</span><span class="op">(</span>method<span class="op">=</span><span class="st">'lm'</span><span class="op">)</span> <span class="op">+</span> <span class="fu">scale_x_log10</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">'Patient flow'</span>, y <span class="op">=</span> <span class="st">'# closely related\npairs (&lt; 11 SNVs)'</span><span class="op">)</span> </code></pre></div>
+  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">'Patient flow'</span>, y <span class="op">=</span> <span class="st">'# closely related\npairs (≤ 10 SNVs)'</span><span class="op">)</span> </code></pre></div>
 <pre><code>## `geom_smooth()` using formula 'y ~ x'</code></pre>
 <pre><code>## Warning: Removed 155 rows containing non-finite values (stat_smooth).</code></pre>
 <pre><code>## Warning: Removed 155 rows containing missing values (geom_point).</code></pre>
@@ -770,7 +777,7 @@
 <h1 class="hasAnchor">
 <a href="#are-there-any-observable-geographic-trends-in-prevalencetransmission" class="anchor"></a>Are there any observable geographic trends in prevalence/transmission?</h1>
 <p>To evaluate whether there are any observable geographic trends in prevalence or transmission, we will need geographic information (latitude and longitude) for each facility. Here we’ve de-identified the facility geographies as an example. Note that we don’t have geographic information for all facility pairs.</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">facil_coord</span></code></pre></div>
 <pre><code>## # A tibble: 11 x 3
 ##    facil     long      lat
@@ -788,7 +795,7 @@
 ## 11 T     -930605. -740730.</code></pre>
 <p>This data frame contains the facility ID, longitude, latitude.</p>
 <p>We can also add information about the number of isolates from each facility to include as point size on our map:</p>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># get counts for each location</span>
 <span class="va">loc_n</span> <span class="op">&lt;-</span> <span class="va">locs</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu">`colnames&lt;-`</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"facil"</span>, <span class="st">"n_isolates"</span><span class="op">)</span><span class="op">)</span>
 
@@ -810,7 +817,7 @@
 ## 10 P     -930605. -740730.         24
 ## 11 T     -930605. -740730.         15</code></pre>
 <p>We can use this to plot the facilities on a map and connect them by closely related pairs (here we use the under 7 threshold for visualization purposes). Point size represents number of isolates collected from a facility and transparency represents the number of closely related isolate pairs.</p>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># merge facil_info and facil_geo</span>
 <span class="va">snv_geo</span> <span class="op">&lt;-</span> <span class="va">pair_info</span> <span class="op">%&gt;%</span> 
   <span class="fu">left_join</span><span class="op">(</span><span class="va">facil_geo</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"loc1"</span> <span class="op">=</span> <span class="st">"facil"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -820,46 +827,46 @@
   <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">facil_1_lat</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">facil_2_lat</span><span class="op">)</span><span class="op">)</span>
 
 <span class="co"># filter to not plot zeros</span>
-<span class="va">snv_geo_thresh</span> <span class="op">&lt;-</span> <span class="va">snv_geo</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">under_7</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> 
+<span class="va">snv_geo_thresh</span> <span class="op">&lt;-</span> <span class="va">snv_geo</span> <span class="op">%&gt;%</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">leq_6</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> 
 
 <span class="va">facil_geo</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">long</span>, y<span class="op">=</span><span class="va">lat</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu">geom_curve</span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">facil_1_long</span>, y <span class="op">=</span> <span class="va">facil_1_lat</span>, xend <span class="op">=</span> <span class="va">facil_2_long</span>, yend <span class="op">=</span> <span class="va">facil_2_lat</span>,
-                 alpha <span class="op">=</span> <span class="va">under_7</span><span class="op">)</span>,
+                 alpha <span class="op">=</span> <span class="va">leq_6</span><span class="op">)</span>,
              data <span class="op">=</span> <span class="va">snv_geo_thresh</span>, curvature <span class="op">=</span> <span class="fl">0.33</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>size<span class="op">=</span><span class="va">n_isolates</span><span class="op">)</span>, alpha<span class="op">=</span><span class="fl">1</span>, color <span class="op">=</span> <span class="st">"lightblue"</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu"><a href="https://wilkelab.org/cowplot/reference/theme_map.html">theme_map</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> 
-  <span class="fu">labs</span><span class="op">(</span>size <span class="op">=</span> <span class="st">'Number of samples'</span>, alpha <span class="op">=</span> <span class="st">'Number of closely related\npairs (&lt; 7 SNVs)'</span><span class="op">)</span></code></pre></div>
+  <span class="fu">labs</span><span class="op">(</span>size <span class="op">=</span> <span class="st">'Number of samples'</span>, alpha <span class="op">=</span> <span class="st">'Number of closely related\npairs (≤ 6 SNVs)'</span><span class="op">)</span></code></pre></div>
 <p><img src="Introduction_files/figure-html/unnamed-chunk-42-1.png" width="700"></p>
 <p>We can also look at the relationship between physical distance between facilities and number of closely related pairs. First, we have to get the physical distance between facilities:</p>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">snv_geo</span> <span class="op">&lt;-</span> <span class="va">snv_geo</span> <span class="op">%&gt;%</span> 
   <span class="fu">mutate</span><span class="op">(</span>geo_dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="op">(</span><span class="va">facil_1_long</span><span class="op">-</span><span class="va">facil_2_long</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">+</span><span class="op">(</span><span class="va">facil_1_lat</span><span class="op">-</span><span class="va">facil_2_lat</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Then we can plot the relationship between physical distance and summary metrics. Here is an example using the number of pairs under a pairwise SNV distance of 11 between facility pairs:</p>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">snv_geo</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">geo_dist</span>, y <span class="op">=</span> <span class="va">under_11</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">'lm'</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">'Physical distance between facilities'</span>, y <span class="op">=</span> <span class="st">'# closely related pairs\n(&lt; 11 SNVs)'</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">geo_dist</span>, y <span class="op">=</span> <span class="va">leq_10</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">'lm'</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">'Physical distance between facilities'</span>, y <span class="op">=</span> <span class="st">'# closely related pairs\n(≤ 10 SNVs)'</span><span class="op">)</span></code></pre></div>
 <pre><code>## `geom_smooth()` using formula 'y ~ x'</code></pre>
 <p><img src="Introduction_files/figure-html/unnamed-chunk-44-1.png" width="700"></p>
 </div>
 <div id="a-note-on-additional-metadata" class="section level1">
 <h1 class="hasAnchor">
 <a href="#a-note-on-additional-metadata" class="anchor"></a>A note on additional metadata</h1>
-<p>Sometimes it’s useful to make plots faceted or subsetted based on various information from metadata such as collection date, sequence type, etc. To do this, you can merge the <code>snv_dists</code> object with the <code>metadata</code> object as follows (modifying the code as fit for your dataset):</p>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># merge snv_dists and metadata, and find time difference</span>
-<span class="va">snv_and_metadat</span> <span class="op">&lt;-</span> <span class="fu">left_join</span><span class="op">(</span><span class="va">snv_dists</span>, <span class="va">metadata</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'sample1'</span> <span class="op">=</span> <span class="st">'sample_id'</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<p>Sometimes it’s useful to make plots faceted or subsetted based on various information from metadata such as collection date, sequence type, etc. To do this, you can merge the <code>pair_types</code> object with the <code>metadata</code> object as follows (modifying the code as fit for your dataset):</p>
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># merge pair_types and metadata, and find time difference</span>
+<span class="va">snv_and_metadat</span> <span class="op">&lt;-</span> <span class="fu">left_join</span><span class="op">(</span><span class="va">pair_types</span>, <span class="va">metadata</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'isolate1'</span> <span class="op">=</span> <span class="st">'isolate_id'</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu">rename</span><span class="op">(</span>patient_id_1 <span class="op">=</span> <span class="va">patient_id</span>, collection_date_1 <span class="op">=</span> <span class="va">collection_date</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu">left_join</span><span class="op">(</span><span class="va">metadata</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'sample2'</span> <span class="op">=</span> <span class="st">'sample_id'</span><span class="op">)</span><span class="op">)</span> 
+  <span class="fu">left_join</span><span class="op">(</span><span class="va">metadata</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'isolate2'</span> <span class="op">=</span> <span class="st">'isolate_id'</span><span class="op">)</span><span class="op">)</span> 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">snv_and_metadat</span><span class="op">)</span></code></pre></div>
-<pre><code>##   sample1 sample2 pairwise_dist loc1 loc2           pair_type patient_id_1
-## 1 PCMP_H2 PCMP_H1            42    A    B Inter-facility pair           p2
-## 2 PCMP_H3 PCMP_H1            91    A    C Inter-facility pair           p3
-## 3 PCMP_H4 PCMP_H1            65    A    D Inter-facility pair           p4
-## 4 PCMP_H5 PCMP_H1           148    A    E Inter-facility pair           p5
-## 5 PCMP_H7 PCMP_H1            87    A    G Inter-facility pair           p7
-## 6 PCMP_H8 PCMP_H1           201    A    H Inter-facility pair           p8
+<pre><code>##   isolate1 isolate2 pairwise_dist loc1 loc2           pair_type patient_id_1
+## 1  PCMP_H2  PCMP_H1            42    B    A Inter-facility pair           p2
+## 2  PCMP_H3  PCMP_H1            91    C    A Inter-facility pair           p3
+## 3  PCMP_H4  PCMP_H1            65    D    A Inter-facility pair           p4
+## 4  PCMP_H5  PCMP_H1           148    E    A Inter-facility pair           p5
+## 5  PCMP_H7  PCMP_H1            87    G    A Inter-facility pair           p7
+## 6  PCMP_H8  PCMP_H1           201    H    A Inter-facility pair           p8
 ##   facility.x collection_date_1 patient_id facility.y collection_date
 ## 1          B              2014         p1          A            2014
 ## 2          C              2014         p1          A            2014
@@ -872,7 +879,7 @@
 <h1 class="hasAnchor">
 <a href="#making-your-code-run-faster" class="anchor"></a>Making your code run faster</h1>
 <p>For some functions, we have used <code>future.apply()</code> to enable you to make it run faster. Currently, this is only an option for <code><a href="../reference/get_clusters.html">get_clusters()</a></code>, but we plan to implement it for <code><a href="../reference/get_facility_fsp.html">get_facility_fsp()</a></code> as well, and possibly others. To decrease runtime in this way, you have to register a future plan prior to calling the function. This code says to use a multisession plan to split the work across 4 cores, instead of the deafult of 1. You can look at the <a href="https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html"><code>future</code> documentation</a> to figure out what plan is best for what you’re doing. Note that only multisession works for RStudio, but multicore might work better for some purposes, such as working on a computing cluster. After registering a future plan, you can call <code><a href="../reference/get_clusters.html">get_clusters()</a></code> like normal and it should run faster!</p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">doFuture</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/doFuture/man/registerDoFuture.html">registerDoFuture</a></span><span class="op">(</span><span class="op">)</span>
 <span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/future/man/multisession.html">multisession</a></span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>
 
