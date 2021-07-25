@@ -22,7 +22,7 @@ test_dists_3 <- test_dists_2
 test_dists_3[2] <- -1
 test_dists_4 <- test_dists_2
 test_dists_4[,1] <- as.character(test_dists_4[,1])
-test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs)
+test_snv_dists <- get_pair_types(dists = test_dists, locs = test_locs)
 test_snv_dists_2 <- test_snv_dists[,2:ncol(test_snv_dists)]
 test_snv_dists_3 <- test_snv_dists
 colnames(test_snv_dists_3) <- c("A", "B", "C", "D", "E", "F")
@@ -59,7 +59,7 @@ test_pt_trans_net_4 <- test_pt_trans_net
 test_pt_trans_net_4$n_transfers <- as.character(test_pt_trans_net_4$n_transfers)
 test_pt_trans_net_5 <- test_pt_trans_net %>% dplyr::filter(source_facil == "A", dest_facil == "A")
 
-test_snv_dists_pt_trans <- get_snv_dists(dists = test_dists, locs = test_locs)
+test_snv_dists_pt_trans <- get_pair_types(dists = test_dists, locs = test_locs)
 
 mat2 <- data.frame(matrix(data = c(0, 20, 12,
                                   20, 0, 26,
@@ -74,62 +74,62 @@ test_pt_trans_net2$n_transfers <- as.numeric(test_pt_trans_net2$n_transfers)
 mat3 <- mat
 rownames(mat3) <- c(1, 2, 3, 4)
 
-####################################test get_snv_dists######################################
-test_that("check_get_snv_dists_input works", {
+####################################test get_pair_types######################################
+test_that("check_get_pair_types_input works", {
   #check ones that should pass
-  expect_true(is.null(check_get_snv_dists_input(test_dists, test_locs)))
+  expect_true(is.null(check_get_pair_types_input(test_dists, test_locs)))
   #one input - dists
   expect_error(
-    check_get_snv_dists_input(dists = test_dists),
+    check_get_pair_types_input(dists = test_dists),
     'argument "locs" is missing, with no default',
     fixed = TRUE
   )
   #one input - locs
   expect_error(
-    check_get_snv_dists_input(locs = test_locs),
+    check_get_pair_types_input(locs = test_locs),
     'argument "dists" is missing, with no default',
     fixed = TRUE
   )
   #no locs input
   expect_error(
-    check_get_snv_dists_input(dists = test_dists),
+    check_get_pair_types_input(dists = test_dists),
     'argument "locs" is missing, with no default',
     fixed = TRUE
   )
   #test_dists not a dists object
   expect_error(
-    check_get_snv_dists_input(dists = "test_dists", locs = test_locs),
+    check_get_pair_types_input(dists = "test_dists", locs = test_locs),
     "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character",
     fixed = TRUE
   )
   #locs not a named list
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = "test_locs"),
+    check_get_pair_types_input(dists = test_dists, locs = "test_locs"),
     "The locs object must be a a named list of locations named by sample IDs",
     fixed = TRUE
   )
   #dist names not matching locs names
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs_2),
+    check_get_pair_types_input(dists = test_dists, locs = test_locs_2),
     "You have not provided locations of at least 2 isolates in your SNV distance matrix (dists). Please provide locations for at least 2 isolates in your SNV distance matrix.",
     fixed = TRUE
   )
   #one with less than two in common
   expect_error(
-    check_get_snv_dists_input(dists = test_dists, locs = test_locs_4),
+    check_get_pair_types_input(dists = test_dists, locs = test_locs_4),
     "You have only supplied locations for 1 isolates. Please supply a named vector of locations for at least 2 isolates",
     fixed = TRUE
   )
 
   #warnings
   #dist names being a subset of locs names
-  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists_2, locs = test_locs))
+  warnings <- capture_warnings(check_get_pair_types_input(dists = test_dists_2, locs = test_locs))
   expect_true(warnings[1] == "You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset")
   expect_true(warnings[2] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
   #locs names being a subset of dists names
-  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists, locs = test_locs_3))
+  warnings <- capture_warnings(check_get_pair_types_input(dists = test_dists, locs = test_locs_3))
   expect_true(warnings[1] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
-  warnings <- capture_warnings(check_get_snv_dists_input(dists = test_dists_2, locs = test_locs))
+  warnings <- capture_warnings(check_get_pair_types_input(dists = test_dists_2, locs = test_locs))
   expect_true(warnings[1] == "You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset")
   expect_true(warnings[2] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
 
@@ -160,7 +160,7 @@ test_that("check_snv_dists works", {
   expect_error(check_snv_dists(test_snv_dists_5),
                "Your snv_dists input has  ")
   expect_error(check_snv_dists('test_snv_dists'),
-               "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character", fixed = TRUE)
+               "The snv_dists object must be the output of the get_pair_types() function, but you provided:  character", fixed = TRUE)
 })
 
 #test check_subset_pairs_input works
@@ -180,13 +180,13 @@ test_that("check_get_frac_intra_input works", {
   #one that's input is similar but wrong # cols
   expect_error(
     check_get_frac_intra_input(snv_dists = test_snv_dists_2),
-    "The snv_dists object must be the output of the get_snv_dists() function, but you provided a data.frame with  5  columns.",
+    "The snv_dists object must be the output of the get_pair_types() function, but you provided a data.frame with  5  columns.",
     fixed = TRUE
   )
   #one that's input is similar but not correct rownames
   expect_error(
     check_get_frac_intra_input(snv_dists = test_snv_dists_3),
-    "The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has  6  columns that are not the output columns needed.",
+    "The snv_dists object must be the output of the get_pair_types() function, but the data.frame you provided has  6  columns that are not the output columns needed.",
     fixed = TRUE
   )
   #one that's input is similar but not numeric dist col
@@ -563,7 +563,7 @@ test_that("check_summarize_pairs_input works", {
   expect_null(check_summarize_pairs_input(test_snv_dists, NULL, 5))
   expect_null(check_summarize_pairs_input(test_snv_dists, 'min', NULL))
   expect_error(check_summarize_pairs_input('test_snv_dists', min, 5),
-               "The snv_dists object must be the output of the get_snv_dists() function, but you provided:  character", fixed = TRUE)
+               "The snv_dists object must be the output of the get_pair_types() function, but you provided:  character", fixed = TRUE)
   expect_error(check_summarize_pairs_input(test_snv_dists, min, 5),
                "The summary_fns argment must either be `NULL` or a character vector of function names you wish to use to summarize inter-facility pariwise distances. You have provided function")
   expect_error(check_summarize_pairs_input(test_snv_dists, c('min','asd'), 5),

@@ -17,7 +17,7 @@ st_tiplabs <- sapply(1:nrow(test_clusters$pure_subtree_info), function(x){
   name
 })
 
-test_that("get_snv_dists works", {
+test_that("get_pair_types works", {
   #check that test_clusters is a list of three
   expect_true(length(test_clusters) == 3)
   #check the types

@@ -1,6 +1,6 @@
 #' Calculate gene flow (Fsp)
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #' @param fasta ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
 #' @param matrix whether to output symmetric matrix (TRUE; default) or long form (FALSE)
 #'
