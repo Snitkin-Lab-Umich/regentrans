@@ -75,9 +75,9 @@ round(2*ref_genome_length*mutation_rate)
 ```{r}
 # pre-calculated in vignette
 # dists <- dist.dna(fasta, model = 'N', pairwise.deletion = TRUE, as.matrix = TRUE)
-snv_dists <- get_pair_types(dists = dists, locs = locs) %>% subset_pairs()
+pair_types <- get_pair_types(dists = dists, locs = locs) %>% subset_pairs()
 
-frac_intra <- get_frac_intra(snv_dists = snv_dists)
+frac_intra <- get_frac_intra(pair_types = pair_types)
 
 f2 <- frac_intra %>% 
   mutate(under = ifelse(Pairwise_Dists < 11, '< 11 SNVs','Over threshold'), under = ifelse(Pairwise_Dists < 7, '< 7 SNVs',under),
@@ -130,7 +130,7 @@ f3
 
 
 ```{r, message=FALSE}
-pw_snv_plot <- snv_dists %>% 
+pw_snv_plot <- pair_types %>% 
   ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
   labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
@@ -139,7 +139,7 @@ pw_snv_plot <- snv_dists %>%
         axis.line = element_line(colour = "black"),
         panel.border = element_blank())
 
-pw_snv_plot_zoom <- snv_dists %>% 
+pw_snv_plot_zoom <- pair_types %>% 
   filter(Pairwise_Dists < 11) %>% 
   ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
@@ -177,11 +177,11 @@ pheatmap(fsp, border_color = 'white',
 ### SNV distances 
 
 ```{r, message=FALSE, warning=FALSE}
-coldat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', snv_dists %>% filter(Pairwise_Dists < 7) %>%
+coldat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', pair_types %>% filter(Pairwise_Dists < 7) %>%
                      mutate(Loc1=factor(Loc1), Pair_Type=factor(Pair_Type)) %>%
                      group_by(Loc1, Pair_Type) %>% summarize(n = n())
                      %>% tidyr::complete(Loc1, Pair_Type)),
-                    bind_cols(snvthresh = '< 11 SNVs', snv_dists %>% filter(Pairwise_Dists < 11) %>%
+                    bind_cols(snvthresh = '< 11 SNVs', pair_types %>% filter(Pairwise_Dists < 11) %>%
                      mutate(Loc1=factor(Loc1), Pair_Type=factor(Pair_Type)) %>%
                      group_by(Loc1, Pair_Type) %>% summarize(n = n())
                      %>% tidyr::complete(Loc1, Pair_Type)))
@@ -206,10 +206,10 @@ fsp_flow <- full_join(reshape2::melt(as.matrix(pt_flow)) %>% rename(pt_flow = va
 
 thresh = 7
 
-snv_dist_summary <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>% dplyr::filter(Loc1 != Loc2)
+snv_dist_summary <- pair_types %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>% dplyr::filter(Loc1 != Loc2)
 
 # USE MIN INSTEAD/IN ADDITION?
-# snv_dist_summary <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = min(Pairwise_Dists)) %>% dplyr::filter(Loc1 != Loc2)
+# snv_dist_summary <- pair_types %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = min(Pairwise_Dists)) %>% dplyr::filter(Loc1 != Loc2)
 
 pair_info <- full_join(fsp_flow, snv_dist_summary)
 
@@ -244,7 +244,7 @@ f7
 
 
 ```{r}
-time1 <- snv_dists %>% 
+time1 <- pair_types %>% 
   mutate(date1 = dates[Isolate1], date2 = dates[Isolate2]) %>% 
   filter(date1 == date2) %>% 
   ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
@@ -255,7 +255,7 @@ time1 <- snv_dists %>%
         axis.line = element_line(colour = "black"),
         panel.border = element_blank())
 
-time2 <- snv_dists %>% 
+time2 <- pair_types %>% 
   mutate(date1 = dates[Isolate1], date2 = dates[Isolate2]) %>% 
   filter(date1 == date2) %>% 
   ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
@@ -300,7 +300,7 @@ facil_geo <- facil_coord %>% left_join(loc_n)
 
 # bind_cols(facil=names(longs), long=longs, lat=lats) %>% ggplot(aes(x = lats, y = longs)) + geom_point() + theme_map()
 
-snv_geo <- snv_dists %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists < 7)) %>% dplyr::filter(Loc1 != Loc2, n_closely_related_pairs > 0) %>%
+snv_geo <- pair_types %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists < 7)) %>% dplyr::filter(Loc1 != Loc2, n_closely_related_pairs > 0) %>%
   left_join(facil_geo, by = c("Loc1" = "facil")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facil")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +

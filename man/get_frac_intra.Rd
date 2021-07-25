@@ -4,10 +4,10 @@
 \alias{get_frac_intra}
 \title{Get fraction of intra-facility pairs for different SNV thresholds}
 \usage{
-get_frac_intra(snv_dists)
+get_frac_intra(pair_types)
 }
 \arguments{
-\item{snv_dists}{the output object of the get_pair_types function}
+\item{pair_types}{the output object of the get_pair_types function}
 }
 \value{
 fraction of intra-facility pairs for each SNV distance in dataset
@@ -18,7 +18,7 @@ Get fraction of intra-facility pairs for different SNV thresholds
 \examples{
 \dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
-snv_dists <- get_pair_types(dists, locs)
-get_frac_intra(snv_dists)
+pair_types <- get_pair_types(dists, locs)
+get_frac_intra(pair_types)
 }
 }

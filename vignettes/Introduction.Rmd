@@ -250,16 +250,16 @@ We can use `get_pair_types()` to get the pair types for each isolate pair (intra
 
 ```{r}
 # get pair types for pairwise SNV distances (intra vs. inter)
-snv_dists <- get_pair_types(dists = dists, locs = locs)
+pair_types <- get_pair_types(dists = dists, locs = locs)
 
 # get fraction of intra-facility pairs for each SNV distance
-frac_intra <- get_frac_intra(snv_dists = snv_dists)
+frac_intra <- get_frac_intra(pair_types = pair_types)
 ```
 
 The output of `get_pair_types()` includes information about each isolate pair including the pairwise distance, location of each isolate in the pair, and the type of pair (intra- or inter-facility): 
 
 ```{r}
-head(snv_dists)
+head(pair_types)
 ```
 
 
@@ -415,7 +415,7 @@ Even if isolates from the same facility cluster on the phylogeny, they may still
 Below we plot the intra- and inter-facility pairwise SNV distances as a histogram. The grey line is a pairwise SNV distance of 11. We can see that there are closely related intra- and inter-facility isolate pairs, with an enrichment in intra-facility pairs. 
 
 ```{r, message=FALSE}
-snv_hist <- snv_dists %>% 
+snv_hist <- pair_types %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
   labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
@@ -450,7 +450,7 @@ Note that this is one of many ways in which the functions provided in `regentran
 pts <- unique(locs)[1:round(length(unique(locs))/2)]
 # get environments
 envs <- unique(locs)[(round(length(unique(locs))/2)+1):length(unique(locs))]
-snv_dists %>% mutate(src1 = ifelse(loc1 %in% pts, 'pt','env'),
+pair_types %>% mutate(src1 = ifelse(loc1 %in% pts, 'pt','env'),
                      src2 = ifelse(loc2 %in% pts, 'pt','env')) %>% 
   ggplot(aes(x = pairwise_dist, fill = paste(src1, src2))) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
@@ -490,11 +490,11 @@ For this, we must choose a SNV threshold.
 Therefore, we recommend performing a sensitivity analysis by choosing several different SNV thresholds and seeing how robust the results are to these changes. 
 
 ```{r, message=FALSE}
-close_pair_dat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', snv_dists %>% filter(pairwise_dist < 7) %>%
+close_pair_dat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', pair_types %>% filter(pairwise_dist < 7) %>%
                      mutate(loc1=factor(loc1), pair_type=factor(pair_type)) %>%
                      group_by(loc1, pair_type) %>% summarize(n = n())
                      %>% tidyr::complete(loc1, pair_type)),
-                    bind_cols(snvthresh = '< 11 SNVs', snv_dists %>% filter(pairwise_dist < 11) %>%
+                    bind_cols(snvthresh = '< 11 SNVs', pair_types %>% filter(pairwise_dist < 11) %>%
                      mutate(loc1=factor(loc1), pair_type=factor(pair_type)) %>%
                      group_by(loc1, pair_type) %>% summarize(n = n())
                      %>% tidyr::complete(loc1, pair_type)))
@@ -520,7 +520,7 @@ To investigate whether transmission dynamics have changed over time or differ ac
 # get dates 
 dates <- metadata %>% select(isolate_id, collection_date) %>% deframe()
 
-time1 <- snv_dists %>% 
+time1 <- pair_types %>% 
   mutate(date1 = dates[sample1], date2 = dates[sample2]) %>% 
   filter(date1 == date2) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
@@ -531,7 +531,7 @@ time1 <- snv_dists %>%
         axis.line = element_line(colour = "black"),
         panel.border = element_blank())
 
-time2 <- snv_dists %>% 
+time2 <- pair_types %>% 
   mutate(date1 = dates[sample1], date2 = dates[sample2]) %>% 
   filter(date1 == date2) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
@@ -563,7 +563,7 @@ First, we can summarize the pairwise SNV distance information using the `summari
 
 ```{r, message=FALSE}
 # get summary of pairwise SNV distance data
-snv_summary <- summarize_pairs(snv_dists,summary_fns = c('min'), threshs = c(7, 11)) %>% filter(loc1 != loc2)
+snv_summary <- summarize_pairs(pair_types,summary_fns = c('min'), threshs = c(7, 11)) %>% filter(loc1 != loc2)
 snv_summary
 ```
 
@@ -697,11 +697,11 @@ snv_geo %>%
 
 # A note on additional metadata
 
-Sometimes it's useful to make plots faceted or subsetted based on various information from metadata such as collection date, sequence type, etc. To do this, you can merge the `snv_dists` object with the `metadata` object as follows (modifying the code as fit for your dataset):
+Sometimes it's useful to make plots faceted or subsetted based on various information from metadata such as collection date, sequence type, etc. To do this, you can merge the `pair_types` object with the `metadata` object as follows (modifying the code as fit for your dataset):
 
 ```{r}
-# merge snv_dists and metadata, and find time difference
-snv_and_metadat <- left_join(snv_dists, metadata, by = c('sample1' = 'isolate_id')) %>% 
+# merge pair_types and metadata, and find time difference
+snv_and_metadat <- left_join(pair_types, metadata, by = c('sample1' = 'isolate_id')) %>% 
   rename(patient_id_1 = patient_id, collection_date_1 = collection_date) %>% 
   left_join(metadata, by = c('sample2' = 'isolate_id')) 
 head(snv_and_metadat)

@@ -3,10 +3,10 @@
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_snv_dists <- get_pair_types(dists = test_dists, locs = test_locs)
-test_isolate_pair_summary <- summarize_pairs(test_snv_dists, summary_fns = c("min"), threshs = c(20, 50))
-test_isolate_pair_summary_2 <- summarize_pairs(test_snv_dists, summary_fns = c("min"), threshs = NULL)
-test_isolate_pair_summary_3 <- summarize_pairs(test_snv_dists, summary_fns = NULL, threshs = c(20, 50))
+test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs)
+test_isolate_pair_summary <- summarize_pairs(test_pair_types, summary_fns = c("min"), threshs = c(20, 50))
+test_isolate_pair_summary_2 <- summarize_pairs(test_pair_types, summary_fns = c("min"), threshs = NULL)
+test_isolate_pair_summary_3 <- summarize_pairs(test_pair_types, summary_fns = NULL, threshs = c(20, 50))
 test_pt_flow <- pt_trans_df %>% dplyr::filter(source_facil %in% c('C','D','E') & dest_facil %in% c('C','D','E')) %>% get_patient_flow()
 test_fsp_long <- make_long_form(fsp)[1:2,]
 merged_summaries <- merge_inter_summaries(test_pt_flow, test_isolate_pair_summary, test_fsp_long)

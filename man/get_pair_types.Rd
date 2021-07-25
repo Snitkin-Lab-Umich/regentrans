@@ -20,6 +20,6 @@ Get data frame of inter- and intra-facility pariwise SNV distances
 \examples{
 \dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
-snv_dists <- get_pair_types(dists, locs)
+pair_types <- get_pair_types(dists, locs)
 }
 }

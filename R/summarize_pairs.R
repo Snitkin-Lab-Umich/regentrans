@@ -1,6 +1,6 @@
 #' Summarize extent of relatedness of intra- and inter-facility pairs by facility pair
 #'
-#' @param snv_dists the output object of the get_pair_types function
+#' @param pair_types the output object of the get_pair_types function
 #' @param summary_fns vector of summary functions for pairwise distances as character strings (default: c("min"))
 #' @param threshs SNV thresholds to use for pairwise distances (default: seq(5, 20, 5))
 #'
@@ -10,18 +10,18 @@
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' snv_dists <- get_pair_types(dists, locs)
-#' summarize_pairs(snv_dists = snv_dists)
+#' pair_types <- get_pair_types(dists, locs)
+#' summarize_pairs(pair_types = pair_types)
 #' }
-summarize_pairs <- function(snv_dists, summary_fns = c("min"), threshs = seq(5,20,5)){
+summarize_pairs <- function(pair_types, summary_fns = c("min"), threshs = seq(5,20,5)){
   #run checks
-  check_summarize_pairs_input(snv_dists = snv_dists, summary_fns = summary_fns, threshs = threshs)
+  check_summarize_pairs_input(pair_types = pair_types, summary_fns = summary_fns, threshs = threshs)
 
   inter_dists_stats_summary <- data.frame(loc1=character(), loc2=character())
 
   if(!is.null(summary_fns)){
     inter_dists_stats_summary <- lapply(summary_fns, function(x){
-      snv_dists %>% dplyr::group_by(loc1, loc2) %>%
+      pair_types %>% dplyr::group_by(loc1, loc2) %>%
         dplyr::summarize(!!dplyr::quo_name(paste0('dist_', x)) := get(x)(pairwise_dist), .groups = 'keep')
     }) %>%
       purrr::reduce(dplyr::full_join, by = c("loc1", "loc2"))
@@ -30,7 +30,7 @@ summarize_pairs <- function(snv_dists, summary_fns = c("min"), threshs = seq(5,2
   inter_dists_thresh_summary <- data.frame(loc1=character(), loc2=character())
   if(!is.null(threshs)){
     inter_dists_thresh_summary <- lapply(threshs, function(x){
-      snv_dists %>% dplyr::group_by(loc1, loc2) %>%
+      pair_types %>% dplyr::group_by(loc1, loc2) %>%
         dplyr::summarize(!!dplyr::quo_name(paste0('under_', x)) := sum(pairwise_dist < x), .groups = 'keep')
     }) %>%
       purrr::reduce(dplyr::full_join, by = c("loc1", "loc2"))
@@ -56,8 +56,8 @@ summarize_pairs <- function(snv_dists, summary_fns = c("min"), threshs = seq(5,2
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' snv_dists <- get_pair_types(dists, locs)
-#' isolate_pair_summary <- summarize_pairs(snv_dists)
+#' pair_types <- get_pair_types(dists, locs)
+#' isolate_pair_summary <- summarize_pairs(pair_types)
 #' patient_flow <- get_patient_flow(edge_df = pt_trans_df)
 #' fsp_long <- make_long_form(fsp)
 #' merge_inter_summaries(patient_flow, isolate_pair_summary, fsp_long)
