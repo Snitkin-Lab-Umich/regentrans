@@ -2,6 +2,8 @@
 
 <img src="man/figures/regentrans_logo.png"  width = "200" />
 
+Website: https://snitkin-lab-umich.github.io/regentrans/
+
 `regentrans` can be installed using the command `devtools::install_github('Snitkin-Lab-Umich/regentrans')` in R 
 
 Examples of how to interrogate all of the questions in the table below can be found in the [introductory vignette](https://snitkin-lab-umich.github.io/regentrans/articles/Introduction.html).
