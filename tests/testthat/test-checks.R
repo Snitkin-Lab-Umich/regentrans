@@ -28,7 +28,7 @@ test_pair_types_3 <- test_pair_types
 colnames(test_pair_types_3) <- c("A", "B", "C", "D", "E", "F")
 test_pair_types_4 <- test_pair_types
 test_pair_types_4$pairwise_dist <- as.character(test_pair_types_4$pairwise_dist)
-test_pair_types_5 <- test_pair_types %>% tibble::tibble() %>% dplyr::filter(sample1 == 'a') %>% data.frame()
+test_pair_types_5 <- test_pair_types %>% tibble::tibble() %>% dplyr::filter(isolate1 == 'a') %>% data.frame()
 test_tr <- ape::keep.tip(tr,names(test_locs))
 test_tr_2 <- ape::keep.tip(tr,names(test_locs_3))
 test_fasta <- aln[names(test_locs),]
@@ -506,29 +506,29 @@ test_that("check_get_largest_subtree_input works", {
 ##################################test patient_flow#####################################
 test_that("check_get_patient_flow_input works", {
   #one that works with pair_types
-  expect_null(check_get_patient_flow_input(edge_df = test_pt_trans_net, paths = FALSE))
-  #one where edge_df is wrong
-  expect_error(check_get_patient_flow_input(edge_df = "test_pt_trans_net", paths = FALSE),
-               "The edge_df object must be a data.frame or matrix, you provided a  character",
+  expect_null(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net, paths = FALSE))
+  #one where pt_trans_df is wrong
+  expect_error(check_get_patient_flow_input(pt_trans_df = "test_pt_trans_net", paths = FALSE),
+               "The pt_trans_df object must be a data.frame or matrix, you provided a  character",
                fixed = TRUE)
-  #one where edge_df has wrong ncol
-  expect_error(check_get_patient_flow_input(edge_df = test_pt_trans_net_2, paths = FALSE),
-               "The edge_df object must be a data.frame or matrix with 3 columns, you provided  2",
+  #one where pt_trans_df has wrong ncol
+  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_2, paths = FALSE),
+               "The pt_trans_df object must be a data.frame or matrix with 3 columns, you provided  2",
                fixed = TRUE)
-  #one where edge_df has wrong colnames
-  expect_error(check_get_patient_flow_input(edge_df = test_pt_trans_net_3, paths = FALSE),
-               "The edge_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided  A B C",
+  #one where pt_trans_df has wrong colnames
+  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_3, paths = FALSE),
+               "The pt_trans_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided  A B C",
                fixed = TRUE)
-  #one where edge_df has wrong coltypes
-  expect_error(check_get_patient_flow_input(edge_df = test_pt_trans_net_4, paths = FALSE),
-               "The edge_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided  factor factor character",
+  #one where pt_trans_df has wrong coltypes
+  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_4, paths = FALSE),
+               "The pt_trans_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided  factor factor character",
                fixed = TRUE)
   #one where paths is wrong
-  expect_error(check_get_patient_flow_input(edge_df = test_pt_trans_net_5, paths = 12),
+  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_5, paths = 12),
                "paths argument must be a logical/logical value representing whether you want to return the shortest paths used to generate the indirect flow metric. You have provided numeric",
                fixed = TRUE)
 
-  expect_error(check_get_patient_flow_input(edge_df = dplyr::bind_rows(test_pt_trans_net, test_pt_trans_net), paths = FALSE),
+  expect_error(check_get_patient_flow_input(pt_trans_df = dplyr::bind_rows(test_pt_trans_net, test_pt_trans_net), paths = FALSE),
                "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.",
                fixed = TRUE)
 })

@@ -9,7 +9,7 @@ dplyr::`%>%`
 utils::globalVariables(c(".","subtr_size","index","isolate_name","pair_type","pairwise_dist",
                          "n","Intra-facility pair","Inter-facility pair","frac_intra",
                          "frac_inter","source_facil","n_transfers","freq","Freq","dest_facil",
-                         "loc1","loc2","pairwise_dist","Patient1","Patient2","sample1",
+                         "loc1","loc2","pairwise_dist","Patient1","Patient2","isolate1",
                          "sample2","n_closely_related_pairs", "n_transfers_f12",
                          "n_transfers_f21", "pt_trans_metric",
                          "pt_trans_metric_f12", "pt_trans_metric_f21","isolate_id"))
@@ -39,11 +39,14 @@ make_long_form <- function(facil_dist, col_names = c('loc1', 'loc2', 'fsp')){
   colnames(facil_dist_long) <- col_names
 
   if(sym){
-    facil_pairs <- sapply(1:nrow(facil_dist_long), function(x)
-      paste0(sort(c(as.character(facil_dist_long[,1][x]),
-                    as.character(facil_dist_long[,2][x]))), collapse = ''))
-    facil_dist_long[,1] <- sapply(facil_pairs, function(x) substring(x, 1, 1))
-    facil_dist_long[,2] <- sapply(facil_pairs, function(x) substring(x, 2, 2))
+    ## sort facilities before summarizing (should probably make this a function)
+    facil_pairs <- lapply(1:nrow(facil_dist_long), function(x)
+      sort(c(as.character(facil_dist_long$loc1[x]), as.character(facil_dist_long$loc2[x])))
+    )
+
+    facil_dist_long$loc1 <- sapply(facil_pairs, function(x) x[1])
+    facil_dist_long$loc2 <- sapply(facil_pairs, function(x) x[2])
+
     facil_dist_long <- subset_pairs(facil_dist_long)
   }
 

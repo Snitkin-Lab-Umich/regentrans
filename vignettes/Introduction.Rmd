@@ -521,7 +521,7 @@ To investigate whether transmission dynamics have changed over time or differ ac
 dates <- metadata %>% select(isolate_id, collection_date) %>% deframe()
 
 time1 <- pair_types %>% 
-  mutate(date1 = dates[sample1], date2 = dates[sample2]) %>% 
+  mutate(date1 = dates[isolate1], date2 = dates[sample2]) %>% 
   filter(date1 == date2) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
@@ -532,7 +532,7 @@ time1 <- pair_types %>%
         panel.border = element_blank())
 
 time2 <- pair_types %>% 
-  mutate(date1 = dates[sample1], date2 = dates[sample2]) %>% 
+  mutate(date1 = dates[isolate1], date2 = dates[sample2]) %>% 
   filter(date1 == date2) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = position_fill(), alpha = 0.4, bins = 30) +
@@ -586,7 +586,7 @@ head(pt_trans_df)
 Here is the output of `get_patinet_flow()`:
 
 ```{r}
-pt_trans <- get_patient_flow(edge_df = pt_trans_df)
+pt_trans <- get_patient_flow(pt_trans_df = pt_trans_df)
 head(pt_trans)
 ```
 
@@ -701,7 +701,7 @@ Sometimes it's useful to make plots faceted or subsetted based on various inform
 
 ```{r}
 # merge pair_types and metadata, and find time difference
-snv_and_metadat <- left_join(pair_types, metadata, by = c('sample1' = 'isolate_id')) %>% 
+snv_and_metadat <- left_join(pair_types, metadata, by = c('isolate1' = 'isolate_id')) %>% 
   rename(patient_id_1 = patient_id, collection_date_1 = collection_date) %>% 
   left_join(metadata, by = c('sample2' = 'isolate_id')) 
 head(snv_and_metadat)
