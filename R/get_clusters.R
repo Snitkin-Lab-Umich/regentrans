@@ -1,6 +1,6 @@
 #' Get facility clusters on the phylogeny
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #' @param tr a tree object returned by the read.tree function from the ape package
 #' @param pureness how pure each cluster should be (must be > 0.5) (optional, defauly = 1)
 #' @param bootstrap Bootstrap support to use to filter unconfident tree edges (optional, default = NULL)

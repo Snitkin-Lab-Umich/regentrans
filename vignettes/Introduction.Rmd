@@ -246,17 +246,17 @@ Sometimes it is difficult to calculate a mutation rate for a given organism, or 
 Therefore, we also recommend using the data to identify potential pairwise SNV distance thresholds.
 Here, we use the assumption that intra-facility transmission is more common than inter-facility transmission to identify reasonable thresholds by looking for drops in the fraction of isolate pairs that are intra-facility pairs compared to inter-facility pairs for various SNV distances. Note that not all datasets will drop off, so this method may not work for some datasets.
 
-We can use `get_snv_dists()` to get the pair types for each isolate pair (intra- or inter-facility) and `get_frac_intra()` to calculate the fraction of intra-facility pairs for different SNV distances:
+We can use `get_pair_types()` to get the pair types for each isolate pair (intra- or inter-facility) and `get_frac_intra()` to calculate the fraction of intra-facility pairs for different SNV distances:
 
 ```{r}
 # get pair types for pairwise SNV distances (intra vs. inter)
-snv_dists <- get_snv_dists(dists = dists, locs = locs)
+snv_dists <- get_pair_types(dists = dists, locs = locs)
 
 # get fraction of intra-facility pairs for each SNV distance
 frac_intra <- get_frac_intra(snv_dists = snv_dists)
 ```
 
-The output of `get_snv_dists()` includes information about each isolate pair including the pairwise distance, location of each isolate in the pair, and the type of pair (intra- or inter-facility): 
+The output of `get_pair_types()` includes information about each isolate pair including the pairwise distance, location of each isolate in the pair, and the type of pair (intra- or inter-facility): 
 
 ```{r}
 head(snv_dists)
@@ -310,7 +310,7 @@ In this case, we might have chosen a pairwise SNV distance of 10, or tried plott
 
 # 1. Is transmission occurring within and/or between locations?
 
-To explore this question we can leverage our whole-genome sequencing data in the form of the phylogenetic tree using the `get_clusters()` function and the SNV distance matrix using the `get_snv_dists()`. 
+To explore this question we can leverage our whole-genome sequencing data in the form of the phylogenetic tree using the `get_clusters()` function and the SNV distance matrix using the `get_pair_types()`. 
 
 ## Threshold-free phylogenetic approach
 
@@ -410,7 +410,7 @@ ggtree(tr) + geom_tippoint(aes(col = clust_tips)) +
 
 ## Pairwise SNV distance approach
 
-Even if isolates from the same facility cluster on the phylogeny, they may still be distantly related to each other. To see how closely related isolate pairs are, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and the `get_snv_dists()` function. We already identified intra- and inter-facility pairs above using `get_snv_dists()`, so we won't re-compute them here. 
+Even if isolates from the same facility cluster on the phylogeny, they may still be distantly related to each other. To see how closely related isolate pairs are, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and the `get_pair_types()` function. We already identified intra- and inter-facility pairs above using `get_pair_types()`, so we won't re-compute them here. 
 
 Below we plot the intra- and inter-facility pairwise SNV distances as a histogram. The grey line is a pairwise SNV distance of 11. We can see that there are closely related intra- and inter-facility isolate pairs, with an enrichment in intra-facility pairs. 
 

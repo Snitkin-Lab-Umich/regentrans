@@ -15,7 +15,7 @@ pt_flow_sub <- pat_flow[1:3,]
 
 test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs)
+test_snv_dists <- get_pair_types(dists = test_dists, locs = test_locs)
 #one without paths returned
 test_pt_trans <- get_patient_flow(edge_df = pat_flow)
 #one with paths returned

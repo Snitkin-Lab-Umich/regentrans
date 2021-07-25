@@ -1,11 +1,11 @@
 #checks for regentrans inputs
-#########################################################get_snv_dists####################################################################################
+#########################################################get_pair_types####################################################################################
 #*******************************************************************************************************************************************#
-#***********************************************START CHECKS FOR get_snv_dists FUNCTION*****************************************************#
+#***********************************************START CHECKS FOR get_pair_types FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
-#' Check dists input to get_snv_dists function
+#' Check dists input to get_pair_types function
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #'
 #' @noRd
 #'
@@ -37,9 +37,9 @@ check_dists <- function(dists){
 
 }
 
-#' Check locs input to get_snv_dists function
+#' Check locs input to get_pair_types function
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #'
 #' @noRd
 #'
@@ -58,7 +58,7 @@ check_locs <- function(locs){
 
 #' Check that the names of the isolates in locs actually exist in the SNV matrix
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #'
 #' @noRd
 #'
@@ -82,7 +82,7 @@ check_dists_vs_locs <- function(dists, locs){
 
 #' Check patient transfer network input
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #'
 #' @noRd
 #'
@@ -124,11 +124,11 @@ check_edge_df <- function(edge_df){
 
 #' Check input to snv_dists
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #'
 #' @noRd
 #'
-check_get_snv_dists_input <- function(dists, locs){
+check_get_pair_types_input <- function(dists, locs){
   #check everything that is common (aka no pt) first
   #check that the dists object is the snv object returned by dist.dna
   check_dists(dists)
@@ -140,7 +140,7 @@ check_get_snv_dists_input <- function(dists, locs){
 
 #' Check subset pairs input
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #'
 #' @noRd
 #'
@@ -152,7 +152,7 @@ check_subset_pairs_input <- function(snv_dists){
 }
 
 #*******************************************************************************************************************************************#
-#***********************************************END CHECKS FOR get_snv_dists FUNCTION*******************************************************#
+#***********************************************END CHECKS FOR get_pair_types FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
 #########################################################get_frac_intra####################################################################################
 #*******************************************************************************************************************************************#
@@ -161,19 +161,19 @@ check_subset_pairs_input <- function(snv_dists){
 
 #' Check snv dists dataframe
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #'
 #' @noRd
 #'
 check_snv_dists <- function(snv_dists){
   #check the type
   if(!(class(snv_dists) == "data.frame")){
-    stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but you provided: ",
+    stop(paste("The snv_dists object must be the output of the get_pair_types() function, but you provided: ",
                class(snv_dists)))
   }
   #check the number of columns
   if(!(ncol(snv_dists) %in% 6:12)){
-    stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but you provided a data.frame with ",
+    stop(paste("The snv_dists object must be the output of the get_pair_types() function, but you provided a data.frame with ",
                ncol(snv_dists), " columns."))
   }
   #check the colnames
@@ -185,7 +185,7 @@ check_snv_dists <- function(snv_dists){
         all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
        (ncol(snv_dists) == 6 &&
         all(colnames(snv_dists) == c("sample1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
-    stop(paste("The snv_dists object must be the output of the get_snv_dists() function, but the data.frame you provided has ",
+    stop(paste("The snv_dists object must be the output of the get_pair_types() function, but the data.frame you provided has ",
                ncol(snv_dists), " columns that are not the output columns needed."))
   }
   #check that there is at least one row
@@ -202,14 +202,14 @@ check_snv_dists <- function(snv_dists){
 
 #' Check input of get_frac_intra
 #'
-#' @inheritParams get_snv_dists
+#' @inheritParams get_pair_types
 #'
 #' @noRd
 #'
 check_get_frac_intra_input <- function(snv_dists){
   #if SNV_dists doesnt exist and they didn't input locs and dists
   if(is.null(snv_dists)){
-    stop("Please provide the output from `get_snv_dists()` to this function.")
+    stop("Please provide the output from `get_pair_types()` to this function.")
   }
   #make the SNV dists object if it needs to be made
   #checks snv_dists input

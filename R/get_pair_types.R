@@ -9,11 +9,11 @@
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' snv_dists <- get_snv_dists(dists, locs)
+#' snv_dists <- get_pair_types(dists, locs)
 #' }
-get_snv_dists <- function(dists, locs){
+get_pair_types <- function(dists, locs){
   #checks
-  check_get_snv_dists_input(dists, locs)
+  check_get_pair_types_input(dists, locs)
 
   #make the subsetted isolates object
   isolates <- intersect(names(locs), rownames(dists))
@@ -56,7 +56,7 @@ get_snv_dists <- function(dists, locs){
 
 #' Subset to unique isolate pairs from a directed list
 #'
-#' @param snv_dists the output object of the get_snv_dists function
+#' @param snv_dists the output object of the get_pair_types function
 #'
 #' @return a data.frame of isolate pairs subsetted to one row representing each pair
 #' @noRd
@@ -64,7 +64,7 @@ get_snv_dists <- function(dists, locs){
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' snv_dists <- get_snv_dists(dists, locs)
+#' snv_dists <- get_pair_types(dists, locs)
 #' subset_pairs(bind_rows(snv_dists,snv_dists))
 #' }
 subset_pairs <- function(snv_dists){

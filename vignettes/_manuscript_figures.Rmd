@@ -75,7 +75,7 @@ round(2*ref_genome_length*mutation_rate)
 ```{r}
 # pre-calculated in vignette
 # dists <- dist.dna(fasta, model = 'N', pairwise.deletion = TRUE, as.matrix = TRUE)
-snv_dists <- get_snv_dists(dists = dists, locs = locs) %>% subset_pairs()
+snv_dists <- get_pair_types(dists = dists, locs = locs) %>% subset_pairs()
 
 frac_intra <- get_frac_intra(snv_dists = snv_dists)
 

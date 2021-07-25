@@ -1,8 +1,8 @@
-#tests for get_snv_dists
+#tests for get_pair_types
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_snv_dists <- get_snv_dists(dists = test_dists, locs = test_locs)
+test_snv_dists <- get_pair_types(dists = test_dists, locs = test_locs)
 
 
 mat <- data.frame(matrix(data = c(0, 20, 12,
@@ -11,7 +11,7 @@ mat <- data.frame(matrix(data = c(0, 20, 12,
 rownames(mat) <- c("A", "B", "C")
 colnames(mat) <- c("A", "B", "C")
 
-test_that("get_snv_dists works", {
+test_that("get_pair_types works", {
   # check number of columns
   expect_true(ncol(test_snv_dists) == 6)
   #check row #s
