@@ -80,9 +80,10 @@ pair_types <- get_pair_types(dists = dists, locs = locs) %>% subset_pairs()
 frac_intra <- get_frac_intra(pair_types = pair_types)
 
 f2 <- frac_intra %>% 
-  mutate(under = ifelse(Pairwise_Dists < 11, '< 11 SNVs','Over threshold'), under = ifelse(Pairwise_Dists < 7, '< 7 SNVs',under),
-         under = factor(under, levels = c('< 7 SNVs', '< 11 SNVs','Over threshold'))) %>% 
-  ggplot(aes(x = Pairwise_Dists, y = Frac_Intra, fill = under)) + 
+  mutate(under = ifelse(pairwise_dist <= 10, '≤ 10 SNVs','Over threshold'), 
+         under = ifelse(pairwise_dist <= 6, '≤ 6 SNVs',under),
+         under = factor(under, levels = c('≤ 6 SNVs', '≤ 10 SNVs','Over threshold'))) %>% 
+  ggplot(aes(x = pairwise_dist, y = frac_intra, fill = under)) + 
   geom_bar(stat = "identity", alpha = 0.5) + 
   scale_fill_grey() + 
   labs(x = "Pairwise SNV distance", y = "Fraction of intra-facility pairs", fill = 'Possible SNV\nthresholds') + 
@@ -113,7 +114,7 @@ clusters <- get_clusters(tr,locs, pureness = 1)
 pure_subtree_info <- clusters$pure_subtree_info
 subtrees <- clusters$subtrees
 
-cluster_plot <- ggplot(data = pure_subtree_info, aes(x = f_id, y = subtr_size, color = f_id)) + 
+cluster_plot <- ggplot(data = pure_subtree_info, aes(x = loc, y = subtr_size, color = loc)) + 
   geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.5) + 
   scale_color_manual(values = cols) +
   labs(y = "Number of isolates in \nphylogenetic cluster", x = "", color = 'Facility') +
@@ -131,17 +132,17 @@ f3
 
 ```{r, message=FALSE}
 pw_snv_plot <- pair_types %>% 
-  ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
   labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
-  geom_vline(xintercept = 11, col = 'darkgrey', size = 1) +
+  geom_vline(xintercept = 10, col = 'darkgrey', size = 1) +
   theme(legend.justification = "top", 
         axis.line = element_line(colour = "black"),
         panel.border = element_blank())
 
 pw_snv_plot_zoom <- pair_types %>% 
-  filter(Pairwise_Dists < 11) %>% 
-  ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
+  filter(pairwise_dist <= 10) %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
   labs(x = "Pairwise SNV\ndistance", y = "Count", fill = "") +
   theme(legend.position = 'none') +
@@ -177,21 +178,28 @@ pheatmap(fsp, border_color = 'white',
 ### SNV distances 
 
 ```{r, message=FALSE, warning=FALSE}
-coldat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', pair_types %>% filter(Pairwise_Dists < 7) %>%
-                     mutate(Loc1=factor(Loc1), Pair_Type=factor(Pair_Type)) %>%
-                     group_by(Loc1, Pair_Type) %>% summarize(n = n())
-                     %>% tidyr::complete(Loc1, Pair_Type)),
-                    bind_cols(snvthresh = '< 11 SNVs', pair_types %>% filter(Pairwise_Dists < 11) %>%
-                     mutate(Loc1=factor(Loc1), Pair_Type=factor(Pair_Type)) %>%
-                     group_by(Loc1, Pair_Type) %>% summarize(n = n())
-                     %>% tidyr::complete(Loc1, Pair_Type)))
+# get snv summary
+snv_summary <- summarize_pairs(pair_types,summary_fns = c('min'), threshs = c(6, 10)) 
 
-f6 <- coldat %>% mutate(Pair_Type = factor(Pair_Type, levels = c('Intra-facility pair', 'Inter-facility pair'))) %>%
-  ggplot(aes(x = reorder(Loc1, -n, median), y = n, fill = Pair_Type)) +
+# get facility summary
+facil_summary <- snv_summary %>% 
+    mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), 
+                            levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
+  group_by(loc1, pair_type, leq_6, leq_10) %>% summarize() %>% 
+  pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>% 
+  mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs')) 
+
+# get locations to keep (at least 1 closely related pair)
+keep_locs <- facil_summary %>% group_by(loc1) %>% summarize(sum_all = sum(n_pairs)) %>% filter(sum_all != 0) %>% select(loc1) %>% deframe()
+
+# plot
+f6 <- facil_summary %>% filter(loc1 %in% keep_locs) %>% 
+  tidyr::complete(loc1, pair_type, thresh) %>% 
+  ggplot(aes(x = reorder(loc1, -n_pairs, sum), y = n_pairs, fill = pair_type)) +
   geom_col(position = 'dodge') +
        scale_fill_manual(values=c("cadetblue", "salmon")) + 
          labs(y = "Number of closely related \nisolate pairs", x = "Facility", fill = '', color = '') +
-  facet_grid(factor(snvthresh, levels = c('< 7 SNVs','< 11 SNVs'))~.)
+  facet_grid(factor(thresh, levels = c('≤ 6 SNVs','≤ 10 SNVs'))~.)
 
 
 ggsave('manuscript_figures/Fig6.png',f6, width = 7, height = 5)
@@ -199,19 +207,22 @@ f6
 ```
 
 ```{r}
-fsp_sub <- fsp[rownames(pt_flow), colnames(pt_flow)]
+pair_info <- merge_inter_summaries(
+  make_long_form(pt_flow, col_names = c('loc1','loc2','pt_flow')), 
+  snv_summary, 
+  make_long_form(fsp)) %>% 
+  filter(loc1 != loc2)
 
-fsp_flow <- full_join(reshape2::melt(as.matrix(pt_flow)) %>% rename(pt_flow = value),
-          reshape2::melt(as.matrix(fsp_sub)) %>% rename(fsp = value)) %>% rename(Loc1 = Var1, Loc2 = Var2)
+# fsp_sub <- fsp[rownames(pt_flow), colnames(pt_flow)]
 
-thresh = 7
+# fsp_flow <- full_join(reshape2::melt(as.matrix(pt_flow)) %>% rename(pt_flow = value),
+          # reshape2::melt(as.matrix(fsp_sub)) %>% rename(fsp = value)) %>% rename(loc1 = Var1, loc2 = Var2)
 
-snv_dist_summary <- pair_types %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists <= thresh)) %>% dplyr::filter(Loc1 != Loc2)
+# thresh = 6
 
-# USE MIN INSTEAD/IN ADDITION?
-# snv_dist_summary <- pair_types %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = min(Pairwise_Dists)) %>% dplyr::filter(Loc1 != Loc2)
+# snv_dist_summary <- pair_types %>% dplyr::group_by(loc1, loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(pairwise_dist <= thresh)) %>% dplyr::filter(loc1 != loc2)
 
-pair_info <- full_join(fsp_flow, snv_dist_summary)
+# pair_info <- full_join(fsp_flow, snv_dist_summary)
 
 flow_fsp_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$fsp)],
                                  pair_info$fsp[!is.na(pair_info$pt_flow) & !is.na(pair_info$fsp)], 
@@ -225,14 +236,14 @@ flow_fsp_plot <- pair_info %>%
            label = paste(paste('Spearman rho =', round(flow_fsp_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(flow_fsp_spear$p.value, 1))))
 
-flow_snv_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$n_closely_related_pairs)],
-                                 pair_info$n_closely_related_pairs[!is.na(pair_info$pt_flow) & !is.na(pair_info$n_closely_related_pairs)], 
+flow_snv_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10)],
+                                 pair_info$leq_10[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10)], 
                                  method = 'spearman')
 
 flow_snv_plot <- pair_info %>% 
-  ggplot(aes(x=pt_flow,y=n_closely_related_pairs)) +
+  ggplot(aes(x=pt_flow,y=leq_10)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
-  labs(x = 'Patient flow', y = '# closely related\npairs (< 7 SNVs)') + 
+  labs(x = 'Patient flow', y = '# closely related\npairs (≤ 10 SNVs)') + 
   annotate('text', x = 0.005, y = 4.5, 
            label = paste(paste('Spearman rho =', round(flow_snv_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(flow_snv_spear$p.value, 1)))) #+ ylim(c(0,100))
@@ -245,9 +256,9 @@ f7
 
 ```{r}
 time1 <- pair_types %>% 
-  mutate(date1 = dates[Isolate1], date2 = dates[Isolate2]) %>% 
+  mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
   filter(date1 == date2) %>% 
-  ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
   labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
   facet_grid(~date1) + 
@@ -256,9 +267,9 @@ time1 <- pair_types %>%
         panel.border = element_blank())
 
 time2 <- pair_types %>% 
-  mutate(date1 = dates[Isolate1], date2 = dates[Isolate2]) %>% 
+  mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
   filter(date1 == date2) %>% 
-  ggplot(aes(x = Pairwise_Dists, fill = Pair_Type)) + 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = position_fill(), alpha = 0.4, bins = 30) +
   # xlim(0,20) +
   labs(x = "Pairwise SNV distance", y = "Fraction", fill = "") +
@@ -300,8 +311,8 @@ facil_geo <- facil_coord %>% left_join(loc_n)
 
 # bind_cols(facil=names(longs), long=longs, lat=lats) %>% ggplot(aes(x = lats, y = longs)) + geom_point() + theme_map()
 
-snv_geo <- pair_types %>% dplyr::group_by(Loc1, Loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(Pairwise_Dists < 7)) %>% dplyr::filter(Loc1 != Loc2, n_closely_related_pairs > 0) %>%
-  left_join(facil_geo, by = c("Loc1" = "facil")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("Loc2" = "facil")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
+snv_geo <- pair_types %>% dplyr::group_by(loc1, loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(pairwise_dist <= 7)) %>% dplyr::filter(loc1 != loc2, n_closely_related_pairs > 0) %>%
+  left_join(facil_geo, by = c("loc1" = "facil")) %>% rename(facil_1_lat = lat, facil_1_long = long, facil_1_n = n) %>% left_join(facil_geo, by = c("loc2" = "facil")) %>% rename(facil_2_lat = lat, facil_2_long = long, facil_2_n = n)
 
 geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +
   geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
@@ -309,11 +320,11 @@ geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +
              data = snv_geo, curvature = 0.33) +
   geom_point(aes(size=n), alpha=1, color = "lightblue") + 
   theme_map() + #theme(legend.position = "none") 
-  labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (< 7 SNVs)')
+  labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (≤ 7 SNVs)')
 
 
-geo_dat <- left_join(pair_info, facil_geo, by = c('Loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
-  select(-n) %>% left_join(., facil_geo, by = c('Loc2' = 'facil')) %>% rename(facil_2_long = long, facil_2_lat = lat) %>% 
+geo_dat <- left_join(pair_info, facil_geo, by = c('loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
+  select(-n) %>% left_join(., facil_geo, by = c('loc2' = 'facil')) %>% rename(facil_2_long = long, facil_2_lat = lat) %>% 
   select(-n) %>% 
   mutate(geo_dist = sqrt((facil_1_long-facil_2_long)^2+(facil_1_lat-facil_2_lat)^2))
 
@@ -321,8 +332,8 @@ geo_fsp_spear <- cor.test(geo_dat$geo_dist[!is.na(geo_dat$geo_dist) & !is.na(geo
                                  geo_dat$fsp[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$fsp)], 
                                  method = 'spearman')
 
-geo_snv_spear <- cor.test(geo_dat$geo_dist[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$n_closely_related_pairs)],
-                                 geo_dat$n_closely_related_pairs[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$n_closely_related_pairs)], 
+geo_snv_spear <- cor.test(geo_dat$geo_dist[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$leq_10)],
+                                 geo_dat$leq_10[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$leq_10)], 
                                  method = 'spearman')
 
 geo_fsp <- geo_dat %>% 
@@ -334,8 +345,8 @@ geo_fsp <- geo_dat %>%
                          paste('Spearman p =', signif(geo_fsp_spear$p.value, 1))))
 
 geo_snv <- geo_dat %>% 
-  ggplot(aes(x = geo_dist, y = n_closely_related_pairs)) + geom_point() + geom_smooth(method = 'lm') +
-  labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(< 7 SNVs)') + 
+  ggplot(aes(x = geo_dist, y = leq_10)) + geom_point() + geom_smooth(method = 'lm') +
+  labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(≤ 10 SNVs)') + 
   annotate('text', x = 1.05, y = 4, 
            label = paste0(paste0('Spearman rho = ', round(geo_snv_spear$estimate, 2)),'\n',
                          paste0('Spearman p = ', signif(geo_snv_spear$p.value, 1))))

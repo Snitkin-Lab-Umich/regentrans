@@ -4,7 +4,7 @@
 #' @param summary_fns vector of summary functions for pairwise distances as character strings (default: c("min"))
 #' @param threshs SNV thresholds to use for pairwise distances (default: seq(5, 20, 5))
 #'
-#' @return a summary of isolate pairs between each facility pair
+#' @return a summary of isolate pairs between each facility pair. leq = less than or equal to
 #' @export
 #'
 #' @examples
@@ -39,7 +39,7 @@ summarize_pairs <- function(pair_types, summary_fns = c("min"), threshs = seq(5,
   if(!is.null(threshs)){
     inter_dists_thresh_summary <- lapply(threshs, function(x){
       pair_types %>% dplyr::group_by(loc1, loc2) %>%
-        dplyr::summarize(!!dplyr::quo_name(paste0('under_', x)) := sum(pairwise_dist < x), .groups = 'keep')
+        dplyr::summarize(!!dplyr::quo_name(paste0('leq_', x)) := sum(pairwise_dist <= x), .groups = 'keep')
     }) %>%
       purrr::reduce(dplyr::full_join, by = c("loc1", "loc2"))
   }

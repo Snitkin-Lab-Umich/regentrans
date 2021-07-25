@@ -18,7 +18,7 @@ test_that("summarize_pairs works", {
   # everything
   expect_equal(test_isolate_pair_summary,
                structure(list(loc1 = c("A", "A", "B"), loc2 = c("B", "C", "C"
-               ), dist_min = c(42, 91, 18), under_20 = c(0L, 0L, 1L), under_50 = c(1L, 0L, 1L)),
+               ), dist_min = c(42, 91, 18), leq_20 = c(0L, 0L, 1L), leq_50 = c(1L, 0L, 1L)),
                row.names = c(NA, -3L),
                groups = structure(list(loc1 = c("A", "A", "B"), loc2 = c("B", "C", "C"),
                                        .rows = structure(list(1L, 2L, 3L),ptype = integer(0),
@@ -38,7 +38,7 @@ test_that("summarize_pairs works", {
   # no summary_fns
   expect_equal(test_isolate_pair_summary_3,
                structure(list(loc1 = c("A", "A", "B"), loc2 = c("B", "C", "C"),
-                              under_20 = c(0L, 0L, 1L), under_50 = c(1L, 0L, 1L)),
+                              leq_20 = c(0L, 0L, 1L), leq_50 = c(1L, 0L, 1L)),
                class = "data.frame", row.names = c(NA, -3L)))
 })
 
@@ -47,8 +47,8 @@ test_that("merge_inter_summaries works", {
                structure(list(loc1 = c("A", "A", "B", "A"),
                               loc2 = c("B", "C", "C", "D"),
                               dist_min = c(42, 91, 18, NA),
-                              under_20 = c(0L, 0L, 1L, NA),
-                              under_50 = c(1L, 0L, 1L, NA),
+                              leq_20 = c(0L, 0L, 1L, NA),
+                              leq_50 = c(1L, 0L, 1L, NA),
                               fsp = c(NA, 0.767963355449144,
                                       NA, 0.746959511800763),
                               n_transfers_f12 = c(NA_real_, NA_real_, NA_real_, NA_real_),
@@ -70,8 +70,8 @@ test_that("merge_inter_summaries works", {
                structure(list(loc1 = c("A", "A", "B", "A"),
                               loc2 = c("B", "C", "C", "D"),
                               dist_min = c(42, 91, 18, NA),
-                              under_20 = c(0L, 0L, 1L, NA),
-                              under_50 = c(1L, 0L, 1L, NA),
+                              leq_20 = c(0L, 0L, 1L, NA),
+                              leq_50 = c(1L, 0L, 1L, NA),
                               fsp = c(NA, 0.767963355449144,
                                       NA, 0.746959511800763)),
                          row.names = c(NA, -4L),
@@ -96,5 +96,5 @@ test_that("merge_inter_summaries works", {
                               sum_pt_trans_metric = c(NA_real_, NA_real_)),
                          class = "data.frame", row.names = c(NA, -2L)))
   expect_equal(merged_summaries_4,
-               structure(list(loc1 = c("A", "A", "B"), loc2 = c("B", "C", "C"), dist_min = c(42, 91, 18), under_20 = c(0L, 0L, 1L), under_50 = c(1L, 0L, 1L), n_transfers_f12 = c(NA_real_, NA_real_, NA_real_), pt_trans_metric_f12 = c(NA_real_, NA_real_, NA_real_), n_transfers_f21 = c(NA_real_, NA_real_, NA_real_), pt_trans_metric_f21 = c(NA_real_, NA_real_, NA_real_), sum_transfers = c(NA_real_, NA_real_, NA_real_), sum_pt_trans_metric = c(NA_real_, NA_real_, NA_real_)), row.names = c(NA, -3L), groups = structure(list(loc1 = c("A", "A", "B"), loc2 = c("B", "C", "C"), .rows = structure(list(1L, 2L, 3L), ptype = integer(0), class = c("vctrs_list_of", "vctrs_vctr", "list"))), row.names = c(NA, -3L), class = c("tbl_df", "tbl", "data.frame"), .drop = TRUE), class = c("grouped_df",  "tbl_df", "tbl", "data.frame")))
+               structure(list(loc1 = c("A", "A", "B"), loc2 = c("B", "C", "C"), dist_min = c(42, 91, 18), leq_20 = c(0L, 0L, 1L), leq_50 = c(1L, 0L, 1L), n_transfers_f12 = c(NA_real_, NA_real_, NA_real_), pt_trans_metric_f12 = c(NA_real_, NA_real_, NA_real_), n_transfers_f21 = c(NA_real_, NA_real_, NA_real_), pt_trans_metric_f21 = c(NA_real_, NA_real_, NA_real_), sum_transfers = c(NA_real_, NA_real_, NA_real_), sum_pt_trans_metric = c(NA_real_, NA_real_, NA_real_)), row.names = c(NA, -3L), groups = structure(list(loc1 = c("A", "A", "B"), loc2 = c("B", "C", "C"), .rows = structure(list(1L, 2L, 3L), ptype = integer(0), class = c("vctrs_list_of", "vctrs_vctr", "list"))), row.names = c(NA, -3L), class = c("tbl_df", "tbl", "data.frame"), .drop = TRUE), class = c("grouped_df",  "tbl_df", "tbl", "data.frame")))
 })
