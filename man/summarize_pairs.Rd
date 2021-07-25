@@ -14,7 +14,7 @@ summarize_pairs(pair_types, summary_fns = c("min"), threshs = seq(5, 20, 5))
 \item{threshs}{SNV thresholds to use for pairwise distances (default: seq(5, 20, 5))}
 }
 \value{
-a summary of isolate pairs between each facility pair
+a summary of isolate pairs between each facility pair. leq = less than or equal to
 }
 \description{
 Summarize extent of relatedness of intra- and inter-facility pairs by facility pair
