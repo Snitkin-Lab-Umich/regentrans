@@ -14,7 +14,7 @@
 #' @examples
 #' \dontrun{
 #' # This takes a long time to run right now!
-#' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
+#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' facil_fsp <- get_facility_fsp(aln, locs, matrix = TRUE)
 #' }
 

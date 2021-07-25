@@ -8,7 +8,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
+#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
 #' }
 get_snv_dists <- function(dists, locs){
@@ -63,7 +63,7 @@ get_snv_dists <- function(dists, locs){
 #'
 #' @examples
 #' \dontrun{
-#' locs <- metadata %>% dplyr::select(sample_id, facility) %>% tibble::deframe()
+#' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' snv_dists <- get_snv_dists(dists, locs)
 #' subset_pairs(bind_rows(snv_dists,snv_dists))
 #' }

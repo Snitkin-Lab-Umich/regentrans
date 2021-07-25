@@ -27,7 +27,7 @@ Get facility clusters on the phylogeny
 }
 \examples{
 \dontrun{
-locs <- metadata \%>\% dplyr::select(sample_id, facility) \%>\% tibble::deframe()
+locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
 clusts <- get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
 }
 }

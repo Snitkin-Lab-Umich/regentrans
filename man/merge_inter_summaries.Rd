@@ -25,7 +25,7 @@ Merge summarized data about facility pairs including patient flow, isolate pairs
 }
 \examples{
 \dontrun{
-locs <- metadata \%>\% dplyr::select(sample_id, facility) \%>\% tibble::deframe()
+locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
 snv_dists <- get_snv_dists(dists, locs)
 isolate_pair_summary <- summarize_pairs(snv_dists)
 patient_flow <- get_patient_flow(edge_df = pt_trans_df)
