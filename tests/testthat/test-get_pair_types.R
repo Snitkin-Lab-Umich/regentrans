@@ -17,13 +17,13 @@ test_that("get_pair_types works", {
   #check row #s
   expect_true(nrow(test_pair_types) == (length(test_locs)^2-length(test_locs))/2)
   #check colnames
-  expect_true(all(colnames(test_pair_types) == c("isolate1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type")))
+  expect_true(all(colnames(test_pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type")))
   #check col types
   #this won't be true when all of the patients IDs aren't numeric
   expect_true(all(sapply(test_pair_types, class) == c("factor", "factor", "numeric", "character", "character", "character")))
   #check isolates in both lists are in the locs names
-  expect_true(all(unique(c(as.character(test_pair_types$isolate1), as.character(test_pair_types$sample2))) %in% names(test_locs)))
-  # expect_true(all(setequal(unique(test_pair_types$isolate1), unique(test_pair_types$sample2)) & setequal(unique(test_pair_types$sample2), unique(names(test_locs)))))
+  expect_true(all(unique(c(as.character(test_pair_types$isolate1), as.character(test_pair_types$isolate2))) %in% names(test_locs)))
+  # expect_true(all(setequal(unique(test_pair_types$isolate1), unique(test_pair_types$isolate2)) & setequal(unique(test_pair_types$isolate2), unique(names(test_locs)))))
   #same with locs
   expect_true(all(unique(c(as.character(test_pair_types$loc1), as.character(test_pair_types$loc2))) %in% test_locs))
   # expect_true(all(setequal(unique(test_pair_types$loc1), unique(test_pair_types$loc2)) & setequal(unique(test_pair_types$loc2), unique(test_locs))))
@@ -45,7 +45,7 @@ test_pair_types_dup <-
                    "PCMP_H4"),
         class = "factor"
       ),
-      sample2 = structure(
+      isolate2 = structure(
         c(1L, 1L,
           1L, 2L, 2L, 2L, 3L, 3L, 3L, 4L, 4L, 4L),
         .Label = c("PCMP_H1",
@@ -90,7 +90,7 @@ test_that("subset_pairs works", {
   expect_true(nrow(test_subset_pairs) == sum(1:(length(test_locs) - 1)))
   #check that each isolate in locs is represented only length(locs)-1 times
   expect_true(all(table(
-    c(test_subset_pairs$isolate1, test_subset_pairs$sample2)
+    c(test_subset_pairs$isolate1, test_subset_pairs$isolate2)
   ) == (length(test_locs) - 1)))
 })
 

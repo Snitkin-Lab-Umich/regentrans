@@ -235,7 +235,7 @@ One way to choose a pairwise SNV distance threshold is to use the estimated muta
 ```{r}
 ref_genome_length <- 5394056
 mutation_rate <- 1.03e-6 # estimated from a K. pneumoniae ST258 time tree
-round(2*ref_genome_length*mutation_rate)
+floor(2*ref_genome_length*mutation_rate)
 ```
 
 This value means that, over the course of a year, each ST258 strain is expected to gain about 5.5 mutations. This gives us a parwise SNV distance threshold of $5.5*2 = 11$, as our isolates were collected over a year-long period. 
@@ -270,14 +270,14 @@ head(frac_intra)
 ```
 
 Below we plot the fraction of intra-facility pairs for pairwise SNV distance up to 50. We have highlighted two drops in fraction of intra-facility pairs, which may be indicative of potential reasonable pairwise SNV distance thresholds. 
-On of these (11) matches with Method 1. 
-We also use 7 as a more conservative distance threshold for our sensitivity analysis.
+On of these (≤ 10) matches closely with Method 1. 
+Based on this data, we use thresholds of 10 and 6 for our sensitivity analysis.
 
 ```{r}
 # plot fraction of intra-facility pairs for each SNV distance
 frac_intra %>% 
-  mutate(under = ifelse(pairwise_dist < 11, '< 11 SNVs','Over threshold'), under = ifelse(pairwise_dist < 7, '< 7 SNVs',under),
-         under = factor(under, levels = c('< 7 SNVs', '< 11 SNVs','Over threshold'))) %>% 
+  mutate(under = ifelse(pairwise_dist <= 10, '≤ 10 SNVs','Over threshold'), under = ifelse(pairwise_dist <= 6, '≤ 6 SNVs',under),
+         under = factor(under, levels = c('≤ 6 SNVs', '≤ 10 SNVs','Over threshold'))) %>% 
   ggplot(aes(x = pairwise_dist, y = frac_intra, fill = under)) + 
   geom_bar(stat = "identity", alpha = 0.5) + 
   scale_fill_grey() + 
@@ -290,7 +290,7 @@ However, if this is not the case in your dataset, you may want to bin the x axis
 
 ```{r}
 frac_intra_bin <- frac_intra %>% 
-  filter(pairwise_dist < 50) %>% 
+  filter(pairwise_dist <= 50) %>% 
   mutate(bin = cut(pairwise_dist, seq(0, max(pairwise_dist) + 5, 5), right = FALSE)) %>% 
   group_by(bin) %>% 
   summarise(n_intra = sum(n_intra), n_inter = sum(n_inter)) %>% 
@@ -489,28 +489,45 @@ We can also look at the number of closely related pairs of isolates at different
 For this, we must choose a SNV threshold. 
 Therefore, we recommend performing a sensitivity analysis by choosing several different SNV thresholds and seeing how robust the results are to these changes. 
 
-```{r, message=FALSE}
-close_pair_dat <- bind_rows(bind_cols(snvthresh = '< 7 SNVs', pair_types %>% filter(pairwise_dist < 7) %>%
-                     mutate(loc1=factor(loc1), pair_type=factor(pair_type)) %>%
-                     group_by(loc1, pair_type) %>% summarize(n = n())
-                     %>% tidyr::complete(loc1, pair_type)),
-                    bind_cols(snvthresh = '< 11 SNVs', pair_types %>% filter(pairwise_dist < 11) %>%
-                     mutate(loc1=factor(loc1), pair_type=factor(pair_type)) %>%
-                     group_by(loc1, pair_type) %>% summarize(n = n())
-                     %>% tidyr::complete(loc1, pair_type)))
+To do this, we can summarize the pairwise SNV distance information using the `summarize_pairs()` function:
 
-close_pair_dat %>% mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair', 'Inter-facility pair'))) %>%
-  ggplot(aes(x = reorder(loc1, -n, median), y = n, fill = pair_type)) +
+```{r, message=FALSE}
+# get summary of pairwise SNV distance data
+snv_summary <- summarize_pairs(pair_types,summary_fns = c('min'), threshs = c(6, 10)) 
+snv_summary
+```
+
+The output is a summary of the isolate pairs for different facility pairs. 
+Here, we also filtered out intra-facility pairs, as we are most interested in inter-facility transmission as compared to patient transfer.
+The function allows you to input a vector of whatever summary functions you'd like (default is minimum pairwise SNV distance), as well as pairwise SNV distance thresholds to compute the number of closely related pairs for each facility pair under that threshold. 
+
+Now, we can plot that information to identify facilities with closely related intra- and inter-facility pairs:
+
+```{r, message=FALSE}
+# get facility summary
+facil_summary <- snv_summary %>% 
+    mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), 
+                            levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
+  group_by(loc1, pair_type, leq_6, leq_10) %>% summarize() %>% 
+  pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>% 
+  mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs')) 
+
+# get locations to keep (at least 1 closely related pair)
+keep_locs <- facil_summary %>% group_by(loc1) %>% summarize(sum_all = sum(n_pairs)) %>% filter(sum_all != 0) %>% select(loc1) %>% deframe()
+
+# plot
+facil_summary %>% filter(loc1 %in% keep_locs) %>% 
+  tidyr::complete(loc1, pair_type, thresh) %>% 
+  ggplot(aes(x = reorder(loc1, -n_pairs, sum), y = n_pairs, fill = pair_type)) +
   geom_col(position = 'dodge') +
        scale_fill_manual(values=c("cadetblue", "salmon")) + 
          labs(y = "Number of closely related \nisolate pairs", x = "Facility", fill = '', color = '') +
-  facet_grid(factor(snvthresh, levels = c('< 7 SNVs','< 11 SNVs'))~.)
+  facet_grid(factor(thresh, levels = c('≤ 6 SNVs','≤ 10 SNVs'))~.)
 ```
 
 Here we see that there is a large number of closely related isolates at certain facilities (e.g. D) and very few at others. We also see that, while most facilities have more closely related intra-facility pairs than inter-facility pairs, this observation does not hold for facilities C and F, which has more closely related intra-facility pairs than inter-facility pairs. 
 
 Furthermore, the results vary somewhat between the two different SNV thresholds, but are relatively consistent. 
-
 
 # 3. Have transmission dynamics changed over time or across species?
 
@@ -521,7 +538,7 @@ To investigate whether transmission dynamics have changed over time or differ ac
 dates <- metadata %>% select(isolate_id, collection_date) %>% deframe()
 
 time1 <- pair_types %>% 
-  mutate(date1 = dates[isolate1], date2 = dates[sample2]) %>% 
+  mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
   filter(date1 == date2) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
@@ -532,7 +549,7 @@ time1 <- pair_types %>%
         panel.border = element_blank())
 
 time2 <- pair_types %>% 
-  mutate(date1 = dates[isolate1], date2 = dates[sample2]) %>% 
+  mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
   filter(date1 == date2) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = position_fill(), alpha = 0.4, bins = 30) +
@@ -555,21 +572,11 @@ If the dataset is from an outbreak setting, you may expect changes in closely re
 
 To explore this question, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and/or Fsp matrix along with the patient transfer network using the `get_patient_flow()`, `summarize_pairs()`, and `merge_inter_summaries()` functions.
 
-*Note:* If you do not have a patient transfer network, you could use geographic distances between facilities as a proxy for patient transfer because they are often correlated. 
+*Note:* If you do not have a patient transfer network, you may be able to use geographic distances between facilities as a proxy for patient transfer because they are often correlated. 
 
 **Remember that choosing pairwise SNV distance threshold(s) based on your dataset is very important, avoid using the default values for your own dataset.**
 
-First, we can summarize the pairwise SNV distance information using the `summarize_pairs()` function:
-
-```{r, message=FALSE}
-# get summary of pairwise SNV distance data
-snv_summary <- summarize_pairs(pair_types,summary_fns = c('min'), threshs = c(7, 11)) %>% filter(loc1 != loc2)
-snv_summary
-```
-
-The output is a summary of the isolate pairs for different facility pairs. 
-Here, we also filtered out intra-facility pairs, as we are most interested in inter-facility transmission as compared to patient transfer.
-The function allows you to input a vector of whatever summary functions you'd like (default is minimum pairwise SNV distance), as well as pairwise SNV distance thresholds to compute the number of closely related pairs for each facility pair under that threshold. 
+We already summarized the genomic data above using `summarize_pairs()`.
 
 We can also get the direct and indirect patient flow between facilities (see [Han et al. 2019](https://aac.asm.org/content/63/11/e01622-19) for details on how indirect flow is calculated.) using `get_patinet_flow()`. The input to this is a data frame with three columns:
 
@@ -604,12 +611,12 @@ Next, we can merge the patient flow, pairwise SNV distance, and fsp summaries (n
 # have to convert fsp matrix to long form first
 fsp_long <- make_long_form(fsp)
 
-pair_info <- merge_inter_summaries(pt_trans, snv_summary, fsp_long) 
+# only keep inter-facility info in snv_summary
+inter_snv_summary <- snv_summary %>% filter(loc1 != loc2)
+
+
+pair_info <- merge_inter_summaries(pt_trans, inter_snv_summary, fsp_long) 
 pair_info
-
-#%>% ggplot(mapping = aes(x = sum_transfers, y = under_7)) + geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.2, color = "blue") + labs(y = "Number of Closely Related sample Pairs", x = "Number of Transfers", title = "Number of Patient Transfers between Facilities \nvs. Number of Closely Related sample Pairs at Facilities \nfor Each Facility Pair") + geom_smooth(method = "lm")
-
-
 ```
 
 Now we're ready to plot patient flow vs. various genomic metrics of similarity between facilities:
@@ -627,9 +634,9 @@ These observations are corroborated by the positive relationship between patient
 
 ```{r}
 pair_info %>% 
-  ggplot(aes(x=sum_pt_trans_metric,y=under_11)) +
+  ggplot(aes(x=sum_pt_trans_metric,y=leq_10)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
-  labs(x = 'Patient flow', y = '# closely related\npairs (< 11 SNVs)') 
+  labs(x = 'Patient flow', y = '# closely related\npairs (≤ 10 SNVs)') 
 ```
 
 
@@ -667,16 +674,16 @@ snv_geo <- pair_info %>%
   filter(!is.na(facil_1_lat) & !is.na(facil_2_lat))
 
 # filter to not plot zeros
-snv_geo_thresh <- snv_geo %>% filter(under_7 > 0) 
+snv_geo_thresh <- snv_geo %>% filter(leq_6 > 0) 
 
 facil_geo %>% 
   ggplot(aes(x=long, y=lat)) +
   geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
-                 alpha = under_7),
+                 alpha = leq_6),
              data = snv_geo_thresh, curvature = 0.33) +
   geom_point(aes(size=n_isolates), alpha=1, color = "lightblue") + 
   theme_map() + 
-  labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (< 7 SNVs)')
+  labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (≤ 6 SNVs)')
 ```
 
 
@@ -691,8 +698,8 @@ Then we can plot the relationship between physical distance and summary metrics.
 
 ```{r}
 snv_geo %>% 
-  ggplot(aes(x = geo_dist, y = under_11)) + geom_point() + geom_smooth(method = 'lm') +
-  labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(< 11 SNVs)')
+  ggplot(aes(x = geo_dist, y = leq_10)) + geom_point() + geom_smooth(method = 'lm') +
+  labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(≤ 10 SNVs)')
 ```
 
 # A note on additional metadata
@@ -703,7 +710,7 @@ Sometimes it's useful to make plots faceted or subsetted based on various inform
 # merge pair_types and metadata, and find time difference
 snv_and_metadat <- left_join(pair_types, metadata, by = c('isolate1' = 'isolate_id')) %>% 
   rename(patient_id_1 = patient_id, collection_date_1 = collection_date) %>% 
-  left_join(metadata, by = c('sample2' = 'isolate_id')) 
+  left_join(metadata, by = c('isolate2' = 'isolate_id')) 
 head(snv_and_metadat)
 ```
 

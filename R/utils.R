@@ -10,7 +10,7 @@ utils::globalVariables(c(".","subtr_size","index","isolate_name","pair_type","pa
                          "n","Intra-facility pair","Inter-facility pair","frac_intra",
                          "frac_inter","source_facil","n_transfers","freq","Freq","dest_facil",
                          "loc1","loc2","pairwise_dist","Patient1","Patient2","isolate1",
-                         "sample2","n_closely_related_pairs", "n_transfers_f12",
+                         "isolate2","n_closely_related_pairs", "n_transfers_f12",
                          "n_transfers_f21", "pt_trans_metric",
                          "pt_trans_metric_f12", "pt_trans_metric_f21","isolate_id"))
 

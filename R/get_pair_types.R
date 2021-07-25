@@ -28,14 +28,14 @@ get_pair_types <- function(dists, locs){
   #make df
   snps <- stats::na.omit(data.frame(as.table(as.matrix(dists_sub))))
   #change freq colname?
-  colnames(snps) <- c("isolate1", "sample2", "pairwise_dist")
+  colnames(snps) <- c("isolate1", "isolate2", "pairwise_dist")
 
   #add locs
   snps$loc1 <- loc_sub[snps$isolate1]
-  snps$loc2 <- loc_sub[snps$sample2]
+  snps$loc2 <- loc_sub[snps$isolate2]
 
   snp_facility_pairs <- dplyr::bind_cols(
-    snps %>% dplyr::filter(isolate1 != sample2) %>%
+    snps %>% dplyr::filter(isolate1 != isolate2) %>%
       dplyr::mutate(pair_type=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
 
   # subset to include only one of each pair

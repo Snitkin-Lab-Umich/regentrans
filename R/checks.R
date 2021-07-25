@@ -178,13 +178,13 @@ check_pair_types <- function(pair_types){
   }
   #check the colnames
   if(!((ncol(pair_types) == 8 &&
-        all(colnames(pair_types) == c("isolate1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
+        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
        (ncol(pair_types) == 12 &&
-        all(colnames(pair_types) == c("isolate1", "sample2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
        (ncol(pair_types) == 10 &&
-        all(colnames(pair_types) == c("isolate1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
        (ncol(pair_types) == 6 &&
-        all(colnames(pair_types) == c("isolate1", "sample2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
+        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
     stop(paste("The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has ",
                ncol(pair_types), " columns that are not the output columns needed."))
   }
