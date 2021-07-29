@@ -21,3 +21,8 @@ Questions regentrans can help investigate:
 | Is transmission occurring along paths of higher patient/person flow? | Compare patient/person flow between locations to inter-location pairwise SNV distances or Fsp | `get_patient_flow()`| Patient transfer network edge matrix | |
 | | Compare patient/person flow between locations to populatoin-level similarity between locations | `get_patient_flow()`, `get_facility_fsp()`| Patient transfer network, fasta file of variants, isolate location information | |
 | Are there any observable geographic trends in prevalence/transmission? | Visualize prevalence and closely related pairs or Fsp | Plot code in vignette | Geographic locations of each facility, patient transfer network, summary metric of genomic similarity | |
+
+
+## Questions
+
+Please open an [issue](https://github.com/Snitkin-Lab-Umich/regentrans/issues) or contact Evan Snitkin (esnitkin@umich.edu) with any questions. 
