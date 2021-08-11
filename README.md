@@ -1,6 +1,4 @@
-# regentrans: R package for investigating regional pathogen tr
-
-ansmission using genomic data
+# regentrans: R package for investigating regional pathogen transmission using genomic data
 
 <img src="man/figures/regentrans_logo.png"  width = "200" />
 
