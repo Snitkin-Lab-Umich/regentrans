@@ -6,7 +6,7 @@ Website: https://snitkin-lab-umich.github.io/regentrans/
 
 Preprint: https://www.medrxiv.org/content/10.1101/2021.07.25.21261097v1
 
-`regentrans` can be installed using the command `devtools::install_github('Snitkin-Lab-Umich/regentrans')` in R 
+regentrans can be installed using the command `devtools::install_github('Snitkin-Lab-Umich/regentrans')` in R 
 
 Examples of how to interrogate all of the questions in the table below can be found in the [introductory vignette](https://snitkin-lab-umich.github.io/regentrans/articles/Introduction.html).
 
