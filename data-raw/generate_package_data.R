@@ -4,6 +4,9 @@ library(ape)
 # metadata
 kp_metadata <- read.delim(system.file("data-raw", "kp_metadata.csv", package = "regentrans"), sep = ",")
 
+# days between isolates
+days_between_isolates <- read.delim(system.file("data-raw", "days_between_isolates.csv", package = "regentrans"), sep = ",")
+
 # alignment
 kp_aln <- ape::read.dna(system.file("data-raw", "kp.fasta", package = "regentrans"),
                        format = "fasta")
@@ -25,6 +28,8 @@ metadata <- kp_metadata %>% dplyr::filter(isolate_id %in% st258_ids)
 aln <- kp_aln[st258_ids,]
 tr <- ape::keep.tip(kp_tr, st258_ids)
 dists <- kp_dists[st258_ids, st258_ids]
+days_between_isolates <- days_between_isolates %>%
+  dplyr::filter(isolate1 %in% st258_ids & isolate2 %in% st258_ids)
 
 # create mini dataset
 metadata_mini <- metadata[1:10,]
@@ -34,6 +39,7 @@ dists_mini <- dists[metadata_mini$sample_id, metadata_mini$sample_id]
 
 # save data to package
 usethis::use_data(metadata, overwrite = TRUE)
+usethis::use_data(days_between_isolates, overwrite = TRUE)
 usethis::use_data(aln, overwrite = TRUE)
 usethis::use_data(tr, overwrite = TRUE)
 usethis::use_data(dists, overwrite = TRUE)

@@ -8,6 +8,14 @@
 #' @format A data frame with 413 rows and 4 variables.
 "metadata"
 
+#' Difference in days between isolate collection dates
+#'
+#' For all pairs of isolates
+#' Corresponding manuscript: https://aac.asm.org/content/63/11/e01622-19
+#'
+#' @format A data frame with 85078 rows and 3 variables.
+"days_between_isolates"
+
 #' Klebiella pneumoniae ST258 isolate variant alignment
 #'
 #' Variant alignment for Klebsiella pneumoniae ST258 isolates in the study.
