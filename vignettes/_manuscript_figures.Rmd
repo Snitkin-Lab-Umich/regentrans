@@ -91,6 +91,7 @@ pat_frac_intra <- pat_pair_types_new %>% select(-orig_dist_bin, -orig_dist) %>%
 
 ```{r}
 f2a <- frac_intra %>% 
+  filter(pairwise_dist <= 100) %>% 
   mutate(under = ifelse(pairwise_dist <= 10, '≤ 10 SNVs','Over threshold'), 
          under = ifelse(pairwise_dist <= 6, '≤ 6 SNVs',under),
          under = factor(under, levels = c('≤ 6 SNVs', '≤ 10 SNVs','Over threshold'))) %>% 
@@ -235,11 +236,16 @@ pheatmap(fsp, border_color = 'white',
 snv_summary <- summarize_pairs(pair_types,summary_fns = c('min'), threshs = c(6, 10)) 
 
 # get facility summary
+# facil_summary <- snv_summary %>% 
+#     mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), 
+#                             levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
+#   group_by(loc1, pair_type, leq_6, leq_10) %>% summarize() %>% 
+#   pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>% 
+#   mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs')) 
 facil_summary <- snv_summary %>% 
-    mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), 
-                            levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
-  group_by(loc1, pair_type, leq_6, leq_10) %>% summarize() %>% 
-  pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>% 
+  mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
+  group_by(loc1, pair_type) %>% summarize(leq_6 = sum(leq_6), leq_10 = sum(leq_10)) %>%
+  pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>%
   mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs')) 
 
 # get locations to keep (at least 1 closely related pair)
@@ -285,7 +291,7 @@ flow_fsp_plot <- pair_info %>%
   ggplot(aes(x=pt_flow,y=fsp)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
   labs(x = 'Patient flow', y = 'Fsp') + 
-  annotate('text', x = 0.005, y = 0.7, 
+  annotate('text', x = 0.004, y = 0.7, 
            label = paste(paste('Spearman rho =', round(flow_fsp_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(flow_fsp_spear$p.value, 1))))
 
@@ -297,13 +303,32 @@ flow_snv_plot <- pair_info %>%
   ggplot(aes(x=pt_flow,y=leq_10)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
   labs(x = 'Patient flow', y = '# closely related\npairs (≤ 10 SNVs)') + 
-  annotate('text', x = 0.005, y = 6.5, 
+  annotate('text', x = 0.004, y = 6.5, 
            label = paste(paste('Spearman rho =', round(flow_snv_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(flow_snv_spear$p.value, 1)))) #+ ylim(c(0,100))
 
-f7 <- plot_grid(flow_fsp_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
-ggsave('manuscript_figures/Fig7.png',f7)
+####__________####
+
+flow_min_snv_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)],
+                                 pair_info$dist_min[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)], 
+                                 method = 'spearman')
+
+flow_min_snv_plot <- pair_info %>%
+  ggplot(aes(x=pt_flow,y=dist_min)) +
+  geom_point() + geom_smooth(method='lm') + scale_x_log10() +
+  labs(x = 'Patient flow', y = 'Minimum pairwise \nSNV distance') +
+  annotate('text', x = 0.004, y = 30, 
+           label = paste(paste('Spearman rho =', round(flow_min_snv_spear$estimate, 2)),'\n',
+                         paste('Spearman p =', signif(flow_min_snv_spear$p.value, 1)))) + ylim(c(0,50))
+
+f7 <- plot_grid(flow_fsp_plot, flow_min_snv_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
+ggsave('manuscript_figures/Fig7.png',f7, width = 6, height = 8)
 f7
+####__________####
+
+#f7 <- plot_grid(flow_fsp_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
+#ggsave('manuscript_figures/Fig7.png',f7)
+#f7
 ```
 
 

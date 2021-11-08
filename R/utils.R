@@ -28,18 +28,15 @@ utils::globalVariables(c(".","subtr_size","index","isolate_name","pair_type","pa
 #'
 #' @examples
 #' make_long_form(fsp)
-make_long_form <- function(facil_dist, col_names = c('loc1', 'loc2', 'fsp'), remove_zeros = TRUE){
+make_long_form <- function(facil_dist, col_names = c('loc1', 'loc2', 'fsp')){
   #check that it is a symmetric matrix
   check_long_form_input(facil_dist, col_names)
 
   sym <- isSymmetric(as.matrix(facil_dist))
 
-  #change to longform
-  facil_dist_long <- stats::na.omit(data.frame(as.table(as.matrix(facil_dist))))
-  if(remove_zeros){
-    facil_dist_long <- facil_dist_long %>% dplyr::filter(Freq != 0)
-  }
-  colnames(facil_dist_long) <- c('loc1', 'loc2', 'fsp')
+  #change to longform, remove diagonal rows
+  facil_dist_long <- stats::na.omit(data.frame(as.table(as.matrix(facil_dist)))) %>% dplyr::filter(Var1 != Var2)
+  colnames(facil_dist_long) <- col_names
 
   if(sym){
     ## sort facilities before summarizing (should probably make this a function)

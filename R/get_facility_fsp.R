@@ -4,6 +4,7 @@
 #' @param fasta ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
 #' @param matrix whether to output symmetric matrix (TRUE; default) or long form (FALSE)
 #'
+#'
 #' @return facility x facility matrix with Fsp values
 #' @export
 #' @details Fsp is described in Donker et al. 2017
@@ -15,13 +16,15 @@
 #' \dontrun{
 #' # This takes a long time to run right now!
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' facil_fsp <- get_facility_fsp(aln, locs, matrix = TRUE)
+#' pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
+#' facil_fsp <- get_facility_fsp(aln, locs, matrix = TRUE, pt)
 #' }
 
 
 #######################try to make sapply########
-get_facility_fsp <- function(fasta, locs, matrix = TRUE){
+get_facility_fsp <- function(fasta, locs, matrix = TRUE, pt){
   #check the DNAbin object and locs
+  #TO DO: add a check for pt (either null or a named vector of isolates)
   check_facility_fsp_input(fasta, locs, matrix)
   #make a vector of only locs that appear more than once
   locs_over_one <- which(unlist(table(locs) > 1))
@@ -41,12 +44,19 @@ get_facility_fsp <- function(fasta, locs, matrix = TRUE){
   sample_locs <- rownames(fasta_sub)
   #unique list of locations
   locs_unique <- unique(unname(locs_subset))
+  #generate metasequences if pt info is given
+  if(!is.null(pt)){
+    fasta_sub_meta <- make_meta_seqs(fasta, locs, pt)
+  }
+  else{
+    fasta_sub_meta <- fasta_sub
+  }
   #CALCULATE INTRA- AND INTER-FACILITY DISTANCE
   facil_dist <- data.frame(sapply(locs_unique, function(f1){
     sapply(locs_unique, function(f2){
       if (f1 == f2) {return(0)}
       #subset fasta file to just that those locations
-      subset_snp_mat = fasta_sub[sample_locs %in% c(f1, f2), ]
+      subset_snp_mat = fasta_sub_meta[sample_locs %in% c(f1, f2), ]
       #make sure the position is not all unknown or no variance, subset to the ones that have some variation
       subset_snp_mat = subset_snp_mat[,apply(subset_snp_mat, 2, FUN = function(x){sum(x != x[1] | x == 'N') > 0})]
       #figure out which are from each facility
@@ -128,3 +138,86 @@ get_within_pop_var <- function(subset_snp_mat, subset){
   })
   return(sum(within_f))
 }
+
+make_meta_seqs <- function(fasta, locs, pt){
+  #remake metadata df with location, pt, and isolate ID
+  combos <- as.data.frame(cbind(pt, names(pt))) %>% left_join(as.data.frame(cbind(locs, names(locs))))
+  #subset to single pt/isolate ID combos
+  combos_2 <- combos %>% distinct(pt, V2, .keep_all = TRUE)
+  #if there are not multiple patients from the same location, just return the normal fasta
+  if(all(combos == combos_2)){
+    return(fasta)
+  }
+  #otherwise
+  #Find major allele at each position, make a “reference”
+  ref <- find_major_alleles(fasta,locs)
+  #make df to count number of unique combos
+  combos_3 <- combos_2 %>% count(pt, locs)
+  #make fasta character
+  fasta_char <- as.character(fasta)
+  #across all patient location combos
+  fasta_subs <- data.frame(t(apply(combos_3,1,function(x){
+    #find the isolate ID
+    ID <- combos_2 %>% filter(pt == x[1][[1]], locs == x[2][[1]]) %>% select(V2)
+    #if there is only one unique pair, return that sequence as is
+    if(x[3] == 1){
+      metasequence <- fasta_char[rownames(fasta_char) == ID[[1]], ]
+    }
+    #if there are more than one, make a metasequence
+    else{
+      metasequence <- find_major_alleles(fasta_char[rownames(fasta_char) == ID[[1]], ], ref = ref)
+    }
+    return(c(ID[[1]][1], metasequence))
+
+  })))
+  rownames(fasta_subs) <- fasta_subs[,1]
+  fasta_subs <- fasta_subs[,-1]
+  return(as.DNAbin(as.matrix(fasta_subs)))
+}
+
+find_major_alleles <- function(fasta, ref = NULL){
+  #make character fasta
+  fasta_2 <- as.character(fasta)
+  #if there isn't a ref provided, we are making the ref
+  if(is.null(ref)){
+    #return the major allele (most common) at each position
+    ref <- apply(fasta_2, 2, FUN = function(x){
+      #only problem is if there is a tie, which is less of a problem with larger sample size
+      names(which.max(table(x)))
+    })
+  }
+  #if there is already a ref, we are finding the consensus sequence for a patient
+  else{
+    #make ref character
+    ref <- as.character(ref)
+    ref <- apply(1:ncol(fasta_2), FUN = function(i){
+      #subset to that column (position)
+      x = fasta_2[,i]
+      #make a table of frequency of alleles in that seq
+      tab = table(x)
+      #find number of higest appearing
+      max_val = max(tab)
+      #see how many alleles appear that many times
+      n_max_val = sum(tab == max_val)
+      #find the majority allele (first if multiple)
+      maj <- names(which.max(tab))
+      #if there is only one allele at that position appearing max val # times, return it
+      if(n_max_val == 1){
+        return(maj)
+      }
+      #if there are more than one, return one that isn't the reference allele at that position
+      else{
+        #find the reference allele at that position
+        ref_allele <- ref[i]
+        #subtract 1 from the n for the ref allele at that position
+        tab[which(names(tab) == ref_allele)] = tab[which(names(tab) == ref_allele)] -1
+        return(names(which.max(tab)))
+      }
+
+    })
+
+  }
+
+  return(ref)
+}
+
