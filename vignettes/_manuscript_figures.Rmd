@@ -43,6 +43,8 @@ fasta <- aln
 dists <- dists
 #phylogenetic tree
 tree <- tr
+#patristic distances
+pat_dists <- cophenetic.phylo(tree)
 #patient transfer network
 pt_flow <- pt_flow
 #fsp
@@ -75,20 +77,46 @@ round(2*ref_genome_length*mutation_rate)
 ```{r}
 # pre-calculated in vignette
 # dists <- dist.dna(fasta, model = 'N', pairwise.deletion = TRUE, as.matrix = TRUE)
-pair_types <- get_pair_types(dists = dists, locs = locs) %>% subset_pairs()
+pair_types <- get_pair_types(dists = dists, locs = locs) #%>% subset_pairs()
+pat_pair_types <- get_pair_types(dists = pat_dists, locs = locs) #%>% subset_pairs()
 
 frac_intra <- get_frac_intra(pair_types = pair_types)
+pat_pair_types_new <- pat_pair_types %>% 
+  mutate(orig_dist = pairwise_dist, 
+         orig_dist_bin = cut(pairwise_dist, 100), 
+         pairwise_dist = as.numeric(cut(pairwise_dist, 100)))
+pat_frac_intra <- pat_pair_types_new %>% select(-orig_dist_bin, -orig_dist) %>% 
+  get_frac_intra() %>% left_join(pat_pair_types_new %>% select(pairwise_dist, orig_dist_bin) %>% unique())
+```
 
-f2 <- frac_intra %>% 
+```{r}
+f2a <- frac_intra %>% 
   mutate(under = ifelse(pairwise_dist <= 10, '≤ 10 SNVs','Over threshold'), 
          under = ifelse(pairwise_dist <= 6, '≤ 6 SNVs',under),
          under = factor(under, levels = c('≤ 6 SNVs', '≤ 10 SNVs','Over threshold'))) %>% 
   ggplot(aes(x = pairwise_dist, y = frac_intra, fill = under)) + 
   geom_bar(stat = "identity", alpha = 0.5) + 
   scale_fill_grey() + 
-  labs(x = "Pairwise SNV distance", y = "Fraction of intra-facility pairs", fill = 'Possible SNV\nthresholds') + 
-  ylim(0, 1) + xlim(-1,51) #+
-  #theme(legend.position = 'none')
+  labs(x = "Pairwise SNV distance", y = "Fraction of\nintra-facility pairs", fill = 'Possible distance\nthresholds') + 
+  ylim(0, 1) #+ xlim(-1,100)
+
+
+f2b <- pat_frac_intra %>% 
+  # filter(orig_dist_bin %in% levels(pat_frac_intra$orig_dist_bin)[1:100]) %>% 
+  mutate(under = ifelse(orig_dist_bin %in% levels(pat_frac_intra$orig_dist_bin)[1:4], 
+                        'Branch length ≤ 2.56e-6\nmutations/site/year','Over threshold'),
+  # under = ifelse(pairwise_dist <= 6, '≤ 6 SNVs',under),
+  under = factor(under, levels = c('Branch length ≤ 2.56e-6\nmutations/site/year','Over threshold')),
+  orig_dist_bin = as.numeric(gsub('\\(.*,|]','',orig_dist_bin))) %>%
+  arrange(orig_dist_bin) %>% 
+  ggplot(aes(x = orig_dist_bin, y = frac_intra, fill = under)) + 
+  geom_bar(stat = "identity", alpha = 0.5) + 
+  scale_fill_grey() + 
+  labs(x = "Pairwise patristic distance", y = "Fraction of\nintra-facility pairs", fill = 'Possible distance\nthreshold') +
+  ylim(0, 1) #+
+  # theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 0.5))
+
+f2 <- plot_grid(f2a, f2b, ncol = 1, align = 'hv', labels = 'AUTO')
 
 ggsave('manuscript_figures/Fig2.png', f2, width = 7, height = 5)
 f2
@@ -117,7 +145,7 @@ subtrees <- clusters$subtrees
 cluster_plot <- ggplot(data = pure_subtree_info, aes(x = loc, y = subtr_size, color = loc)) + 
   geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.5) + 
   scale_color_manual(values = cols) +
-  labs(y = "Number of isolates in \nphylogenetic cluster", x = "", color = 'Facility') +
+  labs(y = "#isolates in \nphylogenetic cluster", x = "", color = 'Facility') +
   ylim(c(0,12.5)) +
   coord_flip()
 # cluster_plot 
@@ -134,7 +162,7 @@ f3
 pw_snv_plot <- pair_types %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
-  labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
+  labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
   geom_vline(xintercept = 10, col = 'darkgrey', size = 1) +
   theme(legend.justification = "top", 
         axis.line = element_line(colour = "black"),
@@ -144,15 +172,40 @@ pw_snv_plot_zoom <- pair_types %>%
   filter(pairwise_dist <= 10) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
-  labs(x = "Pairwise SNV\ndistance", y = "Count", fill = "") +
+  labs(x = "Pairwise SNV\ndistance", y = "# pairs", fill = "") +
   theme(legend.position = 'none') +
   scale_x_continuous(breaks = pretty_breaks())
 
-f4 <- pw_snv_plot + annotation_custom(ggplotGrob(pw_snv_plot_zoom), xmin = 250, xmax = 450, 
-                       ymin = 200, ymax = 2800)
+f4a <- pw_snv_plot + annotation_custom(ggplotGrob(pw_snv_plot_zoom), 
+                                      xmin = 250, xmax = 450, ymin = 200, ymax = 2800)
 
+# ggsave('manuscript_figures/Fig4.png', f4)
+# f4
+
+pat_pw_snv_plot <- pat_pair_types %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  labs(x = "Patristic distance", y = "# pairs", fill = "") +
+  geom_vline(xintercept = 2.56e-06, col = 'darkgrey', size = 1) +
+  theme(legend.justification = "top", 
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank())
+
+pat_pw_snv_plot_zoom <- pat_pair_types %>%
+  filter(pairwise_dist <= 2.56e-06) %>%
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) +
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
+  labs(x = "Patristic distance", y = "# pairs", fill = "") +
+  theme(legend.position = 'none') #+
+  # scale_x_continuous(breaks = pretty_breaks())
+
+f4b <- pat_pw_snv_plot + annotation_custom(ggplotGrob(pat_pw_snv_plot_zoom), 
+                                    xmin = 5e-5, xmax = 9e-5, ymin = 200, ymax = 2800)
+
+f4 <- plot_grid(f4a, f4b, ncol = 1, labels = 'AUTO')
 ggsave('manuscript_figures/Fig4.png', f4)
 f4
+
 ```
 
 
@@ -198,7 +251,7 @@ f6 <- facil_summary %>% filter(loc1 %in% keep_locs) %>%
   ggplot(aes(x = reorder(loc1, -n_pairs, sum), y = n_pairs, fill = pair_type)) +
   geom_col(position = 'dodge') +
        scale_fill_manual(values=c("cadetblue", "salmon")) + 
-         labs(y = "Number of closely related \nisolate pairs", x = "Facility", fill = '', color = '') +
+         labs(y = "# closely related isolate pairs", x = "Facility", fill = '', color = '') +
   facet_grid(factor(thresh, levels = c('≤ 6 SNVs','≤ 10 SNVs'))~.)
 
 
@@ -260,7 +313,7 @@ time1 <- pair_types %>%
   filter(date1 == date2) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
-  labs(x = "Pairwise SNV distance", y = "Count", fill = "") +
+  labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
   facet_grid(~date1) + 
   theme(legend.justification = "top", 
         axis.line = element_line(colour = "black"),
@@ -272,7 +325,7 @@ time2 <- pair_types %>%
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = position_fill(), alpha = 0.4, bins = 30) +
   # xlim(0,20) +
-  labs(x = "Pairwise SNV distance", y = "Fraction", fill = "") +
+  labs(x = "Pairwise SNV distance", y = "Fraction of pairs", fill = "") +
   facet_grid(~date1) + 
   theme(legend.justification = "top", 
         axis.line = element_line(colour = "black"),
@@ -320,7 +373,7 @@ geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +
              data = snv_geo, curvature = 0.33) +
   geom_point(aes(size=n), alpha=1, color = "lightblue") + 
   theme_map() + #theme(legend.position = "none") 
-  labs(size = 'Number of samples', alpha = 'Number of closely related\npairs (≤ 6 SNVs)')
+  labs(size = '# samples', alpha = '# closely related\npairs (≤ 6 SNVs)')
 
 
 geo_dat <- left_join(pair_info, facil_geo, by = c('loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
