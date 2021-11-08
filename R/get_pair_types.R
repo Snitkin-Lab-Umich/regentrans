@@ -2,6 +2,7 @@
 #'
 #' @param dists a SNV distance matrix returned by the dist.dna function from the ape package
 #' @param locs a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID
+#' @param pt a named vector of patients each isolate originated from, with the name being the sample ID. If this information is unavailable, set pt = NULL.
 #'
 #' @return a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs.
 #' @export
@@ -9,10 +10,12 @@
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' pair_types <- get_pair_types(dists, locs)
+#' pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
+#' pair_types <- get_pair_types(dists, locs, pt)
 #' }
-get_pair_types <- function(dists, locs){
+get_pair_types <- function(dists, locs, pt){
   #checks
+  #TO DO: add a check for pt (either null or a named vector of isolates)
   check_get_pair_types_input(dists, locs)
 
   #make the subsetted isolates object
@@ -39,7 +42,12 @@ get_pair_types <- function(dists, locs){
       dplyr::mutate(pair_type=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
 
   # subset to include only one of each pair
-  snp_facility_pairs <- subset_pairs(snp_facility_pairs)
+  snp_facility_pairs <- snp_facility_pairs %>% dplyr::arrange(pt1) %>% subset_pairs()
+
+  #if there is pt info
+  if(!is.null(pt)){
+    snp_facility_pairs <- snp_facility_pairs %>% group_by(loc1, loc2, pt1, pt2) %>% slice(which.min(pairwise_dist))
+  }
 
   #return snp matrix
   return(snp_facility_pairs)
