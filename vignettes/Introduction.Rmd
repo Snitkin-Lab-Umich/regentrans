@@ -80,12 +80,23 @@ Either a variant alignment or a phylogenetic tree are required for most function
 
 #### Variant alignment
 
-The variant alignment can be read in to R using the following command:
+We recommend using the [Gubbins](https://sanger-pathogens.github.io/gubbins/) variant output fasta file for your dataset. The variant alignment can be read in to R using the following command:
 
 ```{r, eval = FALSE, message=FALSE}
 # this is if your alignment is in a fasta file
 aln <- ape::read.dna("/path/to/aln.fasta",
                      format = "fasta")
+```
+
+#### Phylogenetic tree
+
+We recommend using [IQ-TREE](http://www.iqtree.org/) to generate a maximum likelihood phylogenetic tree for your dataset. In the alignment input for IQ-TREE, we recommend masking Gubbins-filtered variants. However, there are also ways to make simple phylogenies in R using a variant alignment. 
+
+A phylogenetic tree in Newick format can be read into R using the following command:
+
+```{r, eval = FALSE, message=FALSE}
+# this is if the tree is in Newick format
+tr <- ape::read.tree("path/to/data.treefile")
 ```
 
 #### Pairwise SNV distance matrix
@@ -100,15 +111,10 @@ dists <- ape::dist.dna(x = aln, # DNAbin object as read in above
                        )
 ```
 
-#### Phylogenetic tree
-
-We recommend using [IQ-TREE](http://www.iqtree.org/) to generate a maximum likelihood phylogenetic tree for your dataset. However, there are also ways to make simple phylogenies in R using a variant alignment. 
-
-A phylogenetic tree in Newick format can be read into R using the following command:
+Alternatively, to account for ancestral relationships in the genomic distance matrix, a pairwise distance matrix can be created using a phylogenetic tree: 
 
 ```{r, eval = FALSE, message=FALSE}
-# this is if the tree is in Newick format
-tr <- ape::read.tree("path/to/data.treefile")
+dists <- ape::cophenetic.phylo(x = tr) # tree object as read in above
 ```
 
 ### Patient transfer network
@@ -639,6 +645,14 @@ pair_info %>%
   labs(x = 'Patient flow', y = '# closely related\npairs (≤ 10 SNVs)') 
 ```
 
+Another way to quantify the similarity between facilities is the value of the minimum pairwise SNV distance between isolates at the facilities: 
+
+```{r}
+pair_info %>%
+  ggplot(aes(x=sum_pt_trans_metric,y=dist_min)) +
+  geom_point() + geom_smooth(method='lm') + scale_x_log10() +
+  labs(x = 'Patient flow', y = 'Minimum pairwise SNV distance') + ylim(c(0,50))
+```
 
 # Are there any observable geographic trends in prevalence/transmission?
 
