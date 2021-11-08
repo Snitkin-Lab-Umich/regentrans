@@ -1,6 +1,6 @@
 Package: regentrans
 Title: A framework and R package for using genomics to study regional pathogen transmission
-Version: 0.1.0
+Version: 0.0.0.9000
 Authors@R: c( 
     person(given = "Sophie",
            family = "Hoffman",
