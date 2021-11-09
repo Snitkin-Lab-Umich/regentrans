@@ -77,27 +77,27 @@ round(2*ref_genome_length*mutation_rate)
 ```{r}
 # pre-calculated in vignette
 # dists <- dist.dna(fasta, model = 'N', pairwise.deletion = TRUE, as.matrix = TRUE)
-pair_types <- get_pair_types(dists = dists, locs = locs) #%>% subset_pairs()
-pat_pair_types <- get_pair_types(dists = pat_dists, locs = locs) #%>% subset_pairs()
+pair_types <- get_pair_types(dists = dists, locs = locs, pt = pt) #%>% subset_pairs()
+pat_pair_types <- get_pair_types(dists = pat_dists, locs = locs, pt = pt) #%>% subset_pairs()
 
-frac_intra <- get_frac_intra(pair_types = pair_types)
+frac_intra <- get_frac_intra(pair_types = data.frame(pair_types %>% select(-pt1, -pt2)))
 pat_pair_types_new <- pat_pair_types %>% 
   mutate(orig_dist = pairwise_dist, 
          orig_dist_bin = cut(pairwise_dist, 100), 
          pairwise_dist = as.numeric(cut(pairwise_dist, 100)))
-pat_frac_intra <- pat_pair_types_new %>% select(-orig_dist_bin, -orig_dist) %>% 
+pat_frac_intra <- pat_pair_types_new %>% select(-orig_dist_bin, -orig_dist, -pt1, -pt2) %>% data.frame() %>% 
   get_frac_intra() %>% left_join(pat_pair_types_new %>% select(pairwise_dist, orig_dist_bin) %>% unique())
 ```
 
 ```{r}
 f2a <- frac_intra %>% 
-  filter(pairwise_dist <= 100) %>% 
+  # filter(pairwise_dist <= 100) %>% 
   mutate(under = ifelse(pairwise_dist <= 10, '≤ 10 SNVs','Over threshold'), 
          under = ifelse(pairwise_dist <= 6, '≤ 6 SNVs',under),
          under = factor(under, levels = c('≤ 6 SNVs', '≤ 10 SNVs','Over threshold'))) %>% 
   ggplot(aes(x = pairwise_dist, y = frac_intra, fill = under)) + 
   geom_bar(stat = "identity", alpha = 0.5) + 
-  scale_fill_grey() + 
+  scale_fill_manual(values = c('black','grey40','lightgrey')) + 
   labs(x = "Pairwise SNV distance", y = "Fraction of\nintra-facility pairs", fill = 'Possible distance\nthresholds') + 
   ylim(0, 1) #+ xlim(-1,100)
 
@@ -112,12 +112,13 @@ f2b <- pat_frac_intra %>%
   arrange(orig_dist_bin) %>% 
   ggplot(aes(x = orig_dist_bin, y = frac_intra, fill = under)) + 
   geom_bar(stat = "identity", alpha = 0.5) + 
-  scale_fill_grey() + 
+  scale_fill_manual(values = c('black', 'lightgrey')) + 
   labs(x = "Pairwise patristic distance", y = "Fraction of\nintra-facility pairs", fill = 'Possible distance\nthreshold') +
   ylim(0, 1) #+
   # theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 0.5))
 
-f2 <- plot_grid(f2a, f2b, ncol = 1, align = 'hv', labels = 'AUTO')
+f2 <- plot_grid(plot_grid(f2a, NULL, rel_widths = c(1, 0.09), nrow = 1), 
+                f2b, ncol = 1, labels = 'AUTO')
 
 ggsave('manuscript_figures/Fig2.png', f2, width = 7, height = 5)
 f2
@@ -143,20 +144,71 @@ clusters <- get_clusters(tr,locs, pureness = 1)
 pure_subtree_info <- clusters$pure_subtree_info
 subtrees <- clusters$subtrees
 
-cluster_plot <- ggplot(data = pure_subtree_info, aes(x = loc, y = subtr_size, color = loc)) + 
+# cluster_plot <- ggplot(data = pure_subtree_info, aes(x = loc, y = subtr_size, color = loc)) + 
+#   geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.5,
+#                        size = 2) + 
+#   scale_color_manual(values = cols) +
+#   labs(y = "#isolates in \nphylogenetic cluster", x = "", color = 'Facility') +
+#   # ylim(c(0,12.5)) +
+#   coord_flip()
+# # cluster_plot 
+```
+
+```{r}
+# get ids of isolates in each cluster
+isolates_clusters <- sapply(1:nrow(clusters$pure_subtree_info), function(x){
+  i <- clusters$pure_subtree_info$index[x]
+  name <- clusters$pure_subtree_info$isolate_id[x]
+  if(!is.na(i)){
+    name <- clusters$subtrees[[i]]$tip.label
+  }
+  name
+})
+
+# get unique cluster names
+facil_clusters <- sapply(unique(locs), function(x){
+  clusts <- isolates_clusters[clusters$pure_subtree_info$loc == x]
+  names(clusts) <- paste0(x, 1:length(clusts))
+  cluster_nums <- unlist(sapply(names(clusts), function(x){
+  rep(x, length(clusts[[x]]))
+  }))
+  names(cluster_nums) <- unlist(clusts)
+  cluster_nums
+}) %>% unname() %>% unlist()
+
+head(facil_clusters)
+
+day_diffs <- sapply(unique(facil_clusters), function(x){
+  isolates <- names(facil_clusters)[facil_clusters == x]
+  days <- sapply(isolates, function(i1){
+    sapply(isolates, function(i2){
+      b <- (days_between_isolates$isolate1 == i1 & days_between_isolates$isolate2 == i2 |
+              days_between_isolates$isolate1 == i2 & days_between_isolates$isolate2 == i1)
+      days_between_isolates$days_diff[b]
+    })
+  })
+  max(unlist(days[lower.tri(days)]))
+})
+
+day_diffs[day_diffs == -Inf] = 0
+
+cluster_plot <- bind_cols(cluster = names(day_diffs), 
+          subtr_size = table(facil_clusters)[names(day_diffs)], 
+          date_range = day_diffs) %>% 
+  mutate(loc = gsub('[0-9]','',cluster), .before = 1) %>% 
+  ggplot(aes(x = loc, y = subtr_size, color = loc, size = date_range)) + 
   geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.5) + 
   scale_color_manual(values = cols) +
-  labs(y = "#isolates in \nphylogenetic cluster", x = "", color = 'Facility') +
-  ylim(c(0,12.5)) +
+  labs(y = "# isolates in \nphylogenetic cluster", x = "", color = 'Facility', 
+  size = 'Date range\n(days)') +
+  # ylim(c(0,12.5)) +
   coord_flip()
-# cluster_plot 
 
 f3 <- plot_grid(tr_facil, cluster_plot, labels = 'AUTO') #, rel_widths = c(0.4,0.6))
 
-ggsave('manuscript_figures/Fig3.png', f3, width = 8, height = 5)
+ggsave('manuscript_figures/Fig3.png', f3, width = 8, height = 8)
 f3
 ```
-
 
 
 ```{r, message=FALSE}
@@ -178,7 +230,7 @@ pw_snv_plot_zoom <- pair_types %>%
   scale_x_continuous(breaks = pretty_breaks())
 
 f4a <- pw_snv_plot + annotation_custom(ggplotGrob(pw_snv_plot_zoom), 
-                                      xmin = 250, xmax = 450, ymin = 200, ymax = 2800)
+                                      xmin = 250, xmax = 450, ymin = 100, ymax = 2700)
 
 # ggsave('manuscript_figures/Fig4.png', f4)
 # f4
@@ -186,7 +238,7 @@ f4a <- pw_snv_plot + annotation_custom(ggplotGrob(pw_snv_plot_zoom),
 pat_pw_snv_plot <- pat_pair_types %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
-  labs(x = "Patristic distance", y = "# pairs", fill = "") +
+  labs(x = "Pairwise patristic distance", y = "# pairs", fill = "") +
   geom_vline(xintercept = 2.56e-06, col = 'darkgrey', size = 1) +
   theme(legend.justification = "top", 
         axis.line = element_line(colour = "black"),
@@ -196,17 +248,31 @@ pat_pw_snv_plot_zoom <- pat_pair_types %>%
   filter(pairwise_dist <= 2.56e-06) %>%
   ggplot(aes(x = pairwise_dist, fill = pair_type)) +
   geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
-  labs(x = "Patristic distance", y = "# pairs", fill = "") +
+  labs(x = "Pairwise patristic\ndistance", y = "# pairs", fill = "") +
   theme(legend.position = 'none') #+
   # scale_x_continuous(breaks = pretty_breaks())
 
 f4b <- pat_pw_snv_plot + annotation_custom(ggplotGrob(pat_pw_snv_plot_zoom), 
-                                    xmin = 5e-5, xmax = 9e-5, ymin = 200, ymax = 2800)
+                                    xmin = 5.5e-5, xmax = 9.5e-5, ymin = 50, ymax = 2650)
 
 f4 <- plot_grid(f4a, f4b, ncol = 1, labels = 'AUTO')
-ggsave('manuscript_figures/Fig4.png', f4)
+ggsave('manuscript_figures/Fig4.png', f4, height = 7, width = 6)
 f4
 
+```
+
+```{r}
+left_join(pair_types, days_between_isolates) %>% 
+  ggplot(aes(x = days_diff, y = pairwise_dist)) +
+  geom_bin_2d() +
+  geom_smooth(method = 'lm', color = 'white') +
+  labs(x = '# days between samples', y = 'Pairwise SNV distance', fill = '# pairs')
+
+left_join(pat_pair_types, days_between_isolates) %>% 
+  ggplot(aes(x = days_diff, y = pairwise_dist)) +
+  geom_bin_2d() +
+  geom_smooth(method = 'lm', color = 'white') +
+  labs(x = '# days between samples', y = 'Pairwise patristic distance', fill = '# pairs')
 ```
 
 
@@ -233,7 +299,7 @@ pheatmap(fsp, border_color = 'white',
 
 ```{r, message=FALSE, warning=FALSE}
 # get snv summary
-snv_summary <- summarize_pairs(pair_types,summary_fns = c('min'), threshs = c(6, 10)) 
+snv_summary <- summarize_pairs(pair_types %>% select(-pt1,-pt2) %>% data.frame(),summary_fns = c('min'), threshs = c(6, 10)) 
 
 # get facility summary
 # facil_summary <- snv_summary %>% 
@@ -266,6 +332,35 @@ f6
 ```
 
 ```{r}
+time1 <- pair_types %>% 
+  mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
+  filter(date1 == date2) %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
+  facet_grid(~date1) + 
+  theme(legend.justification = "top", 
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank())
+
+time2 <- pair_types %>% 
+  mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
+  filter(date1 == date2) %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
+  geom_histogram(position = position_fill(), alpha = 0.4, bins = 30) +
+  # xlim(0,20) +
+  labs(x = "Pairwise SNV distance", y = "Proportion of pairs", fill = "") +
+  facet_grid(~date1) + 
+  theme(legend.justification = "top", 
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank())
+
+f7 <- plot_grid(time1, time2, nrow = 2, labels = 'AUTO')
+ggsave('manuscript_figures/Fig7.png', f8, width = 7, height = 5)
+f7
+```
+
+```{r}
 pair_info <- merge_inter_summaries(
   make_long_form(pt_flow, col_names = c('loc1','loc2','pt_flow')), 
   snv_summary, 
@@ -288,6 +383,7 @@ flow_fsp_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(
                                  method = 'spearman')
 
 flow_fsp_plot <- pair_info %>% 
+  filter(!is.na(pt_flow)) %>% 
   ggplot(aes(x=pt_flow,y=fsp)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
   labs(x = 'Patient flow', y = 'Fsp') + 
@@ -300,6 +396,7 @@ flow_snv_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(
                                  method = 'spearman')
 
 flow_snv_plot <- pair_info %>% 
+  filter(!is.na(pt_flow)) %>% 
   ggplot(aes(x=pt_flow,y=leq_10)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
   labs(x = 'Patient flow', y = '# closely related\npairs (≤ 10 SNVs)') + 
@@ -307,59 +404,62 @@ flow_snv_plot <- pair_info %>%
            label = paste(paste('Spearman rho =', round(flow_snv_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(flow_snv_spear$p.value, 1)))) #+ ylim(c(0,100))
 
-####__________####
-
 flow_min_snv_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)],
                                  pair_info$dist_min[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)], 
                                  method = 'spearman')
 
 flow_min_snv_plot <- pair_info %>%
+  filter(!is.na(pt_flow)) %>% 
   ggplot(aes(x=pt_flow,y=dist_min)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
   labs(x = 'Patient flow', y = 'Minimum pairwise \nSNV distance') +
   annotate('text', x = 0.004, y = 30, 
            label = paste(paste('Spearman rho =', round(flow_min_snv_spear$estimate, 2)),'\n',
-                         paste('Spearman p =', signif(flow_min_snv_spear$p.value, 1)))) + ylim(c(0,50))
+                         paste('Spearman p =', signif(flow_min_snv_spear$p.value, 1)))) #+ ylim(c(0,40))
 
-f7 <- plot_grid(flow_fsp_plot, flow_min_snv_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
-ggsave('manuscript_figures/Fig7.png',f7, width = 6, height = 8)
-f7
-####__________####
+f8 <- plot_grid(flow_fsp_plot, flow_min_snv_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
+ggsave('manuscript_figures/Fig7.png',f8, width = 6, height = 8)
+f8
 
 #f7 <- plot_grid(flow_fsp_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
 #ggsave('manuscript_figures/Fig7.png',f7)
 #f7
 ```
 
+```{r, eval = FALSE}
+cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$fsp)],
+                                 pair_info$fsp[!is.na(pair_info$pt_flow) &
+                                                 !is.na(pair_info$fsp)],  
+         method = 'spearman')
 
-```{r}
-time1 <- pair_types %>% 
-  mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
-  filter(date1 == date2) %>% 
-  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
-  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
-  labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
-  facet_grid(~date1) + 
-  theme(legend.justification = "top", 
-        axis.line = element_line(colour = "black"),
-        panel.border = element_blank())
+cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$fsp) &
+                             pair_info$pt_flow < 2e-3],
+                                 pair_info$fsp[!is.na(pair_info$pt_flow) &
+                                                 !is.na(pair_info$fsp) &
+                             pair_info$pt_flow < 2e-3],  
+         method = 'spearman')
 
-time2 <- pair_types %>% 
-  mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
-  filter(date1 == date2) %>% 
-  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
-  geom_histogram(position = position_fill(), alpha = 0.4, bins = 30) +
-  # xlim(0,20) +
-  labs(x = "Pairwise SNV distance", y = "Fraction of pairs", fill = "") +
-  facet_grid(~date1) + 
-  theme(legend.justification = "top", 
-        axis.line = element_line(colour = "black"),
-        panel.border = element_blank())
+cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10)],
+                                 pair_info$leq_10[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10)], 
+                                 method = 'spearman')
 
-f8 <- plot_grid(time1, time2, nrow = 2, labels = 'AUTO')
-ggsave('manuscript_figures/Fig8.png', f8, width = 7, height = 5)
-f8
+cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10) &
+                             pair_info$leq_10 < 8],
+                                 pair_info$leq_10[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10) &
+                             pair_info$leq_10 < 8], 
+                                 method = 'spearman')
+
+cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)],
+                                 pair_info$dist_min[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)], 
+                                 method = 'spearman')
+
+cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min) &
+                             pair_info$dist_min < 20],
+                                 pair_info$dist_min[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)&
+                             pair_info$dist_min < 20], 
+                                 method = 'spearman')
 ```
+
 
 ```{r}
 # read_tsv('~/Desktop/isolate_info.tsv') %>% select(isolate_no, clades) %>% mutate(date = dates[isolate_no]) %>% select(clades, date) %>% 
@@ -394,12 +494,15 @@ snv_geo <- pair_types %>% dplyr::group_by(loc1, loc2) %>% dplyr::summarize(n_clo
 
 geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +
   geom_curve(aes(x = facil_1_long, y = facil_1_lat, xend = facil_2_long, yend = facil_2_lat,
-                 alpha = n_closely_related_pairs),
+                 col = as.character(n_closely_related_pairs), size = n_closely_related_pairs/10),
              data = snv_geo, curvature = 0.33) +
-  geom_point(aes(size=n), alpha=1, color = "lightblue") + 
+  geom_point(aes(size=n, fill=n), shape = 21) + #, color = "lightblue") + 
+  # scale_color_gradient2(low = adjustcolor('lightgrey', alpha.f = 0.75), high = adjustcolor('black', alpha.f = 0.75)) +
+  scale_color_manual(values = gray.colors(7, start = 0.3, end = 0.9, gamma = 2.2, alpha = 0.75, rev = TRUE)) +
+  scale_fill_viridis_c(option = 'viridis', direction = -1) +
+  scale_size_continuous(range = c(1, 12), guide = FALSE) +
   theme_map() + #theme(legend.position = "none") 
-  labs(size = '# samples', alpha = '# closely related\npairs (≤ 6 SNVs)')
-
+  labs(size = '# samples', fill = '# samples', col = '# closely related\npairs (≤ 6 SNVs)')
 
 geo_dat <- left_join(pair_info, facil_geo, by = c('loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
   select(-n) %>% left_join(., facil_geo, by = c('loc2' = 'facil')) %>% rename(facil_2_long = long, facil_2_lat = lat) %>% 
@@ -410,26 +513,44 @@ geo_fsp_spear <- cor.test(geo_dat$geo_dist[!is.na(geo_dat$geo_dist) & !is.na(geo
                                  geo_dat$fsp[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$fsp)], 
                                  method = 'spearman')
 
+geo_min_snv_spear <- cor.test(geo_dat$geo_dist[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$dist_min)],
+                                 geo_dat$dist_min[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$dist_min)], 
+                                 method = 'spearman')
+
 geo_snv_spear <- cor.test(geo_dat$geo_dist[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$leq_10)],
                                  geo_dat$leq_10[!is.na(geo_dat$geo_dist) & !is.na(geo_dat$leq_10)], 
                                  method = 'spearman')
 
 geo_fsp <- geo_dat %>% 
+  filter(!is.na(geo_dist)) %>% 
   ggplot(aes(x = geo_dist, y = fsp)) +
   geom_point() + geom_smooth(method = 'lm') +
   labs(x = 'Physical distance between facilities', y = 'Fsp') + 
-  annotate('text', x = 1.05, y = 0.4, 
+  annotate('text', x = 0.9, y = 0.3, 
            label = paste0(paste('Spearman rho =', round(geo_fsp_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(geo_fsp_spear$p.value, 1))))
 
+geo_min_snv <- geo_dat %>% 
+  filter(!is.na(geo_dist)) %>% 
+  ggplot(aes(x = geo_dist, y = dist_min)) + geom_point() + geom_smooth(method = 'lm') +
+  labs(x = 'Physical distance between facilities', y = 'Minimum pairwise \nSNV distance') + 
+  annotate('text', x = 0.9, y = 30, 
+           label = paste0(paste0('Spearman rho = ', round(geo_min_snv_spear$estimate, 2)),'\n',
+                         paste0('Spearman p = ', signif(geo_min_snv_spear$p.value, 1))))
+
 geo_snv <- geo_dat %>% 
+  filter(!is.na(geo_dist)) %>% 
   ggplot(aes(x = geo_dist, y = leq_10)) + geom_point() + geom_smooth(method = 'lm') +
   labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(≤ 10 SNVs)') + 
-  annotate('text', x = 1.05, y = 4, 
+  annotate('text', x = 0.9, y = 10, 
            label = paste0(paste0('Spearman rho = ', round(geo_snv_spear$estimate, 2)),'\n',
                          paste0('Spearman p = ', signif(geo_snv_spear$p.value, 1))))
 
-f9 <- plot_grid(plot_grid(NULL, geo_map, NULL, nrow = 1, rel_widths = c(0.1,0.9,0), labels = c('','A','')), plot_grid(geo_fsp, geo_snv, labels = c('B','C')), ncol = 1, rel_heights = c(0.6, 0.4))
+
+
+f9 <- plot_grid(plot_grid(NULL, geo_map, NULL, nrow = 1, rel_widths = c(0.1,0.9,0), labels = c('','A','')), 
+                plot_grid(geo_fsp, geo_min_snv, geo_snv, labels = c('B','C','D'), nrow = 1), 
+                ncol = 1, rel_heights = c(0.6, 0.4))
 ggsave('manuscript_figures/Fig9.png', f9, width = 12, height = 12)
 f9
 ```
