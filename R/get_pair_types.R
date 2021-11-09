@@ -37,6 +37,10 @@ get_pair_types <- function(dists, locs, pt){
   snps$loc1 <- loc_sub[snps$isolate1]
   snps$loc2 <- loc_sub[snps$isolate2]
 
+  #add pts
+  snps$pt1 <- pt[snps$isolate1]
+  snps$pt2 <- pt[snps$isolate2]
+
   snp_facility_pairs <- dplyr::bind_cols(
     snps %>% dplyr::filter(isolate1 != isolate2) %>%
       dplyr::mutate(pair_type=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
@@ -50,7 +54,7 @@ get_pair_types <- function(dists, locs, pt){
   }
 
   #return snp matrix
-  return(snp_facility_pairs)
+  return(snp_facility_pairs %>% ungroup())
 }
 
 
