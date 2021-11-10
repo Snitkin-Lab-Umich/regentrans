@@ -15,14 +15,22 @@
 #' @examples
 #' \dontrun{
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
-#' clusts <- get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
+#' pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
+#' clusts <- get_clusters(tr, locs, pureness = 1, bootstrap = NULL, pt)
 #' }
-get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL){
+get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL, pt){
   #check inputs
+  #TO DO: add check for pt input
   check_get_clusters_inputs(tr, locs, pureness, bootstrap)
 
   #get the names of the things in common
   isolates <- intersect(tr$tip.label, names(locs))
+  if(!is.null(pt)){
+    #subset patients to one isolate per patient
+    pt_df <- as.data.frame(pt) %>% distinct(pt, .keep_all = TRUE) %>% rownames() %>% as.vector()
+    #subset isolates to one per patient
+    isolates <- intersect(isolates, pt_df)
+  }
   #subset locs
   locs_sub <- locs[isolates]
   #subset the tree
