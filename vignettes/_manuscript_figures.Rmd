@@ -51,17 +51,6 @@ pt_flow <- pt_flow
 fsp <- fsp
 ```
 
-### Subsetting to one isolate per patient per facility
-
-```{r}
-isolate_subset <- cbind(locs, pt) %>% unique() %>% rownames()
-locs <- locs[isolate_subset]
-pt <- pt[isolate_subset]
-dates <- dates[isolate_subset]
-dists <- dists[isolate_subset,isolate_subset]
-
-```
-
 # Choosing a pairwise SNV distance threshold
 
 ## Method 1: Use reference genome length and mutation rate
@@ -139,7 +128,7 @@ tr_facil <- ggtree(tr_sub) + geom_tippoint(aes(col = locs_tip)) +
   theme(legend.position = 'none')
 # tr_facil
 
-clusters <- get_clusters(tr,locs, pureness = 1)
+clusters <- get_clusters(tr,locs, pureness = 1, pt = pt)
 #dissect output
 pure_subtree_info <- clusters$pure_subtree_info
 subtrees <- clusters$subtrees
@@ -261,16 +250,14 @@ f4
 
 ```
 
-```{r}
+```{r, eval = FALSE}
 left_join(pair_types, days_between_isolates) %>% 
-  ggplot(aes(x = days_diff, y = pairwise_dist)) +
-  geom_bin_2d() +
+  ggplot(aes(x = days_diff, y = pairwise_dist)) + geom_bin_2d() +
   geom_smooth(method = 'lm', color = 'white') +
   labs(x = '# days between samples', y = 'Pairwise SNV distance', fill = '# pairs')
 
 left_join(pat_pair_types, days_between_isolates) %>% 
-  ggplot(aes(x = days_diff, y = pairwise_dist)) +
-  geom_bin_2d() +
+  ggplot(aes(x = days_diff, y = pairwise_dist)) + geom_bin_2d() +
   geom_smooth(method = 'lm', color = 'white') +
   labs(x = '# days between samples', y = 'Pairwise patristic distance', fill = '# pairs')
 ```
@@ -356,7 +343,7 @@ time2 <- pair_types %>%
         panel.border = element_blank())
 
 f7 <- plot_grid(time1, time2, nrow = 2, labels = 'AUTO')
-ggsave('manuscript_figures/Fig7.png', f8, width = 7, height = 5)
+ggsave('manuscript_figures/Fig7.png', f7, width = 7, height = 5)
 f7
 ```
 

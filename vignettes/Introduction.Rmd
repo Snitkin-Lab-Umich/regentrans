@@ -491,7 +491,7 @@ fsp[1:4,1:4]
 
 We can plot the fsp values as a heatmap to visualze the extent of similarity between strains from different facility pairs:
 
-```{r, eval=FALSE, message=FALSE}
+```{r, eval=TRUE, message=FALSE}
 # this takes a while to run, so we've pre-computed it and included it in the package
 # fsp <- get_facility_fsp(aln, locs)
 pheatmap(fsp)

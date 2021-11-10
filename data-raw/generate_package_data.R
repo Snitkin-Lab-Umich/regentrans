@@ -51,9 +51,11 @@ usethis::use_data(dists_mini, overwrite = TRUE)
 
 # include example fsp (because it takes a while to run)
 # run these 2 lines if need to update fsp
-# fsp <- get_facility_fsp(aln, locs)
-# write.csv(fsp, 'data-raw/kp_fsp.csv', quote = FALSE)
-fsp <- read.delim(system.file("data-raw", "kp_fsp.csv", package = "regentrans"), sep = ",", row.names = 1)
+# fsp <- get_facility_fsp(aln, locs, matrix = TRUE, pt)
+# write.csv(fsp, 'data-raw/kp_fsp_metaseq.csv', quote = FALSE)
+#old Fsp
+#fsp <- read.delim(system.file("data-raw", "kp_fsp.csv", package = "regentrans"), sep = ",", row.names = 1)
+fsp <- read.delim(system.file("data-raw", "kp_fsp_metaseq.csv", package = "regentrans"), sep = ",", row.names = 1)
 
 # save fsp to package
 usethis::use_data(fsp, overwrite = TRUE)
