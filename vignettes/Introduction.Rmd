@@ -428,7 +428,7 @@ Sometimes pairwise genetic distances are positively correlated with time between
 ```{r}
 left_join(pair_types, days_between_isolates) %>% 
   ggplot(aes(x = days_diff, y = pairwise_dist)) +
-  #geom_bin_2d() +
+  geom_bin_2d() +
   geom_smooth(method = 'lm', color = 'white') +
   labs(x = '# days between samples', y = 'Pairwise SNV distance', fill = '# pairs')
 ```
