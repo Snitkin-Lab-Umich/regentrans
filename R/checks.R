@@ -310,13 +310,13 @@ check_get_clusters_inputs <- function(tr, locs, pureness, bootstrap){
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR get_clusters FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
-#########################################################get_facility_fsp####################################################################################
+#########################################################get_genetic_flow####################################################################################
 #*******************************************************************************************************************************************#
-#***********************************************START CHECKS FOR get_facility_fsp FUNCTION*****************************************************#
+#***********************************************START CHECKS FOR get_genetic_flow FUNCTION*****************************************************#
 #*******************************************************************************************************************************************#
 # Check that the fasta file is a dna bin object
 #'
-#' @inheritParams get_facility_fsp
+#' @inheritParams get_genetic_flow
 #'
 #' @noRd
 #'
@@ -329,7 +329,7 @@ check_dna_bin <- function(fasta){
 
 #' Make sure there are at least two rownames in the fasta that match rownames in the
 #'
-#' @inheritParams get_facility_fsp
+#' @inheritParams get_genetic_flow
 #'
 #' @noRd
 #'
@@ -357,9 +357,9 @@ check_fasta_vs_locs <- function(fasta, locs){
 }
 
 
-#' Check get_facility_fsp input
+#' Check get_genetic_flow input
 #'
-#' @inheritParams get_facility_fsp
+#' @inheritParams get_genetic_flow
 #'
 #' @noRd
 #'
@@ -379,7 +379,7 @@ check_facility_fsp_input <- function(fasta, locs, matrix){
 
 # Check function to convert matrix to long form
 #'
-#' @inheritParams get_facility_fsp
+#' @inheritParams get_genetic_flow
 #'
 #' @noRd
 #'
@@ -406,7 +406,7 @@ check_long_form_input <- function(facil_dist, col_names){
 }
 
 #*******************************************************************************************************************************************#
-#***********************************************END CHECKS FOR get_facility_fsp FUNCTION*******************************************************#
+#***********************************************END CHECKS FOR get_genetic_flow FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
 ##########################################################allele_freq functions####################################################################################
 #*******************************************************************************************************************************************#
@@ -415,7 +415,7 @@ check_long_form_input <- function(facil_dist, col_names){
 
 #' Check allele frequency inputs
 #'
-#' @inheritParams get_facility_fsp
+#' @inheritParams get_genetic_flow
 #'
 #' @noRd
 #'
@@ -466,7 +466,7 @@ check_allele_freq_input <- function(x, subset, allele_n, alleles){
 
 #' Check get_within_pop_var inputs
 #'
-#' @inheritParams get_facility_fsp
+#' @inheritParams get_genetic_flow
 #'
 #' @noRd
 #'
@@ -501,7 +501,7 @@ check_within_pop_var_inputs <- function(subset_snp_mat, subset){
 
 #' Check reverse list structure function inputs
 #'
-#' @inheritParams get_facility_fsp
+#' @inheritParams get_genetic_flow
 #'
 #' @noRd
 #'

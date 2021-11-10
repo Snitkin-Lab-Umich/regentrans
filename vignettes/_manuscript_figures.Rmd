@@ -270,7 +270,7 @@ left_join(pat_pair_types, days_between_isolates) %>%
 Fsp is a measure of similarity between populations at different facilities. Value of 0 indicates that the populations are identical, while value of 1 indicates that the populations are completely different. 
 
 ```{r, eval=FALSE, message=FALSE}
-# fsp <- get_facility_fsp(fasta, locs)
+# fsp <- get_genetic_flow(fasta, locs)
 fsp <- regentrans::fsp
 pheatmap(fsp, border_color = 'white',
          legend_breaks = c(0, 0.2, 0.4, 0.6, 0.8, max(fsp)), 

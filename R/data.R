@@ -50,7 +50,7 @@
 #' samples were collected from long-term acute care hospitals across the US.
 #' Corresponding manuscript: https://aac.asm.org/content/63/11/e01622-19
 #'
-#' @format A data frame with 413 rows and 413 columns.
+#' @format A data frame with 17 rows and 17 columns.
 "fsp"
 
 #' Patient flow between facilities

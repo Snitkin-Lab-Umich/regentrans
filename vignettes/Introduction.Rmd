@@ -463,19 +463,19 @@ pair_types %>% mutate(src1 = ifelse(loc1 %in% pts, 'pt','env'),
 
 We can use threshold-free or SNV threshold-based approaches to investigate what locations transmission is occurring within or between. 
 
-### Gene flow (Fsp)
+### Genetic flow (Fsp)
 
-To determine the extent of gene flow between two facilities, we can calculate Fsp ([Donker et al., 2017](mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113)) as a measure of similarity between populations at different facilities. A value of 0 indicates that the populations are identical, while value of 1 indicates that the populations are completely different. The fsp function outputs a symmetric matrix of fsp values for each facility pair. The row and column names are the facilities and the values are fsp:
+To determine the extent of genetic flow between two facilities, we can calculate Fsp ([Donker et al., 2017](mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113)) as a measure of similarity between populations at different facilities. A value of 0 indicates that the populations are identical, while value of 1 indicates that the populations are completely different. The genetic flow function outputs a symmetric matrix of fsp values for each facility pair. The row and column names are the facilities and the values are fsp:
 
 ```{r}
 fsp[1:4,1:4]
 ```
 
-We can plot the fsp values as a heatmap to visualze the extent of similarity between strains from different facility pairs:
+We can plot the genetic flow values as a heatmap to visualze the extent of similarity between strains from different facility pairs:
 
 ```{r, eval=TRUE, message=FALSE}
 # this takes a while to run, so we've pre-computed it and included it in the package
-# fsp <- get_facility_fsp(fasta = aln, locs = locs, pt = pt)
+# fsp <- get_genetic_flow(fasta = aln, locs = locs, pt = pt)
 pheatmap(fsp)
 ```
 
@@ -571,7 +571,7 @@ If the dataset is from an outbreak setting, you may expect changes in closely re
 
 # 4. Is transmission occurring along paths of higher patient flow? 
 
-To explore this question, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and/or Fsp matrix along with the patient transfer network using the `get_patient_flow()`, `summarize_pairs()`, and `merge_inter_summaries()` functions.
+To explore this question, we can leverage our whole-genome sequencing data in the form of the SNV distance matrix and/or genetic flow (Fsp) matrix along with the patient transfer network using the `get_patient_flow()`, `summarize_pairs()`, and `merge_inter_summaries()` functions.
 
 *Note:* If you do not have a patient transfer network, you may be able to use geographic distances between facilities as a proxy for patient transfer because they are often correlated. 
 
@@ -603,10 +603,10 @@ The `get_patient_flow()` function outputs several columns:
 - The facility pair (`loc1` and `loc2`)
 - The number of transfers from facility 1 to 2 (`n_transfers_f12`), and facility 2 to 1 (`n_transfers_f21`)
 - The indirect flow metrics from facility 1 to 2 (`pt_trans_metric_f12`), and facility 2 to 1 (`pt_trans_metric_f21`)
-- Undirected transfer and flow metrics that are the sum of the two direct metrics (`sum_transfers` and `sum_pt_trans_metric`). This is useful for comparing to the undirected pairwise SNV distance summary and Fsp.
+- Undirected transfer and flow metrics that are the sum of the two direct metrics (`sum_transfers` and `sum_pt_trans_metric`). This is useful for comparing to the undirected pairwise SNV distance summary and genetic flow (Fsp).
 
 
-Next, we can merge the patient flow, pairwise SNV distance, and fsp summaries (note that there are a lot of NA values here because we do not have patient flow information for all facilities):
+Next, we can merge the patient flow, pairwise SNV distance, and genetic flow (fsp) summaries (note that there are a lot of NA values here because we do not have patient flow information for all facilities):
 
 ```{r}
 # have to convert fsp matrix to long form first
@@ -622,13 +622,13 @@ pair_info
 
 Now we're ready to plot patient flow vs. various genomic metrics of similarity between facilities:
 
-We see a negative correlation between patient flow and Fsp, suggesting that facilities connected by more patient transfer are more likely to have similar populations, indicative of more transmission (Remember that fsp values closer to 0 indicate more closely related populations):
+We see a negative correlation between patient flow and genetic flow (Fsp), suggesting that facilities connected by more patient transfer are more likely to have similar populations, indicative of more transmission (Remember that fsp values closer to 0 indicate more closely related populations):
 
 ```{r}
 pair_info %>% 
   ggplot(aes(x=sum_pt_trans_metric,y=fsp)) +
   geom_point() + geom_smooth(method='lm') + scale_x_log10() +
-  labs(x = 'Patient flow', y = 'Fsp') 
+  labs(x = 'Patient flow', y = 'Genetic flow (Fsp)') 
 ```
 
 These observations are corroborated by the positive relationship between patient transfer and number of closely related isolate pairs for a given facility pair:
@@ -725,7 +725,7 @@ head(snv_and_metadat)
 
 # Making your code run faster
 
-For some functions, we have used `future.apply()` to enable you to make it run faster. Currently, this is only an option for `get_clusters()`, but we plan to implement it for `get_facility_fsp()` as well, and possibly others. To decrease runtime in this way, you have to register a future plan prior to calling the function. This code says to use a multisession plan to split the work across 4 cores, instead of the deafult of 1. You can look at the [`future` documentation](https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html) to figure out what plan is best for what you're doing. Note that only multisession works for RStudio, but multicore might work better for some purposes, such as working on a computing cluster. After registering a future plan, you can call `get_clusters()` like normal and it should run faster!
+For some functions, we have used `future.apply()` to enable you to make it run faster. Currently, this is only an option for `get_clusters()`, but we plan to implement it for `get_genetic_flow()` as well, and possibly others. To decrease runtime in this way, you have to register a future plan prior to calling the function. This code says to use a multisession plan to split the work across 4 cores, instead of the deafult of 1. You can look at the [`future` documentation](https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html) to figure out what plan is best for what you're doing. Note that only multisession works for RStudio, but multicore might work better for some purposes, such as working on a computing cluster. After registering a future plan, you can call `get_clusters()` like normal and it should run faster!
 
 ```{r, eval = FALSE}
 doFuture::registerDoFuture()

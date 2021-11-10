@@ -1,13 +1,13 @@
-#get_facility_fsp output
+#get_genetic_flow output
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 
 test_locs_5 <- locs[locs %in% c("A", "F", "H")]
 test_fasta_2 <- aln[names(test_locs_5),]
 
-fsp_mat <- get_facility_fsp(fasta = test_fasta_2, locs = test_locs_5, matrix = TRUE)
-fsp_long <- get_facility_fsp(fasta = test_fasta_2, locs = test_locs_5, matrix = FALSE)
+fsp_mat <- get_genetic_flow(fasta = test_fasta_2, locs = test_locs_5, matrix = TRUE)
+fsp_long <- get_genetic_flow(fasta = test_fasta_2, locs = test_locs_5, matrix = FALSE)
 
-test_that("get_facility_fsp works", {
+test_that("get_genetic_flow works", {
   #for long
   expect_true(class(fsp_long) == "data.frame")
   #ncol = 3
