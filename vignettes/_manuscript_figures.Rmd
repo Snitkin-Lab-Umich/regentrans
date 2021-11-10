@@ -271,7 +271,7 @@ Fsp is a measure of similarity between populations at different facilities. Valu
 
 ```{r, eval=FALSE, message=FALSE}
 # fsp <- get_facility_fsp(fasta, locs)
-fsp <- regentrans::Fsp
+fsp <- regentrans::fsp
 pheatmap(fsp, border_color = 'white',
          legend_breaks = c(0, 0.2, 0.4, 0.6, 0.8, max(fsp)), 
          legend_labels = c(0, 0.2, 0.4, 0.6, 0.8, 'Fsp'), 

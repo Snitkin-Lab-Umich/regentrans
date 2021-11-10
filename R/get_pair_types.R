@@ -38,8 +38,10 @@ get_pair_types <- function(dists, locs, pt){
   snps$loc2 <- loc_sub[snps$isolate2]
 
   #add pts
-  snps$pt1 <- pt[snps$isolate1]
-  snps$pt2 <- pt[snps$isolate2]
+  if(!is.null(pt)){
+    snps$pt1 <- pt[snps$isolate1]
+    snps$pt2 <- pt[snps$isolate2]
+  }
 
   snp_facility_pairs <- dplyr::bind_cols(
     snps %>% dplyr::filter(isolate1 != isolate2) %>%
@@ -54,7 +56,7 @@ get_pair_types <- function(dists, locs, pt){
   }
 
   #return snp matrix
-  return(snp_facility_pairs %>% ungroup())
+  return(snp_facility_pairs %>% ungroup() %>% as.data.frame())
 }
 
 

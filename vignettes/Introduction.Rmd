@@ -74,6 +74,10 @@ The only required metadata is location, but additional information can also be i
 metadata <- readr::read_csv("/path/to/metadata.csv")
 ```
 
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
+```
+
 ### Genomic data
 
 Either a variant alignment or a phylogenetic tree are required for most functions in `regentrans`. 
@@ -182,28 +186,6 @@ This data frame contains three columns:
 1. `dest_facil`: The destination facility.
 1. `n_transfers`: The number of patient transfers between source and destination facility over some length of time (e.g. 1 day, 1 month, or 1 year).
 
-
-## Subsetting to one isolate per patient per facility
-
-As we have multiple samples from some patients, we first subset to the first isolate from each patient per facility to avoid overestimating transmission. We can do this in R as follows:
-
-```{r}
-# subset metadata to include the first isolate from each patient per facility
-metadata <- metadata %>% arrange(collection_date) %>% filter(!duplicated(patient_id, facility))
-
-# isolate subset
-isolate_subset <- metadata$isolate_id
-
-# subset alignment
-aln <- aln[isolate_subset,]
-
-# subset tree
-tr <- keep.tip(tr, isolate_subset)
-
-# subset distance matrix
-dists <- dists[isolate_subset, isolate_subset]
-```
-
 ## Extracting location as a vector
 
 For many of the `regentrans` functions, the required location input is a named vector where the elements are locations (e.g. facility) and the names are the sample ID. To get the location information from the built-in metadata, we can run this command: 
@@ -256,7 +238,7 @@ We can use `get_pair_types()` to get the pair types for each isolate pair (intra
 
 ```{r}
 # get pair types for pairwise SNV distances (intra vs. inter)
-pair_types <- get_pair_types(dists = dists, locs = locs)
+pair_types <- get_pair_types(dists = dists, locs = locs, pt = pt)
 
 # get fraction of intra-facility pairs for each SNV distance
 frac_intra <- get_frac_intra(pair_types = pair_types)
@@ -346,7 +328,7 @@ It is also useful to quantify the size of phylogenetic clusters from the same fa
 
 ```{r, message=FALSE}
 # get clusters (note this takes some time to run, but not too long for the test dataset!)
-clusters <- get_clusters(tr,locs, pureness = 1)
+clusters <- get_clusters(tr,locs, pureness = 1, pt = pt)
 ```
 
 The output of `get_clusters()` is a list including a data frame of information about the pure subtrees identifed and a list of the subtrees themselves:
@@ -493,7 +475,7 @@ We can plot the fsp values as a heatmap to visualze the extent of similarity bet
 
 ```{r, eval=TRUE, message=FALSE}
 # this takes a while to run, so we've pre-computed it and included it in the package
-# fsp <- get_facility_fsp(aln, locs)
+# fsp <- get_facility_fsp(fasta = aln, locs = locs, pt = pt)
 pheatmap(fsp)
 ```
 
