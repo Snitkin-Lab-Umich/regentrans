@@ -177,17 +177,17 @@ check_pair_types <- function(pair_types){
                ncol(pair_types), " columns."))
   }
   #check the colnames
-  if(!((ncol(pair_types) == 8 &&
-        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
-       (ncol(pair_types) == 12 &&
-        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
-       (ncol(pair_types) == 10 &&
-        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
-       (ncol(pair_types) == 6 &&
-        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
-    stop(paste("The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has ",
-               ncol(pair_types), " columns that are not the output columns needed."))
-  }
+  # if(!((ncol(pair_types) == 8 &&
+  #       all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
+  #      (ncol(pair_types) == 12 &&
+  #       all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+  #      (ncol(pair_types) == 10 &&
+  #       all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+  #      (ncol(pair_types) == 6 &&
+  #       all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
+  #   stop(paste("The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has ",
+  #              ncol(pair_types), " columns that are not the output columns needed."))
+  # }
   #check that there is at least one row
   if(nrow(pair_types) < 1){
       stop(paste("Your pair_types input has ", nrow(pair_types), " facility pairs. Please use an pair_types input that has 1 or more pairs (rows)"))
