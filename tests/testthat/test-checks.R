@@ -272,7 +272,7 @@ test_that("check_control_labels works", {
                "control_labels must be either ")
 })
 
-##################################test get_facility_fsp#####################################
+##################################test get_genetic_flow#####################################
 test_that("check_facility_fsp_input works", {
   #one that works
   expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, matrix = TRUE)))

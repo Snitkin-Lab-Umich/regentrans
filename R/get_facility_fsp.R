@@ -1,4 +1,4 @@
-#' Calculate gene flow (Fsp)
+#' Calculate genetic flow (Fsp)
 #'
 #' @inheritParams get_pair_types
 #' @param fasta ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta
@@ -7,7 +7,7 @@
 #'
 #' @return facility x facility matrix with Fsp values
 #' @export
-#' @details Fsp is described in Donker et al. 2017
+#' @details Genetic flow (Fsp) is described in Donker et al. 2017
 #' (mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113).
 #' Only bi-allelic sites are included when computing Fsp.
 #' The Fsp values are between 0 and 1 where lower values indicate more similar populations. Note that the current implementation of this function is fairly slow.
@@ -17,12 +17,12 @@
 #' # This takes a long time to run right now!
 #' locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
 #' pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
-#' facil_fsp <- get_facility_fsp(aln, locs, matrix = TRUE, pt)
+#' facil_fsp <- get_genetic_flow(aln, locs, matrix = TRUE, pt)
 #' }
 
 
 #######################try to make sapply########
-get_facility_fsp <- function(fasta, locs, matrix = TRUE, pt){
+get_genetic_flow <- function(fasta, locs, matrix = TRUE, pt){
   #check the DNAbin object and locs
   #TO DO: add a check for pt (either null or a named vector of isolates)
   check_facility_fsp_input(fasta, locs, matrix)
@@ -109,7 +109,7 @@ get_facility_fsp <- function(fasta, locs, matrix = TRUE, pt){
 
 #' Find allele frequency for each allele at each site
 #'
-#' @inheritParams get_facility_fsp
+#' @inheritParams get_genetic_flow
 #'
 #' @noRd
 #'
@@ -129,7 +129,7 @@ get_allele_freq_within <- function(x, allele_n, alleles){
 
 #' Get within population variation
 #'
-#' @inheritParams get_facility_fsp
+#' @inheritParams get_genetic_flow
 #'
 #' @noRd
 #'

@@ -55,7 +55,7 @@ summarize_pairs <- function(pair_types, summary_fns = c("min"), threshs = seq(5,
 #'
 #' @param patient_flow output of get_patient_flow function
 #' @param isolate_pair_summary output of summarize_pairs function
-#' @param fsp_long long-form output of get_facility_fsp function
+#' @param fsp_long long-form output of get_genetic_flow function
 #'
 #' @return merged dataframe
 #' @export
