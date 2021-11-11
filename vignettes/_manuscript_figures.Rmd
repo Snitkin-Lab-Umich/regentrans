@@ -290,6 +290,13 @@ pheatmap(fsp, border_color = 'white',
 snv_summary <- summarize_pairs(pair_types %>% select(-pt1,-pt2) %>% data.frame(),summary_fns = c('min'), threshs = c(6, 10))
 pat_summary <- summarize_pairs(pat_pair_types %>% select(-pt1,-pt2) %>% data.frame(),threshs = c(2.56e-6))
 
+#testing
+snv_summary_2 <- snv_summary
+colnames(snv_summary_2) <- c("loc2", "loc1", "dist_min", "leq_6", "leq_10")
+snv_summary_2 <- snv_summary_2 %>% relocate(loc1, .before = loc2) %>% filter(loc1 != loc2)
+snv_summary <- rbind(snv_summary, snv_summary_2)
+#
+
 # get facility summary
 # facil_summary <- snv_summary %>% 
 #     mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), 
@@ -305,7 +312,7 @@ facil_summary <- left_join(snv_summary, pat_summary %>% select(-dist_min)) %>%
          thresh = gsub('2.56e-06 SNVs', '2.56e-06\nmutations/site/year', thresh)) 
 
 # get locations to keep (at least 1 closely related pair)
-keep_locs <- facil_summary %>% group_by(loc1) %>% summarize(sum_all = sum(n_pairs)) %>% filter(sum_all != 0) %>% select(loc1) %>% deframe()
+keep_locs <- facil_summary %>% group_by(loc1) %>% summarize(sum_all = sum(n_pairs, na.rm = TRUE)) %>% filter(sum_all != 0) %>% select(loc1) %>% deframe()
 
 # plot
 f6 <- facil_summary %>% filter(loc1 %in% keep_locs) %>% 
