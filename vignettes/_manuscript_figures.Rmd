@@ -95,7 +95,6 @@ f2b <- pat_frac_intra %>%
   # filter(orig_dist_bin %in% levels(pat_frac_intra$orig_dist_bin)[1:100]) %>% 
   mutate(under = ifelse(orig_dist_bin %in% levels(pat_frac_intra$orig_dist_bin)[1:4], 
                         'Branch length ≤ 2.56e-6\nmutations/site/year','Over threshold'),
-  # under = ifelse(pairwise_dist <= 6, '≤ 6 SNVs',under),
   under = factor(under, levels = c('Branch length ≤ 2.56e-6\nmutations/site/year','Over threshold')),
   orig_dist_bin = as.numeric(gsub('\\(.*,|]','',orig_dist_bin))) %>%
   arrange(orig_dist_bin) %>% 
@@ -115,6 +114,73 @@ f2
 
 
 # Is transmission occurring within and/or between locations? 
+
+```{r, message=FALSE}
+pw_snv_plot <- pair_types %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
+  geom_vline(xintercept = 10, col = 'darkgrey', size = 1) +
+  theme(legend.justification = "top", 
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank())
+
+pw_snv_plot_zoom <- pair_types %>% 
+  filter(pairwise_dist <= 10) %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
+  labs(x = "Pairwise SNV\ndistance", y = "# pairs", fill = "") +
+  theme(legend.position = 'none') +
+  scale_x_continuous(breaks = pretty_breaks())
+
+f3a <- pw_snv_plot + annotation_custom(ggplotGrob(pw_snv_plot_zoom), 
+                                      xmin = 250, xmax = 450, ymin = 100, ymax = 2700)
+
+# ggsave('manuscript_figures/Fig4.png', f4)
+# f4
+
+pat_pw_snv_plot <- pat_pair_types %>% 
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  labs(x = "Pairwise patristic distance", y = "# pairs", fill = "") +
+  geom_vline(xintercept = 2.56e-06, col = 'darkgrey', size = 1) +
+  theme(legend.justification = "top", 
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank())
+
+pat_pw_snv_plot_zoom <- pat_pair_types %>%
+  filter(pairwise_dist <= 2.56e-06) %>%
+  ggplot(aes(x = pairwise_dist, fill = pair_type)) +
+  geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
+  labs(x = "Pairwise patristic\ndistance", y = "# pairs", fill = "") +
+  theme(legend.position = 'none') #+
+  # scale_x_continuous(breaks = pretty_breaks())
+
+f3b <- pat_pw_snv_plot + annotation_custom(ggplotGrob(pat_pw_snv_plot_zoom), 
+                                    xmin = 5.5e-5, xmax = 9.5e-5, ymin = 50, ymax = 2650)
+
+f3 <- plot_grid(f3a, f3b, ncol = 1, labels = 'AUTO')
+ggsave('manuscript_figures/Fig3.png', f3, height = 7, width = 6)
+f3
+
+```
+
+```{r, eval = FALSE}
+left_join(pair_types, days_between_isolates) %>% 
+  ggplot(aes(x = days_diff, y = pairwise_dist)) + geom_bin_2d() +
+  geom_smooth(method = 'lm', color = 'white') +
+  labs(x = '# days between samples', y = 'Pairwise SNV distance', fill = '# pairs')
+
+left_join(pat_pair_types, days_between_isolates) %>% 
+  ggplot(aes(x = days_diff, y = pairwise_dist)) + geom_bin_2d() +
+  geom_smooth(method = 'lm', color = 'white') +
+  labs(x = '# days between samples', y = 'Pairwise patristic distance', fill = '# pairs')
+```
+
+
+# What locations is transmission occurring within/between?
+
+### Phylogenetic clusters
 
 ```{r, message=FALSE}
 cols <- c('#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#000000')
@@ -193,77 +259,12 @@ cluster_plot <- bind_cols(cluster = names(day_diffs),
   # ylim(c(0,12.5)) +
   coord_flip()
 
-f3 <- plot_grid(tr_facil, cluster_plot, labels = 'AUTO') #, rel_widths = c(0.4,0.6))
+f4 <- plot_grid(tr_facil, cluster_plot, labels = 'AUTO') #, rel_widths = c(0.4,0.6))
 
-ggsave('manuscript_figures/Fig3.png', f3, width = 8, height = 8)
-f3
-```
-
-
-```{r, message=FALSE}
-pw_snv_plot <- pair_types %>% 
-  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
-  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
-  labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
-  geom_vline(xintercept = 10, col = 'darkgrey', size = 1) +
-  theme(legend.justification = "top", 
-        axis.line = element_line(colour = "black"),
-        panel.border = element_blank())
-
-pw_snv_plot_zoom <- pair_types %>% 
-  filter(pairwise_dist <= 10) %>% 
-  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
-  geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
-  labs(x = "Pairwise SNV\ndistance", y = "# pairs", fill = "") +
-  theme(legend.position = 'none') +
-  scale_x_continuous(breaks = pretty_breaks())
-
-f4a <- pw_snv_plot + annotation_custom(ggplotGrob(pw_snv_plot_zoom), 
-                                      xmin = 250, xmax = 450, ymin = 100, ymax = 2700)
-
-# ggsave('manuscript_figures/Fig4.png', f4)
-# f4
-
-pat_pw_snv_plot <- pat_pair_types %>% 
-  ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
-  geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
-  labs(x = "Pairwise patristic distance", y = "# pairs", fill = "") +
-  geom_vline(xintercept = 2.56e-06, col = 'darkgrey', size = 1) +
-  theme(legend.justification = "top", 
-        axis.line = element_line(colour = "black"),
-        panel.border = element_blank())
-
-pat_pw_snv_plot_zoom <- pat_pair_types %>%
-  filter(pairwise_dist <= 2.56e-06) %>%
-  ggplot(aes(x = pairwise_dist, fill = pair_type)) +
-  geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
-  labs(x = "Pairwise patristic\ndistance", y = "# pairs", fill = "") +
-  theme(legend.position = 'none') #+
-  # scale_x_continuous(breaks = pretty_breaks())
-
-f4b <- pat_pw_snv_plot + annotation_custom(ggplotGrob(pat_pw_snv_plot_zoom), 
-                                    xmin = 5.5e-5, xmax = 9.5e-5, ymin = 50, ymax = 2650)
-
-f4 <- plot_grid(f4a, f4b, ncol = 1, labels = 'AUTO')
-ggsave('manuscript_figures/Fig4.png', f4, height = 7, width = 6)
+ggsave('manuscript_figures/Fig4.png', f4, width = 8, height = 8)
 f4
-
 ```
 
-```{r, eval = FALSE}
-left_join(pair_types, days_between_isolates) %>% 
-  ggplot(aes(x = days_diff, y = pairwise_dist)) + geom_bin_2d() +
-  geom_smooth(method = 'lm', color = 'white') +
-  labs(x = '# days between samples', y = 'Pairwise SNV distance', fill = '# pairs')
-
-left_join(pat_pair_types, days_between_isolates) %>% 
-  ggplot(aes(x = days_diff, y = pairwise_dist)) + geom_bin_2d() +
-  geom_smooth(method = 'lm', color = 'white') +
-  labs(x = '# days between samples', y = 'Pairwise patristic distance', fill = '# pairs')
-```
-
-
-# What locations is transmission occurring within/between?
 
 ### Fsp
 
@@ -286,7 +287,8 @@ pheatmap(fsp, border_color = 'white',
 
 ```{r, message=FALSE, warning=FALSE}
 # get snv summary
-snv_summary <- summarize_pairs(pair_types %>% select(-pt1,-pt2) %>% data.frame(),summary_fns = c('min'), threshs = c(6, 10)) 
+snv_summary <- summarize_pairs(pair_types %>% select(-pt1,-pt2) %>% data.frame(),summary_fns = c('min'), threshs = c(6, 10))
+pat_summary <- summarize_pairs(pat_pair_types %>% select(-pt1,-pt2) %>% data.frame(),threshs = c(2.56e-6))
 
 # get facility summary
 # facil_summary <- snv_summary %>% 
@@ -295,11 +297,12 @@ snv_summary <- summarize_pairs(pair_types %>% select(-pt1,-pt2) %>% data.frame()
 #   group_by(loc1, pair_type, leq_6, leq_10) %>% summarize() %>% 
 #   pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>% 
 #   mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs')) 
-facil_summary <- snv_summary %>% 
+facil_summary <- left_join(snv_summary, pat_summary %>% select(-dist_min)) %>% 
   mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
-  group_by(loc1, pair_type) %>% summarize(leq_6 = sum(leq_6), leq_10 = sum(leq_10)) %>%
-  pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>%
-  mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs')) 
+  group_by(loc1, pair_type) %>% summarize(leq_6 = sum(leq_6), leq_10 = sum(leq_10), `leq_2.56e-06` = sum(`leq_2.56e-06`)) %>%
+  pivot_longer(cols = c(leq_6, leq_10, `leq_2.56e-06`)) %>% rename(thresh = name, n_pairs = value) %>%
+  mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs'),
+         thresh = gsub('2.56e-06 SNVs', '2.56e-06\nmutations/site/year', thresh)) 
 
 # get locations to keep (at least 1 closely related pair)
 keep_locs <- facil_summary %>% group_by(loc1) %>% summarize(sum_all = sum(n_pairs)) %>% filter(sum_all != 0) %>% select(loc1) %>% deframe()
@@ -311,7 +314,7 @@ f6 <- facil_summary %>% filter(loc1 %in% keep_locs) %>%
   geom_col(position = 'dodge') +
        scale_fill_manual(values=c("cadetblue", "salmon")) + 
          labs(y = "# closely related isolate pairs", x = "Facility", fill = '', color = '') +
-  facet_grid(factor(thresh, levels = c('≤ 6 SNVs','≤ 10 SNVs'))~.)
+  facet_grid(factor(thresh, levels = c('≤ 6 SNVs','≤ 10 SNVs','≤ 2.56e-06\nmutations/site/year'))~.)
 
 
 ggsave('manuscript_figures/Fig6.png',f6, width = 7, height = 5)
