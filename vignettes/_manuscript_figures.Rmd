@@ -408,7 +408,7 @@ flow_min_snv_plot <- pair_info %>%
                          paste('Spearman p =', signif(flow_min_snv_spear$p.value, 1)))) #+ ylim(c(0,40))
 
 f8 <- plot_grid(flow_fsp_plot, flow_min_snv_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
-ggsave('manuscript_figures/Fig7.png',f8, width = 6, height = 8)
+ggsave('manuscript_figures/Fig8.png',f8, width = 6, height = 8)
 f8
 
 #f7 <- plot_grid(flow_fsp_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
