@@ -48,7 +48,12 @@ get_pair_types <- function(dists, locs, pt){
       dplyr::mutate(pair_type=ifelse(loc1==loc2,'Intra-facility pair','Inter-facility pair')))
 
   # subset to include only one of each pair
-  snp_facility_pairs <- snp_facility_pairs %>% dplyr::arrange(pt1) %>% subset_pairs()
+  if(!is.null(pt)){
+    # also remove intra-facility pairs from the same patient
+    snp_facility_pairs <- snp_facility_pairs %>% dplyr::arrange(pt1) %>% filter(pt1 != pt2) %>% subset_pairs()
+  }else{
+    snp_facility_pairs <- snp_facility_pairs %>% subset_pairs()
+  }
 
   #if there is pt info
   if(!is.null(pt)){
