@@ -295,6 +295,12 @@ snv_summary_2 <- snv_summary
 colnames(snv_summary_2) <- c("loc2", "loc1", "dist_min", "leq_6", "leq_10")
 snv_summary_2 <- snv_summary_2 %>% relocate(loc1, .before = loc2) %>% filter(loc1 != loc2)
 snv_summary <- rbind(snv_summary, snv_summary_2)
+
+pat_summary_2 <- pat_summary
+colnames(pat_summary_2) <- c("loc2", "loc1", "dist_min", "leq_2.56e-06")
+pat_summary_2 <- pat_summary_2 %>% relocate(loc1, .before = loc2) %>% filter(loc1 != loc2)
+pat_summary <- rbind(pat_summary, pat_summary_2)
+
 #
 
 # get facility summary
