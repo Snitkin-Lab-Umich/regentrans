@@ -22,6 +22,8 @@ library(phytools)
 library(gridExtra)
 library(cowplot)
 library(scales)
+library(ggraph)
+library(igraph)
 
 #set theme 
 theme_set(theme_bw() + theme(strip.background = element_rect(fill="white",linetype='blank'), text=element_text(size=15)))
@@ -117,8 +119,11 @@ f2
 
 ```{r, message=FALSE}
 pw_snv_plot <- pair_types %>% 
+  # mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair','Inter-facility pair'))) %>%
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
+  guides(fill = guide_legend(reverse = TRUE)) +
   labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
   geom_vline(xintercept = 10, col = 'darkgrey', size = 1) +
   theme(legend.justification = "top", 
@@ -127,8 +132,11 @@ pw_snv_plot <- pair_types %>%
 
 pw_snv_plot_zoom <- pair_types %>% 
   filter(pairwise_dist <= 10) %>% 
+  # mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair','Inter-facility pair'))) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
+  # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
+  guides(fill = guide_legend(reverse = TRUE)) +
   labs(x = "Pairwise SNV\ndistance", y = "# pairs", fill = "") +
   theme(legend.position = 'none') +
   scale_x_continuous(breaks = pretty_breaks())
@@ -136,12 +144,12 @@ pw_snv_plot_zoom <- pair_types %>%
 f3a <- pw_snv_plot + annotation_custom(ggplotGrob(pw_snv_plot_zoom), 
                                       xmin = 250, xmax = 450, ymin = 100, ymax = 2700)
 
-# ggsave('manuscript_figures/Fig4.png', f4)
-# f4
-
 pat_pw_snv_plot <- pat_pair_types %>% 
+  # mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair','Inter-facility pair'))) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
+  # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
+  guides(fill = guide_legend(reverse = TRUE)) +
   labs(x = "Pairwise patristic distance", y = "# pairs", fill = "") +
   geom_vline(xintercept = 2.56e-06, col = 'darkgrey', size = 1) +
   theme(legend.justification = "top", 
@@ -149,9 +157,12 @@ pat_pw_snv_plot <- pat_pair_types %>%
         panel.border = element_blank())
 
 pat_pw_snv_plot_zoom <- pat_pair_types %>%
+  # mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair','Inter-facility pair'))) %>% 
   filter(pairwise_dist <= 2.56e-06) %>%
   ggplot(aes(x = pairwise_dist, fill = pair_type)) +
   geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
+  # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
+  guides(fill = guide_legend(reverse = TRUE)) +
   labs(x = "Pairwise patristic\ndistance", y = "# pairs", fill = "") +
   theme(legend.position = 'none') #+
   # scale_x_continuous(breaks = pretty_breaks())
@@ -294,12 +305,12 @@ pat_summary <- summarize_pairs(pat_pair_types %>% select(-pt1,-pt2) %>% data.fra
 snv_summary_2 <- snv_summary
 colnames(snv_summary_2) <- c("loc2", "loc1", "dist_min", "leq_6", "leq_10")
 snv_summary_2 <- snv_summary_2 %>% relocate(loc1, .before = loc2) %>% filter(loc1 != loc2)
-snv_summary <- rbind(snv_summary, snv_summary_2)
+snv_summary_comb <- rbind(snv_summary, snv_summary_2)
 
 pat_summary_2 <- pat_summary
 colnames(pat_summary_2) <- c("loc2", "loc1", "dist_min", "leq_2.56e-06")
 pat_summary_2 <- pat_summary_2 %>% relocate(loc1, .before = loc2) %>% filter(loc1 != loc2)
-pat_summary <- rbind(pat_summary, pat_summary_2)
+pat_summary_comb <- rbind(pat_summary, pat_summary_2)
 
 #
 
@@ -310,7 +321,7 @@ pat_summary <- rbind(pat_summary, pat_summary_2)
 #   group_by(loc1, pair_type, leq_6, leq_10) %>% summarize() %>% 
 #   pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>% 
 #   mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs')) 
-facil_summary <- left_join(snv_summary, pat_summary %>% select(-dist_min)) %>% 
+facil_summary <- left_join(snv_summary_comb, pat_summary_comb %>% select(-dist_min)) %>% 
   mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
   group_by(loc1, pair_type) %>% summarize(leq_6 = sum(leq_6), leq_10 = sum(leq_10), `leq_2.56e-06` = sum(`leq_2.56e-06`)) %>%
   pivot_longer(cols = c(leq_6, leq_10, `leq_2.56e-06`)) %>% rename(thresh = name, n_pairs = value) %>%
@@ -321,30 +332,55 @@ facil_summary <- left_join(snv_summary, pat_summary %>% select(-dist_min)) %>%
 keep_locs <- facil_summary %>% group_by(loc1) %>% summarize(sum_all = sum(n_pairs, na.rm = TRUE)) %>% filter(sum_all != 0) %>% select(loc1) %>% deframe()
 
 # plot
-f6 <- facil_summary %>% filter(loc1 %in% keep_locs) %>% 
+f6a <- facil_summary %>% filter(loc1 %in% keep_locs) %>% 
   tidyr::complete(loc1, pair_type, thresh) %>% 
   ggplot(aes(x = reorder(loc1, -n_pairs, sum), y = n_pairs, fill = pair_type)) +
   geom_col(position = 'dodge') +
-       scale_fill_manual(values=c("cadetblue", "salmon")) + 
+       # scale_fill_manual(values=c("cadetblue", "salmon")) + 
          labs(y = "# closely related isolate pairs", x = "Facility", fill = '', color = '') +
-  facet_grid(factor(thresh, levels = c('≤ 6 SNVs','≤ 10 SNVs','≤ 2.56e-06\nmutations/site/year'))~.)
+  scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
+  guides(fill = guide_legend(reverse = TRUE)) +
+  facet_grid(factor(thresh, levels = c('≤ 6 SNVs','≤ 10 SNVs','≤ 2.56e-06\nmutations/site/year'))~.) +
+  theme(legend.position = 'bottom')
 
+g <- pair_types %>% filter(pairwise_dist <= 6) %>% select(pt1, pt2) %>% graph_from_data_frame() 
+E(g)$pair_type <- pair_types %>% filter(pairwise_dist <= 6) %>% pull(pair_type)
+pt_locs <- metadata %>% select(patient_id, facility) %>% deframe()
+pt_locs <- pt_locs[names(V(g))]
+V(g)$loc <- pt_locs
+  
+set.seed(0)
+f6b <- ggraph(g, layout = 'kk') +
+  geom_edge_link(aes(col = pair_type), alpha = 0.5) + 
+    geom_node_point(aes(col = loc)) +
+  scale_edge_color_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
+  scale_color_manual(values = cols) +
+  guides(color = guide_legend(ncol = 2), edge_color = guide_legend(reverse = TRUE)) +
+  labs(edge_color = 'Pair type\n(≤ 6 SNVs)', color = 'Patient\'s\nfacility') +
+  theme_void() + theme(text=element_text(size=15))
 
-ggsave('manuscript_figures/Fig6.png',f6, width = 7, height = 5)
+# plot_grid(f6b, NULL, ncol = 1, rel_heights = c(0.9,0.1))
+
+f6 <- plot_grid(f6a, plot_grid(f6b, NULL, ncol = 1, rel_heights = c(0.9,0.1)), rel_widths = c(0.4,0.6), labels = 'AUTO')
+ggsave('manuscript_figures/Fig6.png',f6, width = 10, height = 5.5)
 f6
 ```
+
 
 ```{r}
 time1 <- pair_types %>% 
   mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
   filter(date1 == date2) %>% 
+  # mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair','Inter-facility pair'))) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
   labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
+  # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
+  guides(fill = guide_legend(reverse = TRUE)) +
   facet_grid(~date1) + 
   theme(legend.justification = "top", 
         axis.line = element_line(colour = "black"),
-        panel.border = element_blank())
+        panel.border = element_blank()) 
 
 time2 <- pair_types %>% 
   mutate(date1 = dates[isolate1], date2 = dates[isolate2]) %>% 
@@ -353,6 +389,8 @@ time2 <- pair_types %>%
   geom_histogram(position = position_fill(), alpha = 0.4, bins = 30) +
   # xlim(0,20) +
   labs(x = "Pairwise SNV distance", y = "Proportion of pairs", fill = "") +
+  # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
+  guides(fill = guide_legend(reverse = TRUE)) +
   facet_grid(~date1) + 
   theme(legend.justification = "top", 
         axis.line = element_line(colour = "black"),
