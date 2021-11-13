@@ -400,10 +400,20 @@ f7 <- plot_grid(time1, time2, nrow = 2, labels = 'AUTO')
 ggsave('manuscript_figures/Fig7.png', f7, width = 7, height = 5)
 f7
 ```
-
 ```{r}
+pt_flow_long <- make_long_form(pt_flow, col_names = c('loc1','loc2','pt_flow')) 
+
+facil_pairs <- lapply(1:nrow(pt_flow_long), function(x)
+      sort(c(as.character(pt_flow_long$loc1[x]), as.character(pt_flow_long$loc2[x]))))
+
+pt_flow_long$loc1 <- sapply(facil_pairs, function(x) x[1])
+pt_flow_long$loc2 <- sapply(facil_pairs, function(x) x[2])
+
+pt_flow_long_mean <- pt_flow_long %>% arrange(loc1, loc2) %>% group_by(loc1, loc2) %>% 
+  summarize(mean_pt_flow = mean(pt_flow))
+
 pair_info <- merge_inter_summaries(
-  make_long_form(pt_flow, col_names = c('loc1','loc2','pt_flow')), 
+  pt_flow_long_mean, 
   snv_summary, 
   make_long_form(fsp)) %>% 
   filter(loc1 != loc2)
@@ -419,41 +429,41 @@ pair_info <- merge_inter_summaries(
 
 # pair_info <- full_join(fsp_flow, snv_dist_summary)
 
-flow_fsp_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$fsp)],
-                                 pair_info$fsp[!is.na(pair_info$pt_flow) & !is.na(pair_info$fsp)], 
+flow_fsp_spear <- cor.test(pair_info$mean_pt_flow[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$fsp)],
+                                 pair_info$fsp[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$fsp)], 
                                  method = 'spearman')
 
 flow_fsp_plot <- pair_info %>% 
-  filter(!is.na(pt_flow)) %>% 
-  ggplot(aes(x=pt_flow,y=fsp)) +
-  geom_point() + geom_smooth(method='lm') + scale_x_log10() +
-  labs(x = 'Patient flow', y = 'Fsp') + 
+  filter(!is.na(mean_pt_flow)) %>% 
+  ggplot(aes(x=mean_pt_flow,y=fsp)) +
+  geom_point() + geom_smooth(method='lm', col = 'grey50') + scale_x_log10() +
+  labs(x = 'Mean patient flow', y = 'Fsp') + 
   annotate('text', x = 0.004, y = 0.7, 
            label = paste(paste('Spearman rho =', round(flow_fsp_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(flow_fsp_spear$p.value, 1))))
 
-flow_snv_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10)],
-                                 pair_info$leq_10[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10)], 
+flow_snv_spear <- cor.test(pair_info$mean_pt_flow[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$leq_10)],
+                                 pair_info$leq_10[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$leq_10)], 
                                  method = 'spearman')
 
 flow_snv_plot <- pair_info %>% 
-  filter(!is.na(pt_flow)) %>% 
-  ggplot(aes(x=pt_flow,y=leq_10)) +
-  geom_point() + geom_smooth(method='lm') + scale_x_log10() +
-  labs(x = 'Patient flow', y = '# closely related\npairs (≤ 10 SNVs)') + 
-  annotate('text', x = 0.004, y = 6.5, 
+  filter(!is.na(mean_pt_flow)) %>% 
+  ggplot(aes(x=mean_pt_flow,y=leq_10)) +
+  geom_point() + geom_smooth(method='lm', col = 'grey50') + scale_x_log10() +
+  labs(x = 'Mean patient flow', y = '# closely related\npairs (≤ 10 SNVs)') + 
+  annotate('text', x = 0.004, y = 8, 
            label = paste(paste('Spearman rho =', round(flow_snv_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(flow_snv_spear$p.value, 1)))) #+ ylim(c(0,100))
 
-flow_min_snv_spear <- cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)],
-                                 pair_info$dist_min[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)], 
+flow_min_snv_spear <- cor.test(pair_info$mean_pt_flow[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$dist_min)],
+                                 pair_info$dist_min[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$dist_min)], 
                                  method = 'spearman')
 
 flow_min_snv_plot <- pair_info %>%
-  filter(!is.na(pt_flow)) %>% 
-  ggplot(aes(x=pt_flow,y=dist_min)) +
-  geom_point() + geom_smooth(method='lm') + scale_x_log10() +
-  labs(x = 'Patient flow', y = 'Minimum pairwise \nSNV distance') +
+  filter(!is.na(mean_pt_flow)) %>% 
+  ggplot(aes(x=mean_pt_flow,y=dist_min)) +
+  geom_point() + geom_smooth(method='lm', col = 'grey50') + scale_x_log10() +
+  labs(x = 'Mean patient flow', y = 'Minimum pairwise \nSNV distance') +
   annotate('text', x = 0.004, y = 30, 
            label = paste(paste('Spearman rho =', round(flow_min_snv_spear$estimate, 2)),'\n',
                          paste('Spearman p =', signif(flow_min_snv_spear$p.value, 1)))) #+ ylim(c(0,40))
@@ -565,7 +575,7 @@ geo_snv_spear <- cor.test(geo_dat$geo_dist[!is.na(geo_dat$geo_dist) & !is.na(geo
 geo_fsp <- geo_dat %>% 
   filter(!is.na(geo_dist)) %>% 
   ggplot(aes(x = geo_dist, y = fsp)) +
-  geom_point() + geom_smooth(method = 'lm') +
+  geom_point() + geom_smooth(method = 'lm', col = 'grey50') +
   labs(x = 'Physical distance between facilities', y = 'Fsp') + 
   annotate('text', x = 0.9, y = 0.3, 
            label = paste0(paste('Spearman rho =', round(geo_fsp_spear$estimate, 2)),'\n',
@@ -573,7 +583,7 @@ geo_fsp <- geo_dat %>%
 
 geo_min_snv <- geo_dat %>% 
   filter(!is.na(geo_dist)) %>% 
-  ggplot(aes(x = geo_dist, y = dist_min)) + geom_point() + geom_smooth(method = 'lm') +
+  ggplot(aes(x = geo_dist, y = dist_min)) + geom_point() + geom_smooth(method = 'lm', col = 'grey50') +
   labs(x = 'Physical distance between facilities', y = 'Minimum pairwise \nSNV distance') + 
   annotate('text', x = 0.9, y = 30, 
            label = paste0(paste0('Spearman rho = ', round(geo_min_snv_spear$estimate, 2)),'\n',
@@ -581,7 +591,7 @@ geo_min_snv <- geo_dat %>%
 
 geo_snv <- geo_dat %>% 
   filter(!is.na(geo_dist)) %>% 
-  ggplot(aes(x = geo_dist, y = leq_10)) + geom_point() + geom_smooth(method = 'lm') +
+  ggplot(aes(x = geo_dist, y = leq_10)) + geom_point() + geom_smooth(method = 'lm', col = 'grey50') +
   labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(≤ 10 SNVs)') + 
   annotate('text', x = 0.9, y = 10, 
            label = paste0(paste0('Spearman rho = ', round(geo_snv_spear$estimate, 2)),'\n',
