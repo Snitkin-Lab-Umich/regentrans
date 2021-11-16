@@ -505,13 +505,27 @@ The function allows you to input a vector of whatever summary functions you'd li
 Now, we can plot that information to identify facilities with closely related intra- and inter-facility pairs:
 
 ```{r, message=FALSE}
+# because each pair is only represented once, we must duplicate pairs with different locations
+snv_summary_2 <- snv_summary
+colnames(snv_summary_2) <- c("loc2", "loc1", "dist_min", "leq_6", "leq_10")
+snv_summary_2 <- snv_summary_2 %>% relocate(loc1, .before = loc2) %>% filter(loc1 != loc2)
+snv_summary_comb <- rbind(snv_summary, snv_summary_2)
+
 # get facility summary
-facil_summary <- snv_summary %>% 
+# facil_summary <- snv_summary_comb %>% 
+#     mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), 
+#                             levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
+#   group_by(loc1, pair_type, leq_6, leq_10) %>% summarize() %>% 
+#   pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>% 
+#   mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs')) 
+
+facil_summary <- snv_summary_comb %>% 
     mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), 
                             levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
-  group_by(loc1, pair_type, leq_6, leq_10) %>% summarize() %>% 
+  group_by(loc1, pair_type) %>% summarize(leq_6 = sum(leq_6), leq_10 = sum(leq_10)) %>% 
   pivot_longer(cols = c(leq_6, leq_10)) %>% rename(thresh = name, n_pairs = value) %>% 
   mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs')) 
+
 
 # get locations to keep (at least 1 closely related pair)
 keep_locs <- facil_summary %>% group_by(loc1) %>% summarize(sum_all = sum(n_pairs)) %>% filter(sum_all != 0) %>% select(loc1) %>% deframe()

@@ -4,12 +4,14 @@
 \alias{get_pair_types}
 \title{Get data frame of inter- and intra-facility pariwise SNV distances}
 \usage{
-get_pair_types(dists, locs)
+get_pair_types(dists, locs, pt)
 }
 \arguments{
 \item{dists}{a SNV distance matrix returned by the dist.dna function from the ape package}
 
 \item{locs}{a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID}
+
+\item{pt}{a named vector of patients each isolate originated from, with the name being the sample ID. If this information is unavailable, set pt = NULL.}
 }
 \value{
 a data.frame of isolate pairs, their SNV distance, and labeled as either inter- or intra-facility pairs.
@@ -20,6 +22,7 @@ Get data frame of inter- and intra-facility pariwise SNV distances
 \examples{
 \dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
-pair_types <- get_pair_types(dists, locs)
+pt <- metadata \%>\% dplyr::select(isolate_id, patient_id) \%>\% tibble::deframe()
+pair_types <- get_pair_types(dists, locs, pt)
 }
 }

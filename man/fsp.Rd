@@ -5,7 +5,7 @@
 \alias{fsp}
 \title{Klebiella pneumoniae ST258 gene flow}
 \format{
-A data frame with 413 rows and 413 columns.
+A data frame with 17 rows and 17 columns.
 }
 \usage{
 fsp
