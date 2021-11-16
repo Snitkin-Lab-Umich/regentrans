@@ -13,6 +13,8 @@ devtools::load_all()
 ```
 
 ```{r setup,echo=TRUE,message=FALSE}
+
+
 library(tidyverse)
 library(ape)
 library(devtools)
@@ -111,7 +113,7 @@ f2 <- plot_grid(plot_grid(f2a, NULL, rel_widths = c(1, 0.09), nrow = 1),
                 f2b, ncol = 1, labels = 'AUTO')
 
 ggsave('manuscript_figures/Fig2.png', f2, width = 7, height = 5)
-f2
+ggsave('manuscript_figures/Fig2.tiff', f2, width = 7, height = 5, dpi=1200)
 ```
 
 
@@ -168,11 +170,11 @@ pat_pw_snv_plot_zoom <- pat_pair_types %>%
   # scale_x_continuous(breaks = pretty_breaks())
 
 f3b <- pat_pw_snv_plot + annotation_custom(ggplotGrob(pat_pw_snv_plot_zoom), 
-                                    xmin = 5.5e-5, xma
-                                    x = 9.5e-5, ymin = 50, ymax = 2650)
+                                    xmin = 5.5e-5, xmax = 9.5e-5, ymin = 50, ymax = 2650)
 
 f3 <- plot_grid(f3a, f3b, ncol = 1, labels = 'AUTO')
 ggsave('manuscript_figures/Fig3.png', f3, height = 7, width = 6)
+ggsave('manuscript_figures/Fig3.tiff', f3, height = 7, width = 6, dpi=1200)
 f3
 
 ```
@@ -274,6 +276,7 @@ cluster_plot <- bind_cols(cluster = names(day_diffs),
 f4 <- plot_grid(tr_facil, cluster_plot, labels = 'AUTO') #, rel_widths = c(0.4,0.6))
 
 ggsave('manuscript_figures/Fig4.png', f4, width = 8, height = 8)
+ggsave('manuscript_figures/Fig4.tiff', f4, width = 8, height = 8, dpi=1200)
 f4
 ```
 
@@ -290,9 +293,14 @@ pheatmap(fsp, border_color = 'white',
          legend_labels = c(0, 0.2, 0.4, 0.6, 0.8, 'Fsp'), 
          filename = 'manuscript_figures/Fig5.png', width = 7, height = 6)
 
-pheatmap(fsp, border_color = 'white',
+phm <- pheatmap(fsp, border_color = 'white',
          legend_breaks = c(0, 0.2, 0.4, 0.6, 0.8, max(fsp)), 
          legend_labels = c(0, 0.2, 0.4, 0.6, 0.8, 'Fsp'))
+
+tiff('manuscript_figures/Fig5.tiff', width = 7, height = 6, units = 'in', res=1200)
+grid::grid.newpage()
+grid::grid.draw(phm$gtable)
+dev.off()
 ```
 
 ### SNV distances 
@@ -364,6 +372,7 @@ f6b <- ggraph(g, layout = 'kk') +
 
 f6 <- plot_grid(f6a, plot_grid(f6b, NULL, ncol = 1, rel_heights = c(0.9,0.1)), rel_widths = c(0.4,0.6), labels = 'AUTO')
 ggsave('manuscript_figures/Fig6.png',f6, width = 10, height = 5.5)
+ggsave('manuscript_figures/Fig6.tiff', f6, width = 10, height = 5.5, dpi=1200)
 f6
 ```
 
@@ -399,6 +408,7 @@ time2 <- pair_types %>%
 
 f7 <- plot_grid(time1, time2, nrow = 2, labels = 'AUTO')
 ggsave('manuscript_figures/Fig7.png', f7, width = 7, height = 5)
+ggsave('manuscript_figures/Fig7.tiff', f7, width = 7, height = 5, dpi=1200)
 f7
 ```
 ```{r}
@@ -471,11 +481,8 @@ flow_min_snv_plot <- pair_info %>%
 
 f8 <- plot_grid(flow_fsp_plot, flow_min_snv_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
 ggsave('manuscript_figures/Fig8.png',f8, width = 6, height = 8)
+ggsave('manuscript_figures/Fig8.tiff', f8, width = 6, height = 6, dpi=1200)
 f8
-
-#f7 <- plot_grid(flow_fsp_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
-#ggsave('manuscript_figures/Fig7.png',f7)
-#f7
 ```
 
 ```{r, eval = FALSE}
@@ -604,6 +611,7 @@ f9 <- plot_grid(plot_grid(NULL, geo_map, NULL, nrow = 1, rel_widths = c(0.1,0.9,
                 plot_grid(geo_fsp, geo_min_snv, geo_snv, labels = c('B','C','D'), nrow = 1), 
                 ncol = 1, rel_heights = c(0.6, 0.4))
 ggsave('manuscript_figures/Fig9.png', f9, width = 12, height = 12)
+ggsave('manuscript_figures/Fig9.tiff', f9, width = 12, height = 12, dpi=1200)
 f9
 ```
 
