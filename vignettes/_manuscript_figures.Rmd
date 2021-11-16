@@ -168,7 +168,8 @@ pat_pw_snv_plot_zoom <- pat_pair_types %>%
   # scale_x_continuous(breaks = pretty_breaks())
 
 f3b <- pat_pw_snv_plot + annotation_custom(ggplotGrob(pat_pw_snv_plot_zoom), 
-                                    xmin = 5.5e-5, xmax = 9.5e-5, ymin = 50, ymax = 2650)
+                                    xmin = 5.5e-5, xma
+                                    x = 9.5e-5, ymin = 50, ymax = 2650)
 
 f3 <- plot_grid(f3a, f3b, ncol = 1, labels = 'AUTO')
 ggsave('manuscript_figures/Fig3.png', f3, height = 7, width = 6)
