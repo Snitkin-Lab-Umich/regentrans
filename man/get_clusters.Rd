@@ -4,7 +4,7 @@
 \alias{get_clusters}
 \title{Get facility clusters on the phylogeny}
 \usage{
-get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
+get_clusters(tr, locs, pureness = 1, bootstrap = NULL, pt)
 }
 \arguments{
 \item{tr}{a tree object returned by the read.tree function from the ape package}
@@ -14,6 +14,8 @@ get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
 \item{pureness}{how pure each cluster should be (must be > 0.5) (optional, defauly = 1)}
 
 \item{bootstrap}{Bootstrap support to use to filter unconfident tree edges (optional, default = NULL)}
+
+\item{pt}{a named vector of patients each isolate originated from, with the name being the sample ID. If this information is unavailable, set pt = NULL.}
 }
 \value{
 list where pure_subtree_info is a data.frame of facility clusters on phylogeny,
@@ -28,6 +30,7 @@ Get facility clusters on the phylogeny
 \examples{
 \dontrun{
 locs <- metadata \%>\% dplyr::select(isolate_id, facility) \%>\% tibble::deframe()
-clusts <- get_clusters(tr, locs, pureness = 1, bootstrap = NULL)
+pt <- metadata \%>\% dplyr::select(isolate_id, patient_id) \%>\% tibble::deframe()
+clusts <- get_clusters(tr, locs, pureness = 1, bootstrap = NULL, pt)
 }
 }

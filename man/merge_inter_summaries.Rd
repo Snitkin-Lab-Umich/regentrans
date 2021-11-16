@@ -15,7 +15,7 @@ merge_inter_summaries(
 
 \item{isolate_pair_summary}{output of summarize_pairs function}
 
-\item{fsp_long}{long-form output of get_facility_fsp function}
+\item{fsp_long}{long-form output of get_genetic_flow function}
 }
 \value{
 merged dataframe
