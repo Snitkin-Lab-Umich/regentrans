@@ -7,3 +7,5 @@ inst/doc
 vignettes/.DS_Store
 vignettes/manuscript_figures/.DS_Store
 /doc/
+vignettes/manuscript_figures/*.tiff
+vignettes/manuscript_figures/*.pdf
