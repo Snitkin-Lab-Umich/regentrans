@@ -82,7 +82,7 @@ If the matrix is asymmetric, all rows will be kept (i.e. the number of rows in t
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -105,7 +105,7 @@ If the matrix is asymmetric, all rows will be kept (i.e. the number of rows in t
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/Snitkin-Lab-Umich/regentrans/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -153,144 +153,145 @@ If the matrix is asymmetric, all rows will be kept (i.e. the number of rows in t
     <p>long form data where each row represents a cell in the matrix (rowname, column name, value)</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>make_long_form</span><span class='op'>(</span><span class='va'>fsp</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;     loc1 loc2       fsp
-#&gt; 1      A    C 0.7679634
-#&gt; 2      A    D 0.7469595
-#&gt; 3      A    E 0.8197587
-#&gt; 4      A    G 0.7324192
-#&gt; 5      A    H 0.8440006
-#&gt; 6      A    I 0.8684588
-#&gt; 7      A    J 0.9736750
-#&gt; 8      A    F 0.7390966
-#&gt; 9      A    K 0.9482373
-#&gt; 10     A    M 0.7620864
-#&gt; 11     A    N 0.8054438
-#&gt; 12     A    O 0.8245058
-#&gt; 13     A    P 0.7568318
-#&gt; 14     A    R 0.8037893
-#&gt; 15     A    T 0.8314962
-#&gt; 16     A    U 0.8428519
-#&gt; 18     C    D 0.3525517
-#&gt; 19     C    E 0.3523582
-#&gt; 20     C    G 0.5485256
-#&gt; 21     C    H 0.1631794
-#&gt; 22     C    I 0.3082997
-#&gt; 23     C    J 0.9835028
-#&gt; 24     C    F 0.3454327
-#&gt; 25     C    K 0.8960831
-#&gt; 26     C    M 0.1536132
-#&gt; 27     C    N 0.5545675
-#&gt; 28     C    O 0.5775852
-#&gt; 29     C    P 0.5804615
-#&gt; 30     C    R 0.6689634
-#&gt; 31     C    T 0.2066474
-#&gt; 32     C    U 0.6940619
-#&gt; 35     D    E 0.2267869
-#&gt; 36     D    G 0.5164609
-#&gt; 37     D    H 0.3134141
-#&gt; 38     D    I 0.5849978
-#&gt; 39     D    J 0.9791948
-#&gt; 40     D    F 0.2463885
-#&gt; 41     D    K 0.8568294
-#&gt; 42     D    M 0.3492957
-#&gt; 43     D    N 0.4523370
-#&gt; 44     D    O 0.5228168
-#&gt; 45     D    P 0.4634235
-#&gt; 46     D    R 0.6216858
-#&gt; 47     D    T 0.3810661
-#&gt; 48     D    U 0.7056786
-#&gt; 52     E    G 0.6759870
-#&gt; 53     E    H 0.2340379
-#&gt; 54     E    I 0.4951732
-#&gt; 55     E    J 0.9713430
-#&gt; 56     E    F 0.3025478
-#&gt; 57     E    K 0.9204724
-#&gt; 58     E    M 0.2968074
-#&gt; 59     E    N 0.4180925
-#&gt; 60     E    O 0.5626872
-#&gt; 61     E    P 0.5988715
-#&gt; 62     E    R 0.6892202
-#&gt; 63     E    T 0.4108661
-#&gt; 64     E    U 0.7599313
-#&gt; 69     G    H 0.6063684
-#&gt; 70     G    I 0.7487714
-#&gt; 71     G    J 0.9756019
-#&gt; 72     F    G 0.5516628
-#&gt; 73     G    K 0.7230392
-#&gt; 74     G    M 0.6897677
-#&gt; 75     G    N 0.6765771
-#&gt; 76     G    O 0.4576155
-#&gt; 77     G    P 0.1915366
-#&gt; 78     G    R 0.7805676
-#&gt; 79     G    T 0.4758439
-#&gt; 80     G    U 0.7814475
-#&gt; 86     H    I 0.2242990
-#&gt; 87     H    J 0.9847319
-#&gt; 88     F    H 0.3514035
-#&gt; 89     H    K 0.8896691
-#&gt; 90     H    M 0.1849055
-#&gt; 91     H    N 0.4267840
-#&gt; 92     H    O 0.4825445
-#&gt; 93     H    P 0.5361782
-#&gt; 94     H    R 0.6660236
-#&gt; 95     H    T 0.2033277
-#&gt; 96     H    U 0.6818991
-#&gt; 103    I    J 0.9910012
-#&gt; 104    F    I 0.5554167
-#&gt; 105    I    K 0.9916156
-#&gt; 106    I    M 0.3517606
-#&gt; 107    I    N 0.4782028
-#&gt; 108    I    O 0.4436872
-#&gt; 109    I    P 0.6730902
-#&gt; 110    I    R 0.7681478
-#&gt; 111    I    T 0.3890667
-#&gt; 112    I    U 0.7391876
-#&gt; 120    F    J 0.9762141
-#&gt; 121    J    K 0.9904933
-#&gt; 122    J    M 0.9833338
-#&gt; 123    J    N 0.9872380
-#&gt; 124    J    O 0.9854632
-#&gt; 125    J    P 0.9785429
-#&gt; 126    J    R 0.9835531
-#&gt; 127    J    T 0.9866646
-#&gt; 128    J    U 0.9900439
-#&gt; 137    F    K 0.9017951
-#&gt; 138    F    M 0.3176583
-#&gt; 139    F    N 0.4878188
-#&gt; 140    F    O 0.4869359
-#&gt; 141    F    P 0.4803883
-#&gt; 142    F    R 0.6323267
-#&gt; 143    F    T 0.4299114
-#&gt; 144    F    U 0.6956011
-#&gt; 154    K    M 0.9490206
-#&gt; 155    K    N 0.9104025
-#&gt; 156    K    O 0.8508417
-#&gt; 157    K    P 0.7437704
-#&gt; 158    K    R 0.7527014
-#&gt; 159    K    T 0.8131381
-#&gt; 160    K    U 0.8847174
-#&gt; 171    M    N 0.5345661
-#&gt; 172    M    O 0.6736864
-#&gt; 173    M    P 0.6492386
-#&gt; 174    M    R 0.6620350
-#&gt; 175    M    T 0.2139145
-#&gt; 176    M    U 0.7056917
-#&gt; 188    N    O 0.4045114
-#&gt; 189    N    P 0.5808352
-#&gt; 190    N    R 0.7410150
-#&gt; 191    N    T 0.6128645
-#&gt; 192    N    U 0.7784956
-#&gt; 205    O    P 0.3770237
-#&gt; 206    O    R 0.7723994
-#&gt; 207    O    T 0.5489453
-#&gt; 208    O    U 0.7341225
-#&gt; 222    P    R 0.7523902
-#&gt; 223    P    T 0.4821464
-#&gt; 224    P    U 0.7697556
-#&gt; 239    R    T 0.6462436
-#&gt; 240    R    U 0.3539550
-#&gt; 256    T    U 0.6678736</div></pre>
+    <pre class="examples"><span class='r-in'><span class='fu'>make_long_form</span><span class='op'>(</span><span class='va'>fsp</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     loc1 loc2       fsp</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1      A    C 0.7717549</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2      A    D 0.7663591</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3      A    E 0.8194635</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4      A    F 0.7594117</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5      A    G 0.7383896</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6      A    H 0.8410055</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 7      A    I 0.8667262</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 8      A    J 0.9764447</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 9      A    K 0.9522750</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 10     A    M 0.7662909</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 11     A    N 0.8133973</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 12     A    O 0.8306250</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 13     A    P 0.7425305</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 14     A    R 0.8115470</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 15     A    T 0.8319213</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 16     A    U 0.8421131</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 18     C    D 0.3413702</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 19     C    E 0.3415101</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 20     C    F 0.2628256</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 21     C    G 0.5334353</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 22     C    H 0.2403687</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 23     C    I 0.3084998</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 24     C    J 0.9839316</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 25     C    K 0.8827399</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 26     C    M 0.1504062</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 27     C    N 0.5465672</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 28     C    O 0.5735577</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 29     C    P 0.5341858</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 30     C    R 0.6547738</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 31     C    T 0.1884005</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 32     C    U 0.6816511</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 35     D    E 0.2434790</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 36     D    F 0.2536502</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 37     D    G 0.4939398</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 38     D    H 0.4006562</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 39     D    I 0.5973915</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 40     D    J 0.9805450</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 41     D    K 0.8396582</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 42     D    M 0.3663218</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 43     D    N 0.4586921</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 44     D    O 0.5319298</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 45     D    P 0.4289203</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 46     D    R 0.6282581</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 47     D    T 0.3786305</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 48     D    U 0.7077745</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 52     E    F 0.2514725</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 53     E    G 0.6655447</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 54     E    H 0.3056815</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 55     E    I 0.4980262</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 56     E    J 0.9718302</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 57     E    K 0.9182785</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 58     E    M 0.3001906</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 59     E    N 0.4222323</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 60     E    O 0.5653355</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 61     E    P 0.5857677</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 62     E    R 0.6903798</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 63     E    T 0.4121684</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 64     E    U 0.7565016</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 69     F    G 0.5616049</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 70     F    H 0.3484753</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 71     F    I 0.4898334</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 72     F    J 0.9778149</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 73     F    K 0.9050275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 74     F    M 0.2484644</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 75     F    N 0.4849724</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 76     F    O 0.5135410</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 77     F    P 0.4670237</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 78     F    R 0.6282514</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 79     F    T 0.3535072</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 80     F    U 0.6913074</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 86     G    H 0.5908832</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 87     G    I 0.7489789</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 88     G    J 0.9756172</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 89     G    K 0.7230079</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 90     G    M 0.6895115</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 91     G    N 0.6774641</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 92     G    O 0.4742981</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 93     G    P 0.1962121</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 94     G    R 0.7805078</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 95     G    T 0.4781963</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 96     G    U 0.7814417</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 103    H    I 0.2133007</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 104    H    J 0.9842605</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 105    H    K 0.8892935</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 106    H    M 0.2853168</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 107    H    N 0.4023813</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 108    H    O 0.4058176</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 109    H    P 0.5102451</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 110    H    R 0.6948037</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 111    H    T 0.2846916</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 112    H    U 0.6896490</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 120    I    J 0.9910524</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 121    I    K 0.9906516</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 122    I    M 0.3524131</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 123    I    N 0.4794344</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 124    I    O 0.4275278</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 125    I    P 0.6598976</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 126    I    R 0.7683236</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 127    I    T 0.3896366</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 128    I    U 0.7394817</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 137    J    K 0.9904933</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 138    J    M 0.9831099</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 139    J    N 0.9872937</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 140    J    O 0.9862792</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 141    J    P 0.9792813</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 142    J    R 0.9835531</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 143    J    T 0.9868078</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 144    J    U 0.9900439</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 154    K    M 0.9488845</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 155    K    N 0.9106904</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 156    K    O 0.8565391</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 157    K    P 0.7548870</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 158    K    R 0.7527014</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 159    K    T 0.8148390</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 160    K    U 0.8847174</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 171    M    N 0.5354747</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 172    M    O 0.6820799</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 173    M    P 0.6291749</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 174    M    R 0.6616427</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 175    M    T 0.2138976</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 176    M    U 0.7054690</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 188    N    O 0.3983550</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 189    N    P 0.5732978</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 190    N    R 0.7414548</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 191    N    T 0.6161091</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 192    N    U 0.7787368</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 205    O    P 0.3988167</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 206    O    R 0.7791095</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 207    O    T 0.5617683</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 208    O    U 0.7373228</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 222    P    R 0.7462601</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 223    P    T 0.4855295</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 224    P    U 0.7660985</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 239    R    T 0.6481825</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 240    R    U 0.3539550</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 256    T    U 0.6691453</span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

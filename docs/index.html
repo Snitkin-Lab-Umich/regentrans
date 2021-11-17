@@ -41,7 +41,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -64,7 +64,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/Snitkin-Lab-Umich/regentrans/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -86,7 +86,7 @@
 <p><img src="reference/figures/regentrans_logo.png" width="200"></p>
 <p>Website: <a href="https://snitkin-lab-umich.github.io/regentrans/" class="uri">https://snitkin-lab-umich.github.io/regentrans/</a></p>
 <p>Preprint: <a href="https://www.medrxiv.org/content/10.1101/2021.07.25.21261097v1" class="uri">https://www.medrxiv.org/content/10.1101/2021.07.25.21261097v1</a></p>
-<p><code>regentrans</code> can be installed using the command <code><a href="https://devtools.r-lib.org//reference/remote-reexports.html">devtools::install_github('Snitkin-Lab-Umich/regentrans')</a></code> in R</p>
+<p><code>regentrans</code> can be installed using the command <code>devtools::install_github('Snitkin-Lab-Umich/regentrans')</code> in R</p>
 <p>Examples of how to interrogate all of the questions in the table below can be found in the <a href="https://snitkin-lab-umich.github.io/regentrans/articles/Introduction.html">introductory vignette</a>.</p>
 <p>Questions regentrans can help investigate:</p>
 <table class="table">
@@ -129,8 +129,8 @@
 </tr>
 <tr class="even">
 <td>What locations is transmission occurring within/between?</td>
-<td>Population-level similarity between locations (Fsp)</td>
-<td><code><a href="reference/get_facility_fsp.html">get_facility_fsp()</a></code></td>
+<td>Population-level similarity between locations via genetic flow (Fsp)</td>
+<td><code><a href="reference/get_genetic_flow.html">get_genetic_flow()</a></code></td>
 <td>Fasta file of variants, isolate location information</td>
 <td></td>
 </tr>
@@ -150,7 +150,7 @@
 </tr>
 <tr class="odd">
 <td>Is transmission occurring along paths of higher patient/person flow?</td>
-<td>Compare patient/person flow between locations to inter-location pairwise SNV distances or Fsp</td>
+<td>Compare patient/person flow between locations to inter-location pairwise SNV distances or genetic flow (Fsp)</td>
 <td><code><a href="reference/get_patient_flow.html">get_patient_flow()</a></code></td>
 <td>Patient transfer network edge matrix</td>
 <td></td>
@@ -159,14 +159,14 @@
 <td></td>
 <td>Compare patient/person flow between locations to populatoin-level similarity between locations</td>
 <td>
-<code><a href="reference/get_patient_flow.html">get_patient_flow()</a></code>, <code><a href="reference/get_facility_fsp.html">get_facility_fsp()</a></code>
+<code><a href="reference/get_patient_flow.html">get_patient_flow()</a></code>, <code><a href="reference/get_genetic_flow.html">get_genetic_flow()</a></code>
 </td>
 <td>Patient transfer network, fasta file of variants, isolate location information</td>
 <td></td>
 </tr>
 <tr class="odd">
 <td>Are there any observable geographic trends in prevalence/transmission?</td>
-<td>Visualize prevalence and closely related pairs or Fsp</td>
+<td>Visualize prevalence and closely related pairs or genetic flow (Fsp)</td>
 <td>Plot code in vignette</td>
 <td>Geographic locations of each facility, patient transfer network, summary metric of genomic similarity</td>
 <td></td>

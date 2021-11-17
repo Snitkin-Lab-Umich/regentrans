@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Merge summarized data about facility pairs — merge_inter_summaries • regentrans</title>
+<title>Calculate genetic flow (Fsp) — get_genetic_flow • regentrans</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Merge summarized data about facility pairs — merge_inter_summaries" />
-<meta property="og:description" content="Merge summarized data about facility pairs including patient flow, isolate pairs, and gene flow (Fsp)." />
+<meta property="og:title" content="Calculate genetic flow (Fsp) — get_genetic_flow" />
+<meta property="og:description" content="Calculate genetic flow (Fsp)" />
 
 
 
@@ -120,50 +120,54 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Merge summarized data about facility pairs</h1>
-    <small class="dont-index">Source: <a href='https://github.com/Snitkin-Lab-Umich/regentrans/blob/master/R/summarize_pairs.R'><code>R/summarize_pairs.R</code></a></small>
-    <div class="hidden name"><code>merge_inter_summaries.Rd</code></div>
+    <h1>Calculate genetic flow (Fsp)</h1>
+    <small class="dont-index">Source: <a href='https://github.com/Snitkin-Lab-Umich/regentrans/blob/master/R/get_genetic_flow.R'><code>R/get_genetic_flow.R</code></a></small>
+    <div class="hidden name"><code>get_genetic_flow.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Merge summarized data about facility pairs including patient flow, isolate pairs, and gene flow (Fsp).</p>
+    <p>Calculate genetic flow (Fsp)</p>
     </div>
 
-    <pre class="usage"><span class='fu'>merge_inter_summaries</span><span class='op'>(</span>
-  patient_flow <span class='op'>=</span> <span class='cn'>NULL</span>,
-  isolate_pair_summary <span class='op'>=</span> <span class='cn'>NULL</span>,
-  fsp_long <span class='op'>=</span> <span class='cn'>NULL</span>
-<span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>get_genetic_flow</span><span class='op'>(</span><span class='va'>fasta</span>, <span class='va'>locs</span>, matrix <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>pt</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>patient_flow</th>
-      <td><p>output of get_patient_flow function</p></td>
+      <th>fasta</th>
+      <td><p>ape DNAbin object (i.e. from fasta file of SNPs) using read.fasta</p></td>
     </tr>
     <tr>
-      <th>isolate_pair_summary</th>
-      <td><p>output of summarize_pairs function</p></td>
+      <th>locs</th>
+      <td><p>a named vector of locations of isolates (e.g. facility of isolation), with the name being the sample ID</p></td>
     </tr>
     <tr>
-      <th>fsp_long</th>
-      <td><p>long-form output of get_genetic_flow function</p></td>
+      <th>matrix</th>
+      <td><p>whether to output symmetric matrix (TRUE; default) or long form (FALSE)</p></td>
+    </tr>
+    <tr>
+      <th>pt</th>
+      <td><p>a named vector of patients each isolate originated from, with the name being the sample ID. If this information is unavailable, set pt = NULL.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>merged dataframe</p>
+    <p>facility x facility matrix with Fsp values</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>Genetic flow (Fsp) is described in Donker et al. 2017
+(mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113).
+Only bi-allelic sites are included when computing Fsp.
+The Fsp values are between 0 and 1 where lower values indicate more similar populations. Note that the current implementation of this function is fairly slow.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='co'># This takes a long time to run right now!</span></span>
 <span class='r-in'><span class='va'>locs</span> <span class='op'>&lt;-</span> <span class='va'>metadata</span> <span class='op'><a href='https://rdrr.io/pkg/magrittr/man/pipe.html'>%&gt;%</a></span> <span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/dplyr/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>isolate_id</span>, <span class='va'>facility</span><span class='op'>)</span> <span class='op'><a href='https://rdrr.io/pkg/magrittr/man/pipe.html'>%&gt;%</a></span> <span class='fu'>tibble</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/tibble/man/enframe.html'>deframe</a></span><span class='op'>(</span><span class='op'>)</span></span>
-<span class='r-in'><span class='va'>pair_types</span> <span class='op'>&lt;-</span> <span class='fu'><a href='get_pair_types.html'>get_pair_types</a></span><span class='op'>(</span><span class='va'>dists</span>, <span class='va'>locs</span><span class='op'>)</span></span>
-<span class='r-in'><span class='va'>isolate_pair_summary</span> <span class='op'>&lt;-</span> <span class='fu'><a href='summarize_pairs.html'>summarize_pairs</a></span><span class='op'>(</span><span class='va'>pair_types</span><span class='op'>)</span></span>
-<span class='r-in'><span class='va'>patient_flow</span> <span class='op'>&lt;-</span> <span class='fu'><a href='get_patient_flow.html'>get_patient_flow</a></span><span class='op'>(</span>pt_trans_df <span class='op'>=</span> <span class='va'>pt_trans_df</span><span class='op'>)</span></span>
-<span class='r-in'><span class='va'>fsp_long</span> <span class='op'>&lt;-</span> <span class='fu'><a href='make_long_form.html'>make_long_form</a></span><span class='op'>(</span><span class='va'>fsp</span><span class='op'>)</span></span>
-<span class='r-in'><span class='fu'>merge_inter_summaries</span><span class='op'>(</span><span class='va'>patient_flow</span>, <span class='va'>isolate_pair_summary</span>, <span class='va'>fsp_long</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>pt</span> <span class='op'>&lt;-</span> <span class='va'>metadata</span> <span class='op'><a href='https://rdrr.io/pkg/magrittr/man/pipe.html'>%&gt;%</a></span> <span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/dplyr/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>isolate_id</span>, <span class='va'>patient_id</span><span class='op'>)</span> <span class='op'><a href='https://rdrr.io/pkg/magrittr/man/pipe.html'>%&gt;%</a></span> <span class='fu'>tibble</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/tibble/man/enframe.html'>deframe</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>facil_fsp</span> <span class='op'>&lt;-</span> <span class='fu'>get_genetic_flow</span><span class='op'>(</span><span class='va'>aln</span>, <span class='va'>locs</span>, matrix <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>pt</span><span class='op'>)</span></span>
 <span class='r-in'><span class='op'>}</span></span>
 </pre>
   </div>
