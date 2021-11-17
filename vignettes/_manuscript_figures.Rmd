@@ -13,8 +13,6 @@ devtools::load_all()
 ```
 
 ```{r setup,echo=TRUE,message=FALSE}
-
-
 library(tidyverse)
 library(ape)
 library(devtools)
@@ -114,6 +112,7 @@ f2 <- plot_grid(plot_grid(f2a, NULL, rel_widths = c(1, 0.09), nrow = 1),
 
 ggsave('manuscript_figures/Fig2.png', f2, width = 7, height = 5)
 ggsave('manuscript_figures/Fig2.tiff', f2, width = 7, height = 5, dpi=1200)
+f2
 ```
 
 
@@ -175,6 +174,9 @@ f3b <- pat_pw_snv_plot + annotation_custom(ggplotGrob(pat_pw_snv_plot_zoom),
 f3 <- plot_grid(f3a, f3b, ncol = 1, labels = 'AUTO')
 ggsave('manuscript_figures/Fig3.png', f3, height = 7, width = 6)
 ggsave('manuscript_figures/Fig3.tiff', f3, height = 7, width = 6, dpi=1200)
+
+f3 <- plot_grid(f3a, f3b, ncol = 1, labels = 'AUTO')
+ggsave('manuscript_figures/Fig3.png', f3, height = 7, width = 6)
 f3
 
 ```
@@ -301,6 +303,9 @@ tiff('manuscript_figures/Fig5.tiff', width = 7, height = 6, units = 'in', res=12
 grid::grid.newpage()
 grid::grid.draw(phm$gtable)
 dev.off()
+pheatmap(fsp, border_color = 'white',
+         legend_breaks = c(0, 0.2, 0.4, 0.6, 0.8, max(fsp)), 
+         legend_labels = c(0, 0.2, 0.4, 0.6, 0.8, 'Fsp'))
 ```
 
 ### SNV distances 
@@ -483,6 +488,11 @@ f8 <- plot_grid(flow_fsp_plot, flow_min_snv_plot, flow_snv_plot, ncol = 1, label
 ggsave('manuscript_figures/Fig8.png',f8, width = 6, height = 8)
 ggsave('manuscript_figures/Fig8.tiff', f8, width = 6, height = 6, dpi=1200)
 f8
+
+#f7 <- plot_grid(flow_fsp_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
+#ggsave('manuscript_figures/Fig7.png',f7)
+#f7
+>>>>>>> ba00182bf0878e5236dd6ef4ce4c4b2520c12d8a
 ```
 
 ```{r, eval = FALSE}
