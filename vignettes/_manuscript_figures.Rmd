@@ -27,6 +27,20 @@ library(igraph)
 
 #set theme 
 theme_set(theme_bw() + theme(strip.background = element_rect(fill="white",linetype='blank'), text=element_text(size=15)))
+
+# define function for plotting
+fancy_scientific <- function(l) {
+     # turn in to character string in scientific notation
+     l <- format(l, scientific = TRUE)
+     # change 0
+     l <- ifelse(l == '0e+00', '0', l)
+     # quote the part before the exponent to keep all the digits
+     l <- gsub("^(.*)e", "'\\1'e", l)
+     # turn the 'e+' into plotmath format
+     l <- gsub("e", "%*%10^", l)
+     # return this as an expression
+     parse(text=l)
+}
 ```
 
 
@@ -96,15 +110,17 @@ f2a <- frac_intra %>%
 f2b <- pat_frac_intra %>% 
   # filter(orig_dist_bin %in% levels(pat_frac_intra$orig_dist_bin)[1:100]) %>% 
   mutate(under = ifelse(orig_dist_bin %in% levels(pat_frac_intra$orig_dist_bin)[1:4], 
-                        'Branch length ≤ 2.56e-6\nmutations/site/year','Over threshold'),
-  under = factor(under, levels = c('Branch length ≤ 2.56e-6\nmutations/site/year','Over threshold')),
+                        "Branch length '≤'~2.56*'\u00D7'*10^6~mu/site/yr",'Over threshold'),
+  under = factor(under, levels = c("Branch length '≤'~2.56*'\u00D7'*10^6~mu/site/yr",'Over threshold')),
   orig_dist_bin = as.numeric(gsub('\\(.*,|]','',orig_dist_bin))) %>%
   arrange(orig_dist_bin) %>% 
   ggplot(aes(x = orig_dist_bin, y = frac_intra, fill = under)) + 
   geom_bar(stat = "identity", alpha = 0.5) + 
-  scale_fill_manual(values = c('black', 'lightgrey')) + 
+  scale_fill_manual(values = c('black', 'lightgrey'), 
+                    labels =  c(expression(paste("≤ 2.56", "\u00D7", 10^6, mu, "/site/yr")),'Over threshold       ')) + 
   labs(x = "Pairwise patristic distance", y = "Fraction of\nintra-facility pairs", fill = 'Possible distance\nthreshold') +
-  ylim(0, 1) #+
+  ylim(0, 1) +
+  scale_x_continuous(labels = fancy_scientific)
   # theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust = 0.5))
 
 f2 <- plot_grid(plot_grid(f2a, NULL, rel_widths = c(1, 0.09), nrow = 1), 
@@ -112,6 +128,9 @@ f2 <- plot_grid(plot_grid(f2a, NULL, rel_widths = c(1, 0.09), nrow = 1),
 
 ggsave('manuscript_figures/Fig2.png', f2, width = 7, height = 5)
 # ggsave('manuscript_figures/Fig2.tiff', f2, width = 7, height = 5, dpi=1200)
+tiff('manuscript_figures/Fig2.tiff', width = 7, height = 5, units='in', res=600)
+f2
+dev.off()
 f2
 ```
 
@@ -125,7 +144,7 @@ pw_snv_plot <- pair_types %>%
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
   # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
   guides(fill = guide_legend(reverse = TRUE)) +
-  labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
+  labs(x = "Pairwise SNV distance", y = "Number of pairs", fill = "") +
   geom_vline(xintercept = 10, col = 'darkgrey', size = 1) +
   theme(legend.justification = "top", 
         axis.line = element_line(colour = "black"),
@@ -138,7 +157,7 @@ pw_snv_plot_zoom <- pair_types %>%
   geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
   # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
   guides(fill = guide_legend(reverse = TRUE)) +
-  labs(x = "Pairwise SNV\ndistance", y = "# pairs", fill = "") +
+  labs(x = "Pairwise SNV\ndistance", y = "Number of pairs", fill = "") +
   theme(legend.position = 'none') +
   scale_x_continuous(breaks = pretty_breaks())
 
@@ -151,11 +170,12 @@ pat_pw_snv_plot <- pat_pair_types %>%
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
   # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
   guides(fill = guide_legend(reverse = TRUE)) +
-  labs(x = "Pairwise patristic distance", y = "# pairs", fill = "") +
+  labs(x = "Pairwise patristic distance", y = "Number of pairs", fill = "") +
   geom_vline(xintercept = 2.56e-06, col = 'darkgrey', size = 1) +
   theme(legend.justification = "top", 
         axis.line = element_line(colour = "black"),
-        panel.border = element_blank())
+        panel.border = element_blank()) +
+  scale_x_continuous(labels = fancy_scientific)
 
 pat_pw_snv_plot_zoom <- pat_pair_types %>%
   # mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair','Inter-facility pair'))) %>% 
@@ -164,9 +184,9 @@ pat_pw_snv_plot_zoom <- pat_pair_types %>%
   geom_histogram(position = 'identity', alpha = 0.4, bins = 10) +
   # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
   guides(fill = guide_legend(reverse = TRUE)) +
-  labs(x = "Pairwise patristic\ndistance", y = "# pairs", fill = "") +
-  theme(legend.position = 'none') #+
-  # scale_x_continuous(breaks = pretty_breaks())
+  labs(x = "Pairwise patristic\ndistance", y = "Number of pairs", fill = "") +
+  theme(legend.position = 'none') +
+  scale_x_continuous(labels = fancy_scientific)
 
 f3b <- pat_pw_snv_plot + annotation_custom(ggplotGrob(pat_pw_snv_plot_zoom), 
                                     xmin = 5.5e-5, xmax = 9.5e-5, ymin = 50, ymax = 2650)
@@ -177,6 +197,9 @@ ggsave('manuscript_figures/Fig3.png', f3, height = 7, width = 6)
 
 f3 <- plot_grid(f3a, f3b, ncol = 1, labels = 'AUTO')
 ggsave('manuscript_figures/Fig3.png', f3, height = 7, width = 6)
+tiff('manuscript_figures/Fig3.tiff', width = 6, height = 7, units='in', res=600)
+f3
+dev.off()
 f3
 
 ```
@@ -270,7 +293,7 @@ cluster_plot <- bind_cols(cluster = names(day_diffs),
   ggplot(aes(x = loc, y = subtr_size, color = loc, size = date_range)) + 
   geom_jitter(position = position_jitter(width = 0.2, height = 0.1), alpha = 0.5) + 
   scale_color_manual(values = cols) +
-  labs(y = "# isolates in \nphylogenetic cluster", x = "", color = 'Facility', 
+  labs(y = "Number of isolates in \nphylogenetic cluster", x = "", color = 'Facility', 
   size = 'Date range\n(days)') +
   # ylim(c(0,12.5)) +
   coord_flip()
@@ -278,7 +301,10 @@ cluster_plot <- bind_cols(cluster = names(day_diffs),
 f4 <- plot_grid(tr_facil, cluster_plot, labels = 'AUTO') #, rel_widths = c(0.4,0.6))
 
 ggsave('manuscript_figures/Fig4.png', f4, width = 8, height = 8)
+tiff('manuscript_figures/Fig4.tiff', width = 8, height = 8, units='in', res=600)
 # ggsave('manuscript_figures/Fig4.tiff', f4, width = 8, height = 8, dpi=1200)
+f4
+dev.off()
 f4
 ```
 
@@ -338,24 +364,28 @@ pat_summary_comb <- rbind(pat_summary, pat_summary_2)
 facil_summary <- left_join(snv_summary_comb, pat_summary_comb %>% select(-dist_min)) %>% 
   mutate(pair_type = factor(ifelse(loc1 == loc2, 'Intra-facility pair', 'Inter-facility pair'), levels = c('Intra-facility pair', 'Inter-facility pair'))) %>% 
   group_by(loc1, pair_type) %>% summarize(leq_6 = sum(leq_6), leq_10 = sum(leq_10), `leq_2.56e-06` = sum(`leq_2.56e-06`)) %>%
-  pivot_longer(cols = c(leq_6, leq_10, `leq_2.56e-06`)) %>% rename(thresh = name, n_pairs = value) %>%
-  mutate(thresh = paste(gsub('leq_','≤ ', thresh), 'SNVs'),
-         thresh = gsub('2.56e-06 SNVs', '2.56e-06\nmutations/site/year', thresh)) 
+  pivot_longer(cols = c(leq_6, leq_10, `leq_2.56e-06`)) %>% rename(thresh = name, n_pairs = value) #%>%
+  # mutate(thresh = paste0(gsub('leq_','≤~', thresh), '~SNVs'),
+         # thresh = gsub('2.56e-06~SNVs', '2.56%*%10^-06\nmutations/site/year', thresh)) 
 
 # get locations to keep (at least 1 closely related pair)
 keep_locs <- facil_summary %>% group_by(loc1) %>% summarize(sum_all = sum(n_pairs, na.rm = TRUE)) %>% filter(sum_all != 0) %>% select(loc1) %>% deframe()
+```
 
+```{r}
 # plot
 f6a <- facil_summary %>% filter(loc1 %in% keep_locs) %>% 
   tidyr::complete(loc1, pair_type, thresh) %>% 
   ggplot(aes(x = reorder(loc1, -n_pairs, sum), y = n_pairs, fill = pair_type)) +
   geom_col(position = 'dodge') +
        # scale_fill_manual(values=c("cadetblue", "salmon")) + 
-         labs(y = "# closely related isolate pairs", x = "Facility", fill = '', color = '') +
+         labs(y = "Number of closely related isolate pairs", x = "Facility", fill = '', color = '') +
   scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
   guides(fill = guide_legend(reverse = TRUE)) +
-  facet_grid(factor(thresh, levels = c('≤ 6 SNVs','≤ 10 SNVs','≤ 2.56e-06\nmutations/site/year'))~.) +
-  theme(legend.position = 'bottom')
+  facet_grid(factor(thresh, levels = c('leq_6', 'leq_10', 'leq_2.56e-06'),
+                    labels = c("'≤'~6~SNVs", "'≤'~10~SNVs","'≤'~2.56*'\u00D7'*10^6~mu/site/yr"))~., 
+                               labeller = label_parsed) +
+  theme(legend.position = 'bottom', strip.text = element_text(size = 10))
 
 g <- pair_types %>% filter(pairwise_dist <= 6) %>% select(pt1, pt2) %>% graph_from_data_frame() 
 E(g)$pair_type <- pair_types %>% filter(pairwise_dist <= 6) %>% pull(pair_type)
@@ -378,6 +408,9 @@ f6b <- ggraph(g, layout = 'kk') +
 f6 <- plot_grid(f6a, plot_grid(f6b, NULL, ncol = 1, rel_heights = c(0.9,0.1)), rel_widths = c(0.4,0.6), labels = 'AUTO')
 ggsave('manuscript_figures/Fig6.png',f6, width = 10, height = 5.5)
 # ggsave('manuscript_figures/Fig6.tiff', f6, width = 10, height = 5.5, dpi=1200)
+tiff('manuscript_figures/Fig6.tiff', width = 10, height = 5.5, units='in', res=600)
+f6
+dev.off()
 f6
 ```
 
@@ -389,7 +422,7 @@ time1 <- pair_types %>%
   # mutate(pair_type = factor(pair_type, levels = c('Intra-facility pair','Inter-facility pair'))) %>% 
   ggplot(aes(x = pairwise_dist, fill = pair_type)) + 
   geom_histogram(position = 'identity', alpha = 0.4, bins = 30) +
-  labs(x = "Pairwise SNV distance", y = "# pairs", fill = "") +
+  labs(x = "Pairwise SNV distance", y = "Number of pairs", fill = "") +
   # scale_fill_manual(values = c('Inter-facility pair' = 'grey','Intra-facility pair' = 'black')) +
   guides(fill = guide_legend(reverse = TRUE)) +
   facet_grid(~date1) + 
@@ -414,6 +447,9 @@ time2 <- pair_types %>%
 f7 <- plot_grid(time1, time2, nrow = 2, labels = 'AUTO')
 ggsave('manuscript_figures/Fig7.png', f7, width = 7, height = 5)
 # ggsave('manuscript_figures/Fig7.tiff', f7, width = 7, height = 5, dpi=1200)
+tiff('manuscript_figures/Fig7.tiff', width = 7, height = 5, units='in', res=600)
+f7
+dev.off()
 f7
 ```
 ```{r}
@@ -433,18 +469,9 @@ pair_info <- merge_inter_summaries(
   snv_summary, 
   make_long_form(fsp)) %>% 
   filter(loc1 != loc2)
+```
 
-# fsp_sub <- fsp[rownames(pt_flow), colnames(pt_flow)]
-
-# fsp_flow <- full_join(reshape2::melt(as.matrix(pt_flow)) %>% rename(pt_flow = value),
-          # reshape2::melt(as.matrix(fsp_sub)) %>% rename(fsp = value)) %>% rename(loc1 = Var1, loc2 = Var2)
-
-# thresh = 6
-
-# snv_dist_summary <- pair_types %>% dplyr::group_by(loc1, loc2) %>% dplyr::summarize(n_closely_related_pairs = sum(pairwise_dist <= thresh)) %>% dplyr::filter(loc1 != loc2)
-
-# pair_info <- full_join(fsp_flow, snv_dist_summary)
-
+```{r}
 flow_fsp_spear <- cor.test(pair_info$mean_pt_flow[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$fsp)],
                                  pair_info$fsp[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$fsp)], 
                                  method = 'spearman')
@@ -452,11 +479,12 @@ flow_fsp_spear <- cor.test(pair_info$mean_pt_flow[!is.na(pair_info$mean_pt_flow)
 flow_fsp_plot <- pair_info %>% 
   filter(!is.na(mean_pt_flow)) %>% 
   ggplot(aes(x=mean_pt_flow,y=fsp)) +
-  geom_point() + geom_smooth(method='lm', col = 'grey50') + scale_x_log10() +
-  labs(x = 'Mean patient flow', y = 'Fsp') + 
+  geom_point() + geom_smooth(method='lm', col = 'grey50') + scale_x_log10(label=fancy_scientific) +
+  labs(x = 'Mean patient flow', y = '\n\nFsp') + 
   annotate('text', x = 0.004, y = 0.7, 
            label = paste(paste('Spearman rho =', round(flow_fsp_spear$estimate, 2)),'\n',
-                         paste('Spearman p =', signif(flow_fsp_spear$p.value, 1))))
+                         paste('Spearman p =', signif(flow_fsp_spear$p.value, 1)))) +
+  theme(plot.margin = margin(t = 0, r = 0.5, b = 0.5, l = 0, unit = "cm"))
 
 flow_snv_spear <- cor.test(pair_info$mean_pt_flow[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$leq_10)],
                                  pair_info$leq_10[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$leq_10)], 
@@ -465,11 +493,12 @@ flow_snv_spear <- cor.test(pair_info$mean_pt_flow[!is.na(pair_info$mean_pt_flow)
 flow_snv_plot <- pair_info %>% 
   filter(!is.na(mean_pt_flow)) %>% 
   ggplot(aes(x=mean_pt_flow,y=leq_10)) +
-  geom_point() + geom_smooth(method='lm', col = 'grey50') + scale_x_log10() +
-  labs(x = 'Mean patient flow', y = '# closely related\npairs (≤ 10 SNVs)') + 
+  geom_point() + geom_smooth(method='lm', col = 'grey50') + scale_x_log10(label=fancy_scientific) +
+  labs(x = 'Mean patient flow', y = 'Number of\nclosely related\npairs (≤ 10 SNVs)') + 
   annotate('text', x = 0.004, y = 8, 
            label = paste(paste('Spearman rho =', round(flow_snv_spear$estimate, 2)),'\n',
-                         paste('Spearman p =', signif(flow_snv_spear$p.value, 1)))) #+ ylim(c(0,100))
+                         paste('Spearman p =', signif(flow_snv_spear$p.value, 1)))) +
+  theme(plot.margin = margin(t = 0, r = 0.5, b = 0.5, l = 0, unit = "cm"))
 
 flow_min_snv_spear <- cor.test(pair_info$mean_pt_flow[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$dist_min)],
                                  pair_info$dist_min[!is.na(pair_info$mean_pt_flow) & !is.na(pair_info$dist_min)], 
@@ -478,57 +507,20 @@ flow_min_snv_spear <- cor.test(pair_info$mean_pt_flow[!is.na(pair_info$mean_pt_f
 flow_min_snv_plot <- pair_info %>%
   filter(!is.na(mean_pt_flow)) %>% 
   ggplot(aes(x=mean_pt_flow,y=dist_min)) +
-  geom_point() + geom_smooth(method='lm', col = 'grey50') + scale_x_log10() +
-  labs(x = 'Mean patient flow', y = 'Minimum pairwise \nSNV distance') +
+  geom_point() + geom_smooth(method='lm', col = 'grey50') + scale_x_log10(label=fancy_scientific) +
+  labs(x = 'Mean patient flow', y = '\nMinimum pairwise \nSNV distance') +
   annotate('text', x = 0.004, y = 30, 
            label = paste(paste('Spearman rho =', round(flow_min_snv_spear$estimate, 2)),'\n',
-                         paste('Spearman p =', signif(flow_min_snv_spear$p.value, 1)))) #+ ylim(c(0,40))
+                         paste('Spearman p =', signif(flow_min_snv_spear$p.value, 1)))) +
+  theme(plot.margin = margin(t = 0, r = 0.5, b = 0.5, l = 0, unit = "cm"))
 
 f8 <- plot_grid(flow_fsp_plot, flow_min_snv_plot, flow_snv_plot, ncol = 1, labels = 'AUTO')
 ggsave('manuscript_figures/Fig8.png',f8, width = 6, height = 8)
 # ggsave('manuscript_figures/Fig8.tiff', f8, width = 6, height = 6, dpi=1200)
+tiff('manuscript_figures/Fig8.tiff', width = 6, height = 8, units='in', res=600)
 f8
-```
-
-```{r, eval = FALSE}
-cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$fsp)],
-                                 pair_info$fsp[!is.na(pair_info$pt_flow) &
-                                                 !is.na(pair_info$fsp)],  
-         method = 'spearman')
-
-cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$fsp) &
-                             pair_info$pt_flow < 2e-3],
-                                 pair_info$fsp[!is.na(pair_info$pt_flow) &
-                                                 !is.na(pair_info$fsp) &
-                             pair_info$pt_flow < 2e-3],  
-         method = 'spearman')
-
-cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10)],
-                                 pair_info$leq_10[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10)], 
-                                 method = 'spearman')
-
-cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10) &
-                             pair_info$leq_10 < 8],
-                                 pair_info$leq_10[!is.na(pair_info$pt_flow) & !is.na(pair_info$leq_10) &
-                             pair_info$leq_10 < 8], 
-                                 method = 'spearman')
-
-cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)],
-                                 pair_info$dist_min[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)], 
-                                 method = 'spearman')
-
-cor.test(pair_info$pt_flow[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min) &
-                             pair_info$dist_min < 20],
-                                 pair_info$dist_min[!is.na(pair_info$pt_flow) & !is.na(pair_info$dist_min)&
-                             pair_info$dist_min < 20], 
-                                 method = 'spearman')
-```
-
-
-```{r}
-# read_tsv('~/Desktop/isolate_info.tsv') %>% select(isolate_no, clades) %>% mutate(date = dates[isolate_no]) %>% select(clades, date) %>% 
-#   table() %>% data.frame() %>% pivot_wider(names_from = date, values_from = freq) %>% 
-#   mutate(frac_2015 = `2015`/(`2014`+`2015`))
+dev.off()
+f8
 ```
 
 
@@ -566,7 +558,7 @@ geo_map <- facil_geo %>% ggplot(aes(x=long, y=lat)) +
   scale_fill_viridis_c(option = 'viridis', direction = -1) +
   scale_size_continuous(range = c(1, 12), guide = FALSE) +
   theme_map() + #theme(legend.position = "none") 
-  labs(size = '# samples', fill = '# samples', col = '# closely related\npairs (≤ 6 SNVs)')
+  labs(size = 'Number of\nsamples', fill = 'Number of\nsamples', col = 'Number of\nclosely related\npairs (≤ 6 SNVs)')
 
 geo_dat <- left_join(pair_info, facil_geo, by = c('loc1' = 'facil')) %>% rename(facil_1_long = long, facil_1_lat = lat) %>% 
   select(-n) %>% left_join(., facil_geo, by = c('loc2' = 'facil')) %>% rename(facil_2_long = long, facil_2_lat = lat) %>% 
@@ -605,7 +597,7 @@ geo_min_snv <- geo_dat %>%
 geo_snv <- geo_dat %>% 
   filter(!is.na(geo_dist)) %>% 
   ggplot(aes(x = geo_dist, y = leq_10)) + geom_point() + geom_smooth(method = 'lm', col = 'grey50') +
-  labs(x = 'Physical distance between facilities', y = '# closely related pairs\n(≤ 10 SNVs)') + 
+  labs(x = 'Physical distance between facilities', y = 'Number of closely related pairs\n(≤ 10 SNVs)') + 
   annotate('text', x = 0.9, y = 10, 
            label = paste0(paste0('Spearman rho = ', round(geo_snv_spear$estimate, 2)),'\n',
                          paste0('Spearman p = ', signif(geo_snv_spear$p.value, 1))))
@@ -616,10 +608,10 @@ f9 <- plot_grid(plot_grid(NULL, geo_map, NULL, nrow = 1, rel_widths = c(0.1,0.9,
                 plot_grid(geo_fsp, geo_min_snv, geo_snv, labels = c('B','C','D'), nrow = 1), 
                 ncol = 1, rel_heights = c(0.6, 0.4))
 ggsave('manuscript_figures/Fig9.png', f9, width = 12, height = 12)
-# tiff('manuscript_figures/Fig9.tiff', width = 12, height = 12, units='in', res=600)
-# # ggsave('manuscript_figures/Fig9.tiff', f9, width = 12, height = 12, dpi=600)
-# f9
-# dev.off()
+tiff('manuscript_figures/Fig9.tiff', width = 12, height = 12, units='in', res=400)
+# ggsave('manuscript_figures/Fig9.tiff', f9, width = 12, height = 12, dpi=600)
+f9
+dev.off()
 f9
 ```
 
