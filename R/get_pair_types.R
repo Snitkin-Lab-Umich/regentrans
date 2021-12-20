@@ -50,18 +50,20 @@ get_pair_types <- function(dists, locs, pt){
   # subset to include only one of each pair
   if(!is.null(pt)){
     # also remove intra-facility pairs from the same patient
-    snp_facility_pairs <- snp_facility_pairs %>% dplyr::arrange(pt1) %>% filter(pt1 != pt2) %>% subset_pairs()
+    snp_facility_pairs <- snp_facility_pairs %>% dplyr::arrange(pt1) %>% dplyr::filter(pt1 != pt2) %>% subset_pairs()
   }else{
     snp_facility_pairs <- snp_facility_pairs %>% subset_pairs()
   }
 
   #if there is pt info
   if(!is.null(pt)){
-    snp_facility_pairs <- snp_facility_pairs %>% group_by(loc1, loc2, pt1, pt2) %>% slice(which.min(pairwise_dist))
+    snp_facility_pairs <- snp_facility_pairs %>%
+      dplyr::group_by(loc1, loc2, pt1, pt2) %>%
+      dplyr::slice(which.min(pairwise_dist))
   }
 
   #return snp matrix
-  return(snp_facility_pairs %>% ungroup() %>% as.data.frame())
+  return(snp_facility_pairs %>% dplyr::ungroup() %>% as.data.frame())
 }
 
 
