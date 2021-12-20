@@ -46,8 +46,8 @@ check_dists <- function(dists){
 check_locs <- function(locs){
   #check that the locs object is a named vector
   #if it is not a vector or has no names then not good (check both of these in tests)
-  if(!(is.vector(locs)) || is.null(names(locs))){
-    stop("The locs object must be a a named list of locations named by sample IDs")
+  if(!(is.vector(locs) | is.factor(locs)) || is.null(names(locs))){
+    stop("The locs object must be a named list of locations named by sample IDs")
   }
   #check that the locs object has at least 2 items
   if(length(locs) < 2){
@@ -82,13 +82,11 @@ check_dists_vs_locs <- function(dists, locs){
 
 #' Check patient transfer network input
 #'
-#' @inheritParams get_pair_types
+#' @inheritParams get_patient_flow
 #'
 #' @noRd
 #'
-check_pt_trans_df <- function(pt_trans_df){
-  #default is null
-  if(!is.null(pt_trans_df)){
+check_pt_trans_df <- function(pt_trans_df, locs){
     #make sure it is a dataframe of three columns, source, dest, n_transfers
     if(!(any(class(pt_trans_df) == "data.frame") || any(class(pt_trans_df) == "matrix"))){
       stop(paste("The pt_trans_df object must be a data.frame or matrix, you provided a ",
@@ -117,6 +115,19 @@ check_pt_trans_df <- function(pt_trans_df){
     # }
     if(length(paste(pt_trans_df$source_facil, pt_trans_df$dest_facil)) != length(unique(paste(pt_trans_df$source_facil, pt_trans_df$dest_facil)))){
       stop(paste("Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs."))
+    }
+  if(!is.null(locs)){
+    if(!(is.vector(locs) | is.factor(locs))){
+      stop("The locs object must be a list of locations")
+    }
+    #check that the locs object has at least 2 items
+    if(length(locs) < 2){
+      stop(paste("You have only supplied locations for "), length(locs),
+           " isolates. Please supply a vector of locations for at least 2 isolates")
+    }
+    #check if locs are in patient transfer df
+    if(!all(locs %in% pt_trans_df$source_facil | locs %in% pt_trans_df$dest_facil)){
+      stop("You have supplied locations not included in the patient transfer data frame. Please only include locations present in the patient transfer data frame.")
     }
   }
 }
@@ -649,9 +660,9 @@ check_paths <- function(paths){
 #'
 #' @noRd
 #'
-check_get_patient_flow_input <- function(pt_trans_df, paths){
+check_get_patient_flow_input <- function(pt_trans_df, locs, paths){
   #check the pt_trans_df input
-  check_pt_trans_df(pt_trans_df)
+  check_pt_trans_df(pt_trans_df, locs)
   #check the paths input
   check_paths(paths)
 }
