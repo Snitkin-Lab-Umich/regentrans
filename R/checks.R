@@ -56,6 +56,47 @@ check_locs <- function(locs){
   }
 }
 
+#' Check locs input to get_pair_types function
+#'
+#' @inheritParams get_pair_types
+#'
+#' @noRd
+#'
+check_pt <- function(pt){
+  #check that if the pt object isn't null, it should be a named vector
+  if(!is.null(pt)){
+    #if it is not a vector or has no names then not good (check both of these in tests)
+    if(!(is.vector(pt) | is.factor(pt)) || is.null(names(pt))){
+      stop("The pt object must be a named list of patient IDs named by sample IDs or NULL")
+    }
+    #check that the locs object has at least 2 items
+    if(length(pt) < 2){
+      stop(paste("You have only supplied patient IDs for "), length(pt),
+           " isolates. Please supply a named vector of patient IDs for at least 2 isolates")
+    }
+  }
+}
+
+#' Check that the names of the isolates in pt exist in locs
+#'
+#' @inheritParams get_pair_types
+#'
+#' @noRd
+#'
+check_pt_vs_locs <- function(pt, locs){
+  #check that there are less than or equal to the number of samples in the vector than in the dists matrix
+  if(length(locs) > length(pt)){
+    stop(paste("You have supplied a vector of more isolates (n = ", length(locs),
+                  ") with locations than exist in your patient ID vector (n = ",
+                  length(pt),
+                  "). Please subset"))
+  }
+  #warn if they will be subsetting??
+  if(!all(intersect(names(locs), names(pt)) == names(locs))){
+    stop("You have provided an isolate patient ID vector that does not contain all isolates found in the patient location vector. Please subset")
+  }
+}
+
 #' Check that the names of the isolates in locs actually exist in the SNV matrix
 #'
 #' @inheritParams get_pair_types
@@ -139,14 +180,19 @@ check_pt_trans_df <- function(pt_trans_df, locs){
 #'
 #' @noRd
 #'
-check_get_pair_types_input <- function(dists, locs){
+check_get_pair_types_input <- function(dists, locs, pt){
   #check everything that is common (aka no pt) first
   #check that the dists object is the snv object returned by dist.dna
   check_dists(dists)
   #check that the locs object is a named vector
   check_locs(locs)
+  #check that the pt object is a named vector or null value
+  check_pt(pt)
+  #check that pt names exist in the locs vector
+  check_pt_vs_locs(pt, locs)
   #check that the locs names exist in the dists dataframe
   check_dists_vs_locs(dists, locs)
+
 }
 
 #' Check subset pairs input
@@ -374,7 +420,7 @@ check_fasta_vs_locs <- function(fasta, locs){
 #'
 #' @noRd
 #'
-check_facility_fsp_input <- function(fasta, locs, matrix){
+check_facility_fsp_input <- function(fasta, locs, matrix, pt){
   #check output form
   if(!is.logical(matrix)){
     stop(paste("matrix must be logical to determine output format, you have provided",
@@ -384,6 +430,10 @@ check_facility_fsp_input <- function(fasta, locs, matrix){
   check_dna_bin(fasta)
   #check locs
   check_locs(locs)
+  #check pt is null or named vector
+  check_pt(pt)
+  #check that pt names exist in the locs vector
+  check_pt_vs_locs(pt, locs)
   #check fasta vs locs
   check_fasta_vs_locs(fasta, locs)
 }

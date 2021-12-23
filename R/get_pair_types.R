@@ -15,8 +15,7 @@
 #' }
 get_pair_types <- function(dists, locs, pt){
   #checks
-  #TO DO: add a check for pt (either null or a named vector of isolates)
-  check_get_pair_types_input(dists, locs)
+  check_get_pair_types_input(dists, locs, pt)
 
   #make the subsetted isolates object
   isolates <- intersect(names(locs), rownames(dists))
