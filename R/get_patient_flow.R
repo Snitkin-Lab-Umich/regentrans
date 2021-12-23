@@ -17,6 +17,11 @@ get_patient_flow <- function(pt_trans_df, locs = NULL, paths = FALSE){
   # could make this more general by defining column names in function, regardless of what they originally were
   check_get_patient_flow_input(pt_trans_df = pt_trans_df, locs = locs, paths = paths)
 
+  if(is.null(locs)){
+    locs = c(as.character(pt_trans_df$source_facil), as.character(pt_trans_df$dest_facil))
+  }
+  locs <- unique(locs)
+
   #make pt_trans_net not factors
   pt_trans_df$source_facil <- as.character(pt_trans_df$source_facil)
   pt_trans_df$dest_facil <- as.character(pt_trans_df$dest_facil)
@@ -82,7 +87,7 @@ get_indirect_flow <- function(pt_trans_df, locs = NULL){
   g <- igraph::graph_from_adjacency_matrix(trans_mat,mode='directed',weighted = TRUE)
 
   #remove weights that are NA (zero transfers)
-  g <- delete_edges(g, E(g)[is.na(E(g)$weight)])
+  g <- igraph::delete_edges(g, igraph::E(g)[is.na(igraph::E(g)$weight)])
 
   #name nodes in network that we have data for
 

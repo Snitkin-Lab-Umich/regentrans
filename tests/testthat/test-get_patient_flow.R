@@ -1,6 +1,7 @@
 #tests for patient transfer
 #make a source destination pair test matrix
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
 
 mat <- data.frame(matrix(data = c(0, 20, 12,
                         20, 0, 26,
@@ -15,11 +16,14 @@ pt_flow_sub <- pat_flow[1:3,]
 
 test_locs <- locs[1:3]
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs)
+test_pt <- pt[1:3]
+test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs, pt = test_pt)
 #one without paths returned
 test_pt_trans <- get_patient_flow(pt_trans_df = pat_flow)
 #one with paths returned
 test_pt_trans_paths <- get_patient_flow(pat_flow, paths = TRUE)
+#one with locs argument != null
+test_pt_trans_locs <- get_patient_flow(pt_trans_df = pat_flow, locs = c("A", "B"))
 
 test_that("get_patient_flow works", {
   #for without paths return
@@ -104,6 +108,8 @@ test_that("get_indirect_flow works", {
   #test one with some NAs...
   expect_true(sum(is.na(test_pt_flow_nas$transfer_network$pt_trans_metric)) == 0)
 
-
+  #test one where we ask for the paths of fewer, check that the result has those same facilities as the output
+  expect_true(nrow(test_pt_trans_locs) == 2)
+  expect_true(all(unique(c(test_pt_trans_locs$loc1, test_pt_trans_locs$loc2)) == c("A", "B")))
 })
 
