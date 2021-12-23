@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -103,7 +103,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/Snitkin-Lab-Umich/regentrans/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -129,7 +129,7 @@
     <p>Get facility clusters on the phylogeny</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_clusters</span><span class='op'>(</span><span class='va'>tr</span>, <span class='va'>locs</span>, pureness <span class='op'>=</span> <span class='fl'>1</span>, bootstrap <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>get_clusters</span><span class='op'>(</span><span class='va'>tr</span>, <span class='va'>locs</span>, pureness <span class='op'>=</span> <span class='fl'>1</span>, bootstrap <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>pt</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -150,6 +150,10 @@
       <th>bootstrap</th>
       <td><p>Bootstrap support to use to filter unconfident tree edges (optional, default = NULL)</p></td>
     </tr>
+    <tr>
+      <th>pt</th>
+      <td><p>a named vector of patients each isolate originated from, with the name being the sample ID. If this information is unavailable, set pt = NULL.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -161,11 +165,12 @@ subtrees is an object of the actual subtrees (can be used for plotting);
 cluster_pureness is the purness of each cluster</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='va'>locs</span> <span class='op'>&lt;-</span> <span class='va'>metadata</span> <span class='op'>%&gt;%</span> <span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span><span class='op'>(</span><span class='va'>isolate_id</span>, <span class='va'>facility</span><span class='op'>)</span> <span class='op'>%&gt;%</span> <span class='fu'>tibble</span><span class='fu'>::</span><span class='fu'><a href='https://tibble.tidyverse.org/reference/enframe.html'>deframe</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='va'>clusts</span> <span class='op'>&lt;-</span> <span class='fu'>get_clusters</span><span class='op'>(</span><span class='va'>tr</span>, <span class='va'>locs</span>, pureness <span class='op'>=</span> <span class='fl'>1</span>, bootstrap <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='va'>locs</span> <span class='op'>&lt;-</span> <span class='va'>metadata</span> <span class='op'><a href='https://rdrr.io/pkg/magrittr/man/pipe.html'>%&gt;%</a></span> <span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/dplyr/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>isolate_id</span>, <span class='va'>facility</span><span class='op'>)</span> <span class='op'><a href='https://rdrr.io/pkg/magrittr/man/pipe.html'>%&gt;%</a></span> <span class='fu'>tibble</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/tibble/man/enframe.html'>deframe</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>pt</span> <span class='op'>&lt;-</span> <span class='va'>metadata</span> <span class='op'><a href='https://rdrr.io/pkg/magrittr/man/pipe.html'>%&gt;%</a></span> <span class='fu'>dplyr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/dplyr/man/select.html'>select</a></span><span class='op'>(</span><span class='va'>isolate_id</span>, <span class='va'>patient_id</span><span class='op'>)</span> <span class='op'><a href='https://rdrr.io/pkg/magrittr/man/pipe.html'>%&gt;%</a></span> <span class='fu'>tibble</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/tibble/man/enframe.html'>deframe</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>clusts</span> <span class='op'>&lt;-</span> <span class='fu'>get_clusters</span><span class='op'>(</span><span class='va'>tr</span>, <span class='va'>locs</span>, pureness <span class='op'>=</span> <span class='fl'>1</span>, bootstrap <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>pt</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -2,6 +2,7 @@
 #' Summarize inter-facility patient transfer network
 #'
 #' @param pt_trans_df a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
+#' @param locs vector of unique locations you want to find shortest paths between (e.g. ones for which you have sequencing data for); default to use all locations
 #' @param paths boolean value, TRUE if you want the shortest paths returned, FALSE if you don't
 #'
 #' @return the number of direct patient transfers and indirect flow metrics between each facility pair. If paths = TRUE, a list of summary (pt_trans_summary) and shortest paths used (paths).
@@ -11,17 +12,17 @@
 #'
 #' @examples
 #' get_patient_flow(pt_trans_df = pt_trans_df)
-get_patient_flow <- function(pt_trans_df, paths = FALSE){
+get_patient_flow <- function(pt_trans_df, locs = NULL, paths = FALSE){
   #run checks
   # could make this more general by defining column names in function, regardless of what they originally were
-  check_get_patient_flow_input(pt_trans_df = pt_trans_df, paths = paths)
+  check_get_patient_flow_input(pt_trans_df = pt_trans_df, locs = locs, paths = paths)
 
   #make pt_trans_net not factors
   pt_trans_df$source_facil <- as.character(pt_trans_df$source_facil)
   pt_trans_df$dest_facil <- as.character(pt_trans_df$dest_facil)
 
   #run indirect flow
-  ind_flow_output <- get_indirect_flow(pt_trans_df)
+  ind_flow_output <- get_indirect_flow(pt_trans_df, locs)
   pt_trans_df_i <- ind_flow_output$transfer_network
   paths_list <- ind_flow_output$paths
 
@@ -29,7 +30,7 @@ get_patient_flow <- function(pt_trans_df, paths = FALSE){
   pat_flow <- pt_trans_df %>% dplyr::filter(source_facil != dest_facil)
 
   pt_trans_summary <- dplyr::full_join(pat_flow, pt_trans_df_i, by = c("source_facil", "dest_facil")) %>%
-    dplyr::filter(source_facil != dest_facil)
+    dplyr::filter(source_facil != dest_facil & (source_facil %in% locs) & (dest_facil %in% locs))
 
   ## sort facilities before summarizing (should probably make this a function)
   facil_pairs <- lapply(1:nrow(pt_trans_summary), function(x)
@@ -54,17 +55,19 @@ get_patient_flow <- function(pt_trans_df, paths = FALSE){
 
 #' Calculate indirect patient flow from patient transfer network
 #'
-#' @param pt_trans_df a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
+#' @inheritParams get_patient_flow
 #'
 #' @return facility x facility matrix of metric of patient flow between each facility pair
 #' @noRd
 #'
 #' @examples
 #' get_indirect_flow(pt_trans_df = pt_trans_df)
-get_indirect_flow <- function(pt_trans_df){
+get_indirect_flow <- function(pt_trans_df, locs = NULL){
   #don't want to subset before getting here, need whole network for indirect
   #checks
-  check_pt_trans_df(pt_trans_df)
+  check_pt_trans_df(pt_trans_df, locs)
+
+  locs <- unique(locs)
 
   # fill in missing source and destination facilities (doesn't change results, but will error out otherwise)
   pt_trans_df <- fill_missing_src_dest(pt_trans_df)
@@ -76,7 +79,10 @@ get_indirect_flow <- function(pt_trans_df){
   trans_mat = t(trans_mat)
 
   #make graph
-  g <- igraph::graph_from_adjacency_matrix(as.matrix(trans_mat),mode='directed',weighted = TRUE)
+  g <- igraph::graph_from_adjacency_matrix(trans_mat,mode='directed',weighted = TRUE)
+
+  #remove weights that are NA (zero transfers)
+  g <- delete_edges(g, E(g)[is.na(E(g)$weight)])
 
   #name nodes in network that we have data for
 
@@ -86,10 +92,8 @@ get_indirect_flow <- function(pt_trans_df){
   edwt_sum = sapply(names(tail_vert), function(x) out_strength[names(out_strength) == x]) # get number of outgoing patient transfers of tail vertex for each edge
   igraph::E(g)$weight = -log10(igraph::E(g)$weight/edwt_sum) # normalize edge weight by number of outgoing patient transfers of source vertex and take negative log (to use to calculate shortest paths)
 
-  #maybe subset to nodes that have info in our dataset
-
   #find shortest path function -> igraph::shortest.paths()
-  sp <- g %>% igraph::shortest.paths(mode="out") %>% as.data.frame()
+  sp <- g %>% igraph::shortest.paths(v = as.character(locs), to = as.character(locs), mode="out") %>% as.data.frame()
 
   #make long form
   trans_net_i <- sp %>% tibble::as_tibble() %>% dplyr::mutate(source_facil = colnames(sp)) %>% tidyr::pivot_longer(!source_facil, names_to = "dest_facil", values_to = "pt_trans_metric")
@@ -107,7 +111,7 @@ get_indirect_flow <- function(pt_trans_df){
 
 #' Fill in missing source and destination facilities in network edge list
 #'
-#' @param pt_trans_df a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)
+#' @inheritParams get_patient_flow
 #'
 #' @return filled in pt_trans_df
 #' @noRd
