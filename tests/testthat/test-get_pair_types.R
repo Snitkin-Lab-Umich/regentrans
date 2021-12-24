@@ -1,9 +1,14 @@
 #tests for get_pair_types
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
 test_locs <- locs[1:3]
+test_pt <- pt[1:3]
+test_pt_2 <- test_pt
+test_pt_2[2] <- test_pt_2[3]
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs)
-
+test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs, pt = test_pt)
+test_pair_types_no_pt <- get_pair_types(dists = test_dists, locs = test_locs, pt = NULL)
+test_pair_types_pt_sub <- get_pair_types(dists = test_dists, locs = test_locs, pt = test_pt_2)
 
 mat <- data.frame(matrix(data = c(0, 20, 12,
                                   20, 0, 26,
@@ -13,20 +18,23 @@ colnames(mat) <- c("A", "B", "C")
 
 test_that("get_pair_types works", {
   # check number of columns
-  expect_true(ncol(test_pair_types) == 6)
+  expect_true(ncol(test_pair_types) == 8)
   #check row #s
   expect_true(nrow(test_pair_types) == (length(test_locs)^2-length(test_locs))/2)
   #check colnames
-  expect_true(all(colnames(test_pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type")))
+  expect_true(all(colnames(test_pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pt1", "pt2", "pair_type")))
+  #check colnames of no pt
+  expect_true(all(colnames(test_pair_types_no_pt) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type")))
   #check col types
   #this won't be true when all of the patients IDs aren't numeric
-  expect_true(all(sapply(test_pair_types, class) == c("factor", "factor", "numeric", "character", "character", "character")))
+  expect_true(all(sapply(test_pair_types, class) == c("factor", "factor", "numeric", "character", "character", "character", "character", "character")))
   #check isolates in both lists are in the locs names
   expect_true(all(unique(c(as.character(test_pair_types$isolate1), as.character(test_pair_types$isolate2))) %in% names(test_locs)))
   # expect_true(all(setequal(unique(test_pair_types$isolate1), unique(test_pair_types$isolate2)) & setequal(unique(test_pair_types$isolate2), unique(names(test_locs)))))
   #same with locs
   expect_true(all(unique(c(as.character(test_pair_types$loc1), as.character(test_pair_types$loc2))) %in% test_locs))
-  # expect_true(all(setequal(unique(test_pair_types$loc1), unique(test_pair_types$loc2)) & setequal(unique(test_pair_types$loc2), unique(test_locs))))
+  #check what happens when you put two isolates from the same patient in, should only return one pair with each other
+  expect_true(nrow(test_pair_types_pt_sub) == 2)
 
 })
 

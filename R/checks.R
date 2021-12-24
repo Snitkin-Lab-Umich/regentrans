@@ -91,8 +91,8 @@ check_pt_vs_locs <- function(pt, locs){
                   length(pt),
                   "). Please subset"))
   }
-  #warn if they will be subsetting??
-  if(!all(intersect(names(locs), names(pt)) == names(locs))){
+  #if they don't overlap, stop
+  if(length(intersect(names(locs), names(pt))) < length(locs)){
     stop("You have provided an isolate patient ID vector that does not contain all isolates found in the patient location vector. Please subset")
   }
 }
@@ -189,7 +189,9 @@ check_get_pair_types_input <- function(dists, locs, pt){
   #check that the pt object is a named vector or null value
   check_pt(pt)
   #check that pt names exist in the locs vector
-  check_pt_vs_locs(pt, locs)
+  if(!is.null(pt)){
+    check_pt_vs_locs(pt, locs)
+  }
   #check that the locs names exist in the dists dataframe
   check_dists_vs_locs(dists, locs)
 
@@ -433,7 +435,9 @@ check_facility_fsp_input <- function(fasta, locs, matrix, pt){
   #check pt is null or named vector
   check_pt(pt)
   #check that pt names exist in the locs vector
-  check_pt_vs_locs(pt, locs)
+  if(!is.null(pt)){
+    check_pt_vs_locs(pt, locs)
+  }
   #check fasta vs locs
   check_fasta_vs_locs(fasta, locs)
 }
@@ -519,6 +523,61 @@ check_allele_freq_input <- function(x, subset, allele_n, alleles){
 #*******************************************************************************************************************************************#
 #***********************************************END CHECKS FOR allele_freq functions FUNCTION*******************************************************#
 #*******************************************************************************************************************************************#
+
+##########################################################find_major_alleles####################################################################################
+#*******************************************************************************************************************************************#
+#***********************************************START CHECKS FOR find_major_alleles functions FUNCTION*****************************************************#
+#*******************************************************************************************************************************************#
+check_find_major_alleles_input <- function(fasta, ref){
+  #check fasta is a character matrix
+  if(all(class(fasta) != c("matrix", "array"))){
+    stop(paste("Fasta must be a character matrix made by converting a DNAbin object using as.character, you provided",
+               class(fasta)))
+  }
+  #check that ref is character vector
+  if(class(ref) != "character"){
+    stop(paste("Ref must be a character vector, you provided",
+               class(ref)))
+  }
+  #check that ref and fasta are same length
+  if(length(ref) != ncol(fasta)){
+    stop(paste("Ref must be reference sequence of the fasta file you provided, so lengths of the sequences must match. You provided a reference sequence of length",
+               length(ref), " and a fasta of sequence length", ncol(fasta)))
+  }
+}
+
+#*******************************************************************************************************************************************#
+#***********************************************END CHECKS FOR find_major_alleles functions FUNCTION*******************************************************#
+#*******************************************************************************************************************************************#
+
+##########################################################make_meta_seqs####################################################################################
+#*******************************************************************************************************************************************#
+#***********************************************START CHECKS FOR make_meta_seqs functions FUNCTION*****************************************************#
+#*******************************************************************************************************************************************#
+check_make_meta_seqs_input <- function(fasta, locs, pt){
+  #check fasta
+  check_dna_bin(fasta)
+  #check pt
+  check_pt(pt)
+  #check locs
+  check_locs(locs)
+  #check fasta == pt == locs
+  if(!setequal(names(locs), names(pt))){
+    stop("locs and pt must represent the same samples")
+  }
+  if(!setequal(names(locs), names(pt))){
+    stop("locs and pt must represent the same samples")
+  }
+  if(!setequal(names(locs), rownames(fasta))){
+    stop("fasta must contain sequences for the same samples as locs and pt")
+  }
+
+}
+
+#*******************************************************************************************************************************************#
+#***********************************************END CHECKS FOR make_meta_seqs functions FUNCTION*******************************************************#
+#*******************************************************************************************************************************************#
+
 
 ##########################################################within_pop_var####################################################################################
 #*******************************************************************************************************************************************#

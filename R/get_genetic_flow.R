@@ -21,8 +21,6 @@
 #' facil_fsp <- get_genetic_flow(aln, locs, matrix = TRUE, pt)
 #' }
 
-
-#######################try to make sapply########
 get_genetic_flow <- function(fasta, locs, matrix = TRUE, pt){
   #check the DNAbin object and locs
   check_facility_fsp_input(fasta, locs, matrix, pt)
@@ -149,10 +147,26 @@ get_within_pop_var <- function(subset_snp_mat, subset){
   return(sum(within_f))
 }
 
+
+#' Make metasequences
+#'
+#' @inheritParams get_genetic_flow
+#'
+#' @noRd
+#'
 make_meta_seqs <- function(fasta, locs, pt){
   #TO DO: add checks
+  check_make_meta_seqs_input(fasta, locs, pt)
+  #TO DO: add subsets
+  isolates <- intersect(intersect(names(locs), rownames(fasta)), names(pt))
+  #subset the DNAbin object to the samples they have in common
+  fasta<-fasta[isolates,]
+  #subset the locs object to the samples they have in common
+  locs <- locs[isolates]
+  #subset the pt object to the samples they have in common
+  pt <- pt[isolates]
   #remake metadata df with location, pt, and isolate ID
-  combos <- as.data.frame(cbind(pt, names(pt))) %>% dplyr::left_join(as.data.frame(cbind(locs, names(locs))))
+  combos <- as.data.frame(cbind(pt, names(pt))) %>% dplyr::left_join(as.data.frame(cbind(locs, names(locs))), by = "V2")
   #subset to single pt/locs combos
   combos_2 <- combos %>% dplyr::distinct(pt, locs, .keep_all = TRUE)
   #if there are not multiple patients from the same location, just return the normal fasta
@@ -179,7 +193,7 @@ make_meta_seqs <- function(fasta, locs, pt){
       metasequence <- find_major_alleles(fasta_char[rownames(fasta_char) %in% ID[[1]], ], ref = ref)
     }
     #return one ID so we can map it back to the location and the sequence
-    return(c(ID[[1]][1], metasequence))
+    return(t(c(ID[[1]][1], metasequence)))
 
   })))
   #make first col (seq_ID) colnames
@@ -190,8 +204,16 @@ make_meta_seqs <- function(fasta, locs, pt){
   return(ape::as.DNAbin(as.matrix(fasta_subs)))
 }
 
+
+#' Find major alleles at each position
+#'
+#' @inheritParams get_genetic_flow
+#'
+#' @noRd
+#'
 find_major_alleles <- function(fasta, ref = NULL){
   #make character fasta (must be entered as character)
+  check_find_major_alleles_input(fasta, ref)
   #TO DO: write tests for fasta and ref as character
   fasta_2 <- fasta
   #if there isn't a ref provided, we are making the ref

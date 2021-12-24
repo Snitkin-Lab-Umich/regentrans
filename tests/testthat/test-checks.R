@@ -16,6 +16,11 @@ test_locs_fsp[1:4] <- "A"
 test_pt <- pt[1:4]
 test_pt_2 <- pt[5:8]
 test_pt_3 <- pt[1:3]
+test_pt_5 <- pt[names(pt) %in% names(test_locs_5)]
+test_pt_6 <- pt[names(pt) %in% names(test_locs_6)]
+test_pt_7 <- pt[names(pt) %in% names(test_locs_7)]
+test_pt_8 <- pt[names(pt) %in% names(test_locs_8)]
+test_pt_9 <- pt[names(pt) %in% names(test_locs_9)]
 test_dists <- dists[names(test_locs), names(test_locs)]
 test_dists_2 <- dists[names(test_locs_3), names(test_locs_3)]
 test_dists_3 <- test_dists_2
@@ -59,7 +64,7 @@ test_pt_trans_net_4 <- test_pt_trans_net
 test_pt_trans_net_4$n_transfers <- as.character(test_pt_trans_net_4$n_transfers)
 test_pt_trans_net_5 <- test_pt_trans_net %>% dplyr::filter(source_facil == "A", dest_facil == "A")
 
-test_pair_types_pt_trans <- get_pair_types(dists = test_dists, locs = test_locs)
+test_pair_types_pt_trans <- get_pair_types(dists = test_dists, locs = test_locs, pt = test_pt)
 
 mat2 <- data.frame(matrix(data = c(0, 20, 12,
                                   20, 0, 26,
@@ -77,7 +82,7 @@ rownames(mat3) <- c(1, 2, 3, 4)
 ####################################test get_pair_types######################################
 test_that("check_get_pair_types_input works", {
   #check ones that should pass
-  expect_true(is.null(check_get_pair_types_input(test_dists, test_locs)))
+  expect_true(is.null(check_get_pair_types_input(test_dists, test_locs, test_pt)))
   #one input - dists
   expect_error(
     check_get_pair_types_input(dists = test_dists),
@@ -90,34 +95,54 @@ test_that("check_get_pair_types_input works", {
     'argument "dists" is missing, with no default',
     fixed = TRUE
   )
-  #no locs input
+  #no pt input
   expect_error(
-    check_get_pair_types_input(dists = test_dists),
-    'argument "locs" is missing, with no default',
+    check_get_pair_types_input(dists = test_dists, locs = test_locs),
+    'argument "pt" is missing, with no default',
     fixed = TRUE
   )
   #test_dists not a dists object
   expect_error(
-    check_get_pair_types_input(dists = "test_dists", locs = test_locs),
+    check_get_pair_types_input(dists = "test_dists", locs = test_locs, pt = test_pt),
     "The dists object must be a SNV distance matrix returned by the dist.dna function from the ape package, but you provided: character",
     fixed = TRUE
   )
   #locs not a named list
   expect_error(
-    check_get_pair_types_input(dists = test_dists, locs = "test_locs"),
+    check_get_pair_types_input(dists = test_dists, locs = "test_locs", pt = test_pt),
     "The locs object must be a a named list of locations named by sample IDs",
     fixed = TRUE
   )
   #dist names not matching locs names
   expect_error(
-    check_get_pair_types_input(dists = test_dists, locs = test_locs_2),
+    check_get_pair_types_input(dists = test_dists, locs = test_locs_2, pt = test_pt),
     "You have not provided locations of at least 2 isolates in your SNV distance matrix (dists). Please provide locations for at least 2 isolates in your SNV distance matrix.",
     fixed = TRUE
   )
   #one with less than two in common
   expect_error(
-    check_get_pair_types_input(dists = test_dists, locs = test_locs_4),
+    check_get_pair_types_input(dists = test_dists, locs = test_locs_4, pt = test_pt),
     "You have only supplied locations for 1 isolates. Please supply a named vector of locations for at least 2 isolates",
+    fixed = TRUE
+  )
+  #one where pt is null
+  expect_true(is.null(check_get_pair_types_input(test_dists, test_locs, NULL)))
+  #one where pt is the wrong type
+  expect_error(
+    check_get_pair_types_input(dists = test_dists, locs = test_locs, pt = "test_pt"),
+    "The pt object must be a named list of patient IDs named by sample IDs or NULL",
+    fixed = TRUE
+  )
+  #one where pt has fewer than locs
+  expect_error(
+    check_get_pair_types_input(dists = test_dists, locs = test_locs, pt = test_pt[1:3]),
+    "You have supplied a vector of more isolates (n =  4 ) with locations than exist in your patient ID vector (n =  3 ). Please subset",
+    fixed = TRUE
+  )
+  #one where pt has different than locs
+  expect_error(
+    check_get_pair_types_input(dists = test_dists, locs = test_locs, pt = test_pt_2),
+    "You have provided an isolate patient ID vector that does not contain all isolates found in the patient location vector. Please subset",
     fixed = TRUE
   )
 
@@ -275,53 +300,53 @@ test_that("check_control_labels works", {
 ##################################test get_genetic_flow#####################################
 test_that("check_facility_fsp_input works", {
   #one that works
-  expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, matrix = TRUE)))
+  expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, matrix = TRUE, pt = test_pt_5)))
   #one that works w long form
-  expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, matrix = FALSE)))
+  expect_true(is.null(check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_5, matrix = FALSE, pt = test_pt_5)))
   #one that doesn't work because no more than one isolate/facility
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, matrix = TRUE),
+    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, matrix = TRUE, pt = test_pt),
     "Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities",
     fixed = TRUE
   )
   #check form input
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, matrix = "hi"),
+    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, matrix = "hi", pt = test_pt),
     "matrix must be logical to determine output format, you have provided hi",
     fixed = TRUE
   )
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, matrix = 12),
+    check_facility_fsp_input(fasta = test_fasta, locs = test_locs, matrix = 12, pt = test_pt),
     "matrix must be logical to determine output format, you have provided 12",
     fixed = TRUE
   )
   #check fasta
   expect_error(
-    check_facility_fsp_input(fasta = "test_fasta", locs = test_locs, matrix = TRUE),
+    check_facility_fsp_input(fasta = "test_fasta", locs = test_locs, matrix = TRUE, pt = test_pt),
     "The fasta object must be of class DNAbin, you have supplied an object of class  character",
     fixed = TRUE
   )
   #check fasta vs. locs when they don't have 2 in common
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_6, matrix = TRUE),
+    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_6, matrix = TRUE, pt = test_pt_6),
     "Please provde a fasta object and locs object with at least two samples in common",
     fixed = TRUE
   )
   #when not two isolates in two facilities
   expect_error(
-    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_7, matrix = TRUE),
+    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_7, matrix = TRUE, pt = test_pt_7),
     "Please provide isolates that appear in a facility at least twice, you have not provided locs of at least two isolates in two facilities",
     fixed = TRUE
   )
   #check fasta vs. locs when you have to subset
   expect_warning(
-    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_9, matrix = TRUE),
-    "You have provided  6  isolate IDs in common between locs and your fasta. Will subset.",
+    check_facility_fsp_input(fasta = test_fasta_2, locs = test_locs_9[2:6], matrix = TRUE, pt = test_pt_9[2:6]),
+    "You have provided  5  isolate IDs in common between locs and your fasta. Will subset.",
     fixed = TRUE
   )
   #one where there's only isolate from a location and will subset
   expect_warning(
-    check_facility_fsp_input(fasta = test_fasta_3, locs = test_locs_8, matrix = TRUE),
+    check_facility_fsp_input(fasta = test_fasta_3, locs = test_locs_8, matrix = TRUE, pt = test_pt_8),
     "You have provided at least one isolate that is the only one in its location. Will subset to exclude location  1",
     fixed = TRUE
   )
