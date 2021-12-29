@@ -236,23 +236,23 @@ check_pair_types <- function(pair_types){
                ncol(pair_types), " columns."))
   }
   #check the colnames
-  # if(!((ncol(pair_types) == 8 &&
-  #       all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type"))) ||
-  #      (ncol(pair_types) == 12 &&
-  #       all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "Patient1",  "Patient2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
-  #      (ncol(pair_types) == 10 &&
-  #       all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
-  #      (ncol(pair_types) == 6 &&
-  #       all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
-  #   stop(paste("The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has ",
-  #              ncol(pair_types), " columns that are not the output columns needed."))
-  # }
+  if(!((ncol(pair_types) == 8 &&
+        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pt1",  "pt2", "pair_type"))) ||
+       (ncol(pair_types) == 12 &&
+        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pt1",  "pt2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+       (ncol(pair_types) == 10 &&
+        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type", "n_1_to_2_transfers", "n_2_to_1_transfers", "indirect_flow_metric_1_to_2", "indirect_flow_metric_2_to_1"))) ||
+       (ncol(pair_types) == 6 &&
+        all(colnames(pair_types) == c("isolate1", "isolate2", "pairwise_dist", "loc1", "loc2", "pair_type"))))){
+    stop(paste("The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has ",
+               ncol(pair_types), " columns that are not the output columns needed."))
+  }
   #check that there is at least one row
   if(nrow(pair_types) < 1){
       stop(paste("Your pair_types input has ", nrow(pair_types), " facility pairs. Please use an pair_types input that has 1 or more pairs (rows)"))
   }
   #check pairwise dist column is numeric
-  if(!class(pair_types$pairwise_dist) == "numeric"){
+  if(!(class(pair_types$pairwise_dist) == "numeric")){
     stop(paste("Your pair_types input does not have numeric pairwise distances, you supplied one with type",
                class(pair_types$pairwise_dist)))
   }
@@ -534,15 +534,17 @@ check_find_major_alleles_input <- function(fasta, ref){
     stop(paste("Fasta must be a character matrix made by converting a DNAbin object using as.character, you provided",
                class(fasta)))
   }
-  #check that ref is character vector
-  if(class(ref) != "character"){
-    stop(paste("Ref must be a character vector, you provided",
-               class(ref)))
-  }
-  #check that ref and fasta are same length
-  if(length(ref) != ncol(fasta)){
-    stop(paste("Ref must be reference sequence of the fasta file you provided, so lengths of the sequences must match. You provided a reference sequence of length",
-               length(ref), " and a fasta of sequence length", ncol(fasta)))
+  #check that ref is character vector or null
+  if(!is.null(ref)){
+    if(class(ref) != "character"){
+      stop(paste("Ref must be a character vector, you provided",
+                 class(ref)))
+    }
+    #check that ref and fasta are same length
+    if(length(ref) != ncol(fasta)){
+      stop(paste("Ref must be reference sequence of the fasta file you provided, so lengths of the sequences must match. You provided a reference sequence of length",
+                 length(ref), " and a fasta of sequence length", ncol(fasta)))
+    }
   }
 }
 
@@ -774,6 +776,12 @@ check_get_patient_flow_input <- function(pt_trans_df, locs, paths){
   check_pt_trans_df(pt_trans_df, locs)
   #check the paths input
   check_paths(paths)
+  #check that locs is a subset of pt trans df
+  if(!is.null(locs)){
+    if(!all(locs %in% unique(c(as.character(pt_trans_df$source_facil), as.character(pt_trans_df$dest_facil))))){
+      stop("locs must either be `NULL` or a character vector of facilities that is a subset of facilities in pt_trans_df")
+    }
+  }
 }
 
 

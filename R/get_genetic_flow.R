@@ -24,11 +24,20 @@
 get_genetic_flow <- function(fasta, locs, matrix = TRUE, pt){
   #check the DNAbin object and locs
   check_facility_fsp_input(fasta, locs, matrix, pt)
-  #make a vector of only locs that appear more than once
-  locs_over_one <- which(unlist(table(locs) > 1))
+  #make a vector of only locs that appear more than once (including after making metasequences if pt != null)
+  if(!is.null(pt)){
+    locs_temp <- unique(cbind(locs, pt))
+    locs_over_one <- which(unlist(table(locs_temp[,1]) > 1))
+  }
+  else{
+    locs_over_one <- which(unlist(table(locs) > 1))
+  }
   locs_subset <- locs[locs %in% names(locs_over_one)]
   #make a list of the ones they have in common for subsetting
   isolates <- intersect(names(locs_subset), rownames(fasta))
+  if(!is.null(pt)){
+    isolates <- intersect(isolates, names(pt))
+  }
   #subset the DNAbin object to the samples they have in common
   fasta_sub<-fasta[isolates,]
   #subset the locs object to the samples they have in common

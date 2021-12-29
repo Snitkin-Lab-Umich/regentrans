@@ -25,7 +25,8 @@ Calculate genetic flow (Fsp)
 Genetic flow (Fsp) is described in Donker et al. 2017
 (mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113).
 Only bi-allelic sites are included when computing Fsp.
-The Fsp values are between 0 and 1 where lower values indicate more similar populations. Note that the current implementation of this function is fairly slow.
+The Fsp values are between 0 and 1 where lower values indicate more similar populations.
+Note that the current implementation of this function is fairly slow, visit https://github.com/nateosher/RPTfast for a faster implementation
 }
 \examples{
 \dontrun{

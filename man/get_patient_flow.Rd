@@ -4,10 +4,12 @@
 \alias{get_patient_flow}
 \title{Summarize inter-facility patient transfer network}
 \usage{
-get_patient_flow(pt_trans_df, paths = FALSE)
+get_patient_flow(pt_trans_df, locs = NULL, paths = FALSE)
 }
 \arguments{
 \item{pt_trans_df}{a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)}
+
+\item{locs}{vector of unique locations you want to find shortest paths between (e.g. ones for which you have sequencing data for); default to use all locations}
 
 \item{paths}{boolean value, TRUE if you want the shortest paths returned, FALSE if you don't}
 }

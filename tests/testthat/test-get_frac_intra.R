@@ -1,9 +1,11 @@
 #tests for get_frac_intra output
 locs <- metadata %>% dplyr::select(isolate_id, facility) %>% tibble::deframe()
+pt <- metadata %>% dplyr::select(isolate_id, patient_id) %>% tibble::deframe()
 
 test_locs <- locs[c(3,7:10)]
+test_pt <- pt[c(3,7:10)]
 test_dists <- dists[names(test_locs), names(test_locs)]
-test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs)
+test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs, pt = test_pt)
 test_snv_df <- structure(list(isolate1 = "MN_CRE202", isolate2 = "MN_CRE17",
                pairwise_dist = 10, loc1 = "M0211", loc2 = "M0211", pair_type = "intra-facility pair"), row.names = 1958L, class = "data.frame")
 test_frac_intra <- get_frac_intra(pair_types = test_pair_types)

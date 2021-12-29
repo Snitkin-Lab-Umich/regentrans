@@ -85,7 +85,7 @@ simple_test_meta_seqs <- as.character(make_meta_seqs(test_fasta_3[1:2,1:8], test
 test_fasta_4 <- aln[names(test_pt_5)[2:4],]
 test_fasta_4 = test_fasta_4[,apply(test_fasta_4, 2, FUN = function(x){sum(x != x[1] | x == 'n') > 0})]
 test_fast_4_char <- as.character(test_fasta_4)
-test_meta_seqs_2 <-as.character(make_meta_seqs(test_fasta_4[,50:53], test_locs_5, test_pt_5))
+test_meta_seqs_2 <-as.character(make_meta_seqs(test_fasta_4[,50:53], test_locs_5[names(test_locs_5) %in% rownames(test_fasta_4[,50:53])], test_pt_5[names(test_pt_5) %in% rownames(test_fasta_4[,50:53])]))
 
 test_that("make_meta_seqs works", {
   #one normal one that doesn't have more than one patient
@@ -93,8 +93,8 @@ test_that("make_meta_seqs works", {
   #one that has more than one patient
   expect_true(nrow(test_meta_seqs) == length(unique(test_pt_5)))
   #test those sequences
-  expect_true((test_meta_seqs[5,] == c("t", "t", "c", "a", "g", "c", "g", "c" )))
+  expect_true(all(test_meta_seqs[5,] == c("t", "t", "c", "a", "g", "c", "g", "c" )))
   #one that has a tie between the sequences and one is different than the majority alleles
-  expect_true(test_meta_seqs_2[1,] == c("c", "a", "t", "a"))
+  expect_true(all(test_meta_seqs_2[1,] == c("c", "a", "t", "a")))
 
 })

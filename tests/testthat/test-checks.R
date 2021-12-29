@@ -27,7 +27,7 @@ test_dists_3 <- test_dists_2
 test_dists_3[2] <- -1
 test_dists_4 <- test_dists_2
 test_dists_4[,1] <- as.character(test_dists_4[,1])
-test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs)
+test_pair_types <- get_pair_types(dists = test_dists, locs = test_locs, pt = test_pt)
 test_pair_types_2 <- test_pair_types[,2:ncol(test_pair_types)]
 test_pair_types_3 <- test_pair_types
 colnames(test_pair_types_3) <- c("A", "B", "C", "D", "E", "F")
@@ -43,7 +43,7 @@ ls <- list(list(a = 2, b = 3), list(c = "a", d = "b"))
 ls_2 <- list(list(a = 2, b = 3), list(c = "a", d = "b"), "x")
 test_subtr <- ape::subtrees(test_tr)
 test_subtr_2 <- ape::subtrees(test_tr_2)
-test_pt_flow <- pt_trans_df %>% dplyr::filter(source_facil %in% c('C','D','E') & dest_facil %in% c('C','D','E')) %>% get_patient_flow()
+test_pt_flow <- regentrans::pt_trans_df %>% dplyr::filter(source_facil %in% c('C','D','E') & dest_facil %in% c('C','D','E')) %>% get_patient_flow()
 test_isolate_pair_summary <- summarize_pairs(test_pair_types)
 test_fsp_long <- make_long_form(fsp)
 
@@ -110,13 +110,13 @@ test_that("check_get_pair_types_input works", {
   #locs not a named list
   expect_error(
     check_get_pair_types_input(dists = test_dists, locs = "test_locs", pt = test_pt),
-    "The locs object must be a a named list of locations named by sample IDs",
+    "The locs object must be a named list of locations named by sample IDs",
     fixed = TRUE
   )
   #dist names not matching locs names
   expect_error(
     check_get_pair_types_input(dists = test_dists, locs = test_locs_2, pt = test_pt),
-    "You have not provided locations of at least 2 isolates in your SNV distance matrix (dists). Please provide locations for at least 2 isolates in your SNV distance matrix.",
+    "You have provided an isolate patient ID vector that does not contain all isolates found in the patient location vector. Please subset",
     fixed = TRUE
   )
   #one with less than two in common
@@ -148,13 +148,13 @@ test_that("check_get_pair_types_input works", {
 
   #warnings
   #dist names being a subset of locs names
-  warnings <- capture_warnings(check_get_pair_types_input(dists = test_dists_2, locs = test_locs))
+  warnings <- capture_warnings(check_get_pair_types_input(dists = test_dists_2, locs = test_locs, pt = test_pt))
   expect_true(warnings[1] == "You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset")
   expect_true(warnings[2] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
   #locs names being a subset of dists names
-  warnings <- capture_warnings(check_get_pair_types_input(dists = test_dists, locs = test_locs_3))
+  warnings <- capture_warnings(check_get_pair_types_input(dists = test_dists, locs = test_locs_3, pt = test_pt_3))
   expect_true(warnings[1] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
-  warnings <- capture_warnings(check_get_pair_types_input(dists = test_dists_2, locs = test_locs))
+  warnings <- capture_warnings(check_get_pair_types_input(dists = test_dists_2, locs = test_locs, pt = test_pt))
   expect_true(warnings[1] == "You have supplied a list of more isolates (n =  4 ) with locations than exist in your SNV distance matrix (n =  3 ). Will subset")
   expect_true(warnings[2] == "You have provided an isolate location vector of fewer isolates than are contained in your SNV distance matrix (dists). Will subset")
 
@@ -204,14 +204,14 @@ test_that("check_get_frac_intra_input works", {
   #one that's input isn't pair_types input at all
   #one that's input is similar but wrong # cols
   expect_error(
-    check_get_frac_intra_input(pair_types = test_pair_types_2),
+    check_get_frac_intra_input(pair_types = test_pair_types_2[,1:5]),
     "The pair_types object must be the output of the get_pair_types() function, but you provided a data.frame with  5  columns.",
     fixed = TRUE
   )
-  #one that's input is similar but not correct rownames
+  #one that's input is similar but not correct colnames
   expect_error(
     check_get_frac_intra_input(pair_types = test_pair_types_3),
-    "The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has  6  columns that are not the output columns needed.",
+    "The pair_types object must be the output of the get_pair_types() function, but the data.frame you provided has  8  columns that are not the output columns needed.",
     fixed = TRUE
   )
   #one that's input is similar but not numeric dist col
@@ -240,7 +240,7 @@ test_that("check_get_clusters_inputs works", {
   #where locs isn't a named list
   expect_error(
     check_get_clusters_inputs(tr = test_tr, locs = "test_locs", pureness = 1, bootstrap = NULL),
-    "The locs object must be a a named list of locations named by sample IDs",
+    "The locs object must be a named list of locations named by sample IDs",
     fixed = TRUE
   )
   #where pureness isn't the right kind of value
@@ -441,6 +441,70 @@ test_that("check_within_pop_var_inputs works", {
   )
 })
 
+##################################test find_major_alleles#####################################
+test_that("check_find_major_alleles_input works", {
+  #one that works (ref = null)
+  expect_true(is.null(check_find_major_alleles_input(as.character(test_fasta), ref = NULL)))
+  #one that works (ref != null)
+  expect_true(is.null(check_find_major_alleles_input(as.character(test_fasta), ref = as.character(test_fasta)[1,])))
+  #one where fasta isn't a char mat
+  expect_error(
+    check_find_major_alleles_input(test_fasta, ref = NULL),
+    "Fasta must be a character matrix made by converting a DNAbin object using as.character, you provided DNAbin",
+    fixed = TRUE
+  )
+  #one where ref isn't a char vec
+  expect_error(
+    check_find_major_alleles_input(as.character(test_fasta), ref = rep(1, ncol(test_fasta))),
+    "Ref must be a character vector, you provided numeric",
+    fixed = TRUE
+  )
+  #one where fasta and ref are different lengths
+  expect_error(
+    check_find_major_alleles_input(as.character(test_fasta), ref = "test"),
+    "Ref must be reference sequence of the fasta file you provided, so lengths of the sequences must match. You provided a reference sequence of length 1  and a fasta of sequence length 83976",
+    fixed = TRUE
+  )
+})
+
+
+##################################test make_meta_seqs#####################################
+test_that("check_make_meta_seqs_input works", {
+  #one that works (pt not null)
+  expect_true(is.null(check_make_meta_seqs_input(test_fasta, test_locs, test_pt)))
+  #one where fasta is not DNAbin
+  expect_error(
+    check_make_meta_seqs_input("test_fasta", test_locs, test_pt),
+    "The fasta object must be of class DNAbin, you have supplied an object of class  character",
+    fixed = TRUE
+  )
+  #one where locs isn't a named list
+  expect_error(
+    check_make_meta_seqs_input(test_fasta, "test_locs", test_pt),
+    "The locs object must be a named list of locations named by sample IDs",
+    fixed = TRUE
+  )
+  #one where pt isn't a named list
+  expect_error(
+    check_make_meta_seqs_input(test_fasta, test_locs, "test_pt"),
+    "The pt object must be a named list of patient IDs named by sample IDs or NULL",
+    fixed = TRUE
+  )
+  #one where locs and pt don't rep the same samps
+  expect_error(
+    check_make_meta_seqs_input(test_fasta, test_locs[1:10], test_pt),
+    "locs and pt must represent the same samples",
+    fixed = TRUE
+  )
+  #one where locs and fasta don't rep the same samps
+  expect_error(
+    check_make_meta_seqs_input(test_fasta[1:10], test_locs, test_pt),
+    "fasta must contain sequences for the same samples as locs and pt",
+    fixed = TRUE
+  )
+})
+
+
 ##################################test reverse_list_str#####################################
 test_that("check_reverse_list_str_input works", {
   #one that works
@@ -479,7 +543,7 @@ test_that("check_get_largest_subtree_input works", {
   #one where isolate labels is wrong
   expect_error(
     check_get_largest_subtree_input(subtrs = test_subtr, isolate_labels = "test_pt", control_labels = NULL, bootstrap = NULL, pureness = 1),
-    "The locs object must be a a named list of locations named by sample IDs",
+    "The locs object must be a named list of locations named by sample IDs",
     fixed = TRUE
   )
   #one where they don't match at all
@@ -531,29 +595,29 @@ test_that("check_get_largest_subtree_input works", {
 ##################################test patient_flow#####################################
 test_that("check_get_patient_flow_input works", {
   #one that works with pair_types
-  expect_null(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net, paths = FALSE))
+  expect_null(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net, paths = FALSE, locs = NULL))
   #one where pt_trans_df is wrong
-  expect_error(check_get_patient_flow_input(pt_trans_df = "test_pt_trans_net", paths = FALSE),
+  expect_error(check_get_patient_flow_input(pt_trans_df = "test_pt_trans_net", paths = FALSE, locs = NULL),
                "The pt_trans_df object must be a data.frame or matrix, you provided a  character",
                fixed = TRUE)
   #one where pt_trans_df has wrong ncol
-  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_2, paths = FALSE),
+  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_2, paths = FALSE, locs = NULL),
                "The pt_trans_df object must be a data.frame or matrix with 3 columns, you provided  2",
                fixed = TRUE)
   #one where pt_trans_df has wrong colnames
-  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_3, paths = FALSE),
+  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_3, paths = FALSE, locs = NULL),
                "The pt_trans_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', you provided  A B C",
                fixed = TRUE)
   #one where pt_trans_df has wrong coltypes
-  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_4, paths = FALSE),
+  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_4, paths = FALSE, locs = NULL),
                "The pt_trans_df object must be a data.frame or matrix with 3 columns named 'source_facil', 'dest_facil', and 'n_transfers', of types character, character and numeric consecutively. you provided  factor factor character",
                fixed = TRUE)
   #one where paths is wrong
-  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_5, paths = 12),
+  expect_error(check_get_patient_flow_input(pt_trans_df = test_pt_trans_net_5, paths = 12, locs = NULL),
                "paths argument must be a logical/logical value representing whether you want to return the shortest paths used to generate the indirect flow metric. You have provided numeric",
                fixed = TRUE)
 
-  expect_error(check_get_patient_flow_input(pt_trans_df = dplyr::bind_rows(test_pt_trans_net, test_pt_trans_net), paths = FALSE),
+  expect_error(check_get_patient_flow_input(pt_trans_df = dplyr::bind_rows(test_pt_trans_net, test_pt_trans_net), paths = FALSE, locs = NULL),
                "Multiple rows in the patient transfer network contain the same source and destination facility. Please include only unique source and destination pairs.",
                fixed = TRUE)
 })

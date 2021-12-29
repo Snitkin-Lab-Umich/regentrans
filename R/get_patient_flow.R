@@ -71,6 +71,9 @@ get_indirect_flow <- function(pt_trans_df, locs = NULL){
   #don't want to subset before getting here, need whole network for indirect
   #checks
   check_pt_trans_df(pt_trans_df, locs)
+  if(is.null(locs)){
+    locs = c(as.character(pt_trans_df$source_facil), as.character(pt_trans_df$dest_facil))
+  }
 
   locs <- unique(locs)
 

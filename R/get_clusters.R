@@ -27,7 +27,7 @@ get_clusters <- function(tr, locs, pureness = 1, bootstrap = NULL, pt){
   isolates <- intersect(tr$tip.label, names(locs))
   if(!is.null(pt)){
     #subset patients to one isolate per patient
-    pt_df <- as.data.frame(pt) %>% distinct(pt, .keep_all = TRUE) %>% rownames() %>% as.vector()
+    pt_df <- as.data.frame(pt) %>% dplyr::distinct(pt, .keep_all = TRUE) %>% rownames() %>% as.vector()
     #subset isolates to one per patient
     isolates <- intersect(isolates, pt_df)
   }
