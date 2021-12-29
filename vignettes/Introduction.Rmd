@@ -425,7 +425,7 @@ snv_hist + xlim(c(0,50))
 
 Sometimes pairwise genetic distances are positively correlated with time between sample collection dates. While we see no correlation in our dataset, here is an example of how to look at the correlation between time between sample collection dates and pairwise SNV distances:
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 left_join(pair_types, days_between_isolates) %>% 
   ggplot(aes(x = days_diff, y = pairwise_dist)) +
   geom_bin_2d() +
