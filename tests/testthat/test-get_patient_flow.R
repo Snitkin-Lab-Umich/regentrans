@@ -56,7 +56,7 @@ test_that("get_patient_flow works", {
   expect_warning(
     expect_equal(get_patient_flow(pt_flow_sub),
                  structure(list(loc1 = c("A", "A", "A", "A", "B", "B"), loc2 = c("B", "C", "B", "C", "C", "C"), n_transfers_f12 = c(NA_real_, NA_real_, NA_real_, NA_real_, NA_real_, NA_real_), pt_trans_metric_f12 = c(0, 0, 0, 0, 0, 0), n_transfers_f21 = c(20, 12, 20, 12, NA, NA), pt_trans_metric_f21 = c(1, 1, 1, 1, 0, 0), sum_transfers = c(NA_real_, NA_real_, NA_real_, NA_real_, NA_real_, NA_real_), sum_pt_trans_metric = c(1, 1, 1, 1, 0, 0)), row.names = c(NA, -6L), class = "data.frame")
-                 ), "At structural_properties.c:4597 :Couldn't reach some vertices")
+                 ), "At structural_properties.c:")
   })
 
 
