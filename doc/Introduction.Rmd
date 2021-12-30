@@ -481,7 +481,7 @@ pheatmap(fsp)
 
 Here we can see that some facilities have more similar CRKP populations than others, suggesting that there is more transmission between those facilities. 
 
-One way to determine whether fsp values are significant is to use permutation ([Donker et al., 2017](mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113)). 
+One way to determine whether fsp values are significant is to use permutation ([Donker et al., 2017](mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113)). A faster version of the Fsp calculation is available [here](https://github.com/nateosher/RPTfast), which we recommend for permutation analysis. 
 
 
 ### SNV distances 
@@ -598,6 +598,8 @@ We can also get the direct and indirect patient flow between facilities (see [Ha
 1. `source_facil`: the source facility
 1. `dest_facil`: the destination facility
 1. `n_transfers`: the number of transfers from source facility to destination facility over a certain amount of time (e.g. 1 month, 1 year, etc.)
+
+For increased efficiency use the optional `locs` argument, a vector of location names of interest. 
 
 Here is a toy example that we generated for the vignette:
 
