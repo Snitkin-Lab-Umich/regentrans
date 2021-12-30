@@ -129,7 +129,7 @@
     <p>Summarize inter-facility patient transfer network from an edge list. Direct and indirect patient flow metrics are calculated.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_patient_flow</span><span class='op'>(</span><span class='va'>pt_trans_df</span>, paths <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>get_patient_flow</span><span class='op'>(</span><span class='va'>pt_trans_df</span>, locs <span class='op'>=</span> <span class='cn'>NULL</span>, paths <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -137,6 +137,10 @@
     <tr>
       <th>pt_trans_df</th>
       <td><p>a dataframe representing a patient transfer network of 3 cols: 'source_facil', 'dest_facil, and 'n_transfers' (code doesn't support missing paths, any missing paths will be represented by 0s)</p></td>
+    </tr>
+    <tr>
+      <th>locs</th>
+      <td><p>vector of unique locations you want to find shortest paths between (e.g. ones for which you have sequencing data for); default to use all locations</p></td>
     </tr>
     <tr>
       <th>paths</th>

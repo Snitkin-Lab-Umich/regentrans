@@ -531,10 +531,6 @@
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_bin_2d.html">geom_bin_2d</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">'lm'</span>, color <span class="op">=</span> <span class="st">'white'</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">'# days between samples'</span>, y <span class="op">=</span> <span class="st">'Pairwise SNV distance'</span>, fill <span class="op">=</span> <span class="st">'# pairs'</span><span class="op">)</span></code></pre></div>
-<pre><code>## Joining, by = c("isolate1", "isolate2")</code></pre>
-<pre><code>## Warning: Removed 6234 rows containing non-finite values (stat_bin2d).</code></pre>
-<pre><code>## `geom_smooth()` using formula 'y ~ x'</code></pre>
-<pre><code>## Warning: Removed 6234 rows containing non-finite values (stat_smooth).</code></pre>
 <p><img src="Introduction_files/figure-html/unnamed-chunk-30-1.png" width="700"></p>
 </div>
 <div id="is-transmission-occurring-between-different-sample-sources" class="section level4">
@@ -544,7 +540,7 @@
 <p>Note that this is a <strong>toy example</strong> as this sample data only includes patient samples.</p>
 <p>If your samples are labeled differently (i.e. patient samples are labeled with PT_… and environmental samples are labeled with EN_…) you may want to use a function like <code>grepl</code> to differentiate between sample types.</p>
 <p>Note that this is one of many ways in which the functions provided in <code>regentrans</code> can be used to ask questions about transmission that we do not directly discuss here. Other examples include looking at transmission between zip codes or wards/rooms in a facility.</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># create toy data</span>
 <span class="co"># each patient and each environment is a different location</span>
 <span class="co"># get patients </span>
@@ -569,7 +565,7 @@
 <h3 class="hasAnchor">
 <a href="#genetic-flow-fsp" class="anchor"></a>Genetic flow (Fsp)</h3>
 <p>To determine the extent of genetic flow between two facilities, we can calculate Fsp (<a href="mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113">Donker et al., 2017</a>) as a measure of similarity between populations at different facilities. A value of 0 indicates that the populations are identical, while value of 1 indicates that the populations are completely different. The genetic flow function outputs a symmetric matrix of fsp values for each facility pair. The row and column names are the facilities and the values are fsp:</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">fsp</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></code></pre></div>
 <pre><code>##           A         C         D         E
 ## A 0.0000000 0.7717549 0.7663591 0.8194635
@@ -577,20 +573,20 @@
 ## D 0.7663591 0.3413702 0.0000000 0.2434790
 ## E 0.8194635 0.3415101 0.2434790 0.0000000</code></pre>
 <p>We can plot the genetic flow values as a heatmap to visualze the extent of similarity between strains from different facility pairs:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># this takes a while to run, so we've pre-computed it and included it in the package</span>
 <span class="co"># fsp &lt;- get_genetic_flow(fasta = aln, locs = locs, pt = pt)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span><span class="va">fsp</span><span class="op">)</span></code></pre></div>
 <p><img src="Introduction_files/figure-html/unnamed-chunk-33-1.png" width="700"></p>
 <p>Here we can see that some facilities have more similar CRKP populations than others, suggesting that there is more transmission between those facilities.</p>
-<p>One way to determine whether fsp values are significant is to use permutation (<a href="mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113">Donker et al., 2017</a>).</p>
+<p>One way to determine whether fsp values are significant is to use permutation (<a href="mgen.microbiologyresearch.org/pubmed/content/journal/mgen/10.1099/mgen.0.000113">Donker et al., 2017</a>). A faster version of the Fsp calculation is available <a href="https://github.com/nateosher/RPTfast">here</a>, which we recommend for permutation analysis.</p>
 </div>
 <div id="snv-distances" class="section level3">
 <h3 class="hasAnchor">
 <a href="#snv-distances" class="anchor"></a>SNV distances</h3>
 <p>We can also look at the number of closely related pairs of isolates at different facility pairs to get a sense of the extent of potential recent transmission and identify facilities and facility pairs with more putative spread. For this, we must choose a SNV threshold. Therefore, we recommend performing a sensitivity analysis by choosing several different SNV thresholds and seeing how robust the results are to these changes.</p>
 <p>To do this, we can summarize the pairwise SNV distance information using the <code><a href="../reference/summarize_pairs.html">summarize_pairs()</a></code> function:</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># get summary of pairwise SNV distance data</span>
 <span class="va">snv_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summarize_pairs.html">summarize_pairs</a></span><span class="op">(</span><span class="va">pair_types</span>,summary_fns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'min'</span><span class="op">)</span>, threshs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span> 
 <span class="va">snv_summary</span></code></pre></div>
@@ -611,7 +607,7 @@
 ## # … with 217 more rows</code></pre>
 <p>The output is a summary of the isolate pairs for different facility pairs. Here, we also filtered out intra-facility pairs, as we are most interested in inter-facility transmission as compared to patient transfer. The function allows you to input a vector of whatever summary functions you’d like (default is minimum pairwise SNV distance), as well as pairwise SNV distance thresholds to compute the number of closely related pairs for each facility pair under that threshold.</p>
 <p>Now, we can plot that information to identify facilities with closely related intra- and inter-facility pairs:</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># because each pair is only represented once, we must duplicate pairs with different locations</span>
 <span class="va">snv_summary_2</span> <span class="op">&lt;-</span> <span class="va">snv_summary</span>
 <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">snv_summary_2</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"loc2"</span>, <span class="st">"loc1"</span>, <span class="st">"dist_min"</span>, <span class="st">"leq_6"</span>, <span class="st">"leq_10"</span><span class="op">)</span>
@@ -655,7 +651,7 @@
 <h1 class="hasAnchor">
 <a href="#have-transmission-dynamics-changed-over-time-or-across-species" class="anchor"></a>3. Have transmission dynamics changed over time or across species?</h1>
 <p>To investigate whether transmission dynamics have changed over time or differ across groups (such as sequence type or species) we can “facet” on those variables. Here is an example of faceting on date:</p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># get dates </span>
 <span class="va">dates</span> <span class="op">&lt;-</span> <span class="va">metadata</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/select.html">select</a></span><span class="op">(</span><span class="va">isolate_id</span>, <span class="va">collection_date</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/pkg/tibble/man/enframe.html">deframe</a></span><span class="op">(</span><span class="op">)</span>
 
@@ -703,8 +699,9 @@
 <li>
 <code>n_transfers</code>: the number of transfers from source facility to destination facility over a certain amount of time (e.g. 1 month, 1 year, etc.)</li>
 </ol>
+<p>For increased efficiency use the optional <code>locs</code> argument, a vector of location names of interest.</p>
 <p>Here is a toy example that we generated for the vignette:</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">pt_trans_df</span><span class="op">)</span></code></pre></div>
 <pre><code>##   source_facil dest_facil n_transfers
 ## 1            H          D          17
@@ -714,7 +711,7 @@
 ## 5            F          D          60
 ## 6            I          D          63</code></pre>
 <p>Here is the output of <code>get_patinet_flow()</code>:</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pt_trans</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_patient_flow.html">get_patient_flow</a></span><span class="op">(</span>pt_trans_df <span class="op">=</span> <span class="va">pt_trans_df</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">pt_trans</span><span class="op">)</span></code></pre></div>
 <pre><code>##   loc1 loc2 n_transfers_f12 pt_trans_metric_f12 n_transfers_f21
@@ -739,7 +736,7 @@
 <li>Undirected transfer and flow metrics that are the sum of the two direct metrics (<code>sum_transfers</code> and <code>sum_pt_trans_metric</code>). This is useful for comparing to the undirected pairwise SNV distance summary and genetic flow (Fsp).</li>
 </ul>
 <p>Next, we can merge the patient flow, pairwise SNV distance, and genetic flow (fsp) summaries (note that there are a lot of NA values here because we do not have patient flow information for all facilities):</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># have to convert fsp matrix to long form first</span>
 <span class="va">fsp_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_long_form.html">make_long_form</a></span><span class="op">(</span><span class="va">fsp</span><span class="op">)</span>
 
@@ -767,7 +764,7 @@
 ## #   pt_trans_metric_f21 &lt;dbl&gt;, sum_transfers &lt;dbl&gt;, sum_pt_trans_metric &lt;dbl&gt;</code></pre>
 <p>Now we’re ready to plot patient flow vs. various genomic metrics of similarity between facilities:</p>
 <p>We see a negative correlation between patient flow and genetic flow (Fsp), suggesting that facilities connected by more patient transfer are more likely to have similar populations, indicative of more transmission (Remember that fsp values closer to 0 indicate more closely related populations):</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pair_info</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">sum_pt_trans_metric</span>,y<span class="op">=</span><span class="va">fsp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method<span class="op">=</span><span class="st">'lm'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/scale_continuous.html">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -777,7 +774,7 @@
 <pre><code>## Warning: Removed 155 rows containing missing values (geom_point).</code></pre>
 <p><img src="Introduction_files/figure-html/unnamed-chunk-40-1.png" width="700"></p>
 <p>These observations are corroborated by the positive relationship between patient transfer and number of closely related isolate pairs for a given facility pair:</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pair_info</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">sum_pt_trans_metric</span>,y<span class="op">=</span><span class="va">leq_10</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method<span class="op">=</span><span class="st">'lm'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/scale_continuous.html">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -787,7 +784,7 @@
 <pre><code>## Warning: Removed 155 rows containing missing values (geom_point).</code></pre>
 <p><img src="Introduction_files/figure-html/unnamed-chunk-41-1.png" width="700"></p>
 <p>Another way to quantify the similarity between facilities is the value of the minimum pairwise SNV distance between isolates at the facilities:</p>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pair_info</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/aes.html">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">sum_pt_trans_metric</span>,y<span class="op">=</span><span class="va">dist_min</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method<span class="op">=</span><span class="st">'lm'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/scale_continuous.html">scale_x_log10</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
@@ -801,7 +798,7 @@
 <h1 class="hasAnchor">
 <a href="#are-there-any-observable-geographic-trends-in-prevalencetransmission" class="anchor"></a>Are there any observable geographic trends in prevalence/transmission?</h1>
 <p>To evaluate whether there are any observable geographic trends in prevalence or transmission, we will need geographic information (latitude and longitude) for each facility. Here we’ve de-identified the facility geographies as an example. Note that we don’t have geographic information for all facility pairs.</p>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">facil_coord</span></code></pre></div>
 <pre><code>## # A tibble: 11 × 3
 ##    facil     long      lat
@@ -819,7 +816,7 @@
 ## 11 T     -930605. -740730.</code></pre>
 <p>This data frame contains the facility ID, longitude, latitude.</p>
 <p>We can also add information about the number of isolates from each facility to include as point size on our map:</p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># get counts for each location</span>
 <span class="va">loc_n</span> <span class="op">&lt;-</span> <span class="va">locs</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> <span class="fu">`colnames&lt;-`</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"facil"</span>, <span class="st">"n_isolates"</span><span class="op">)</span><span class="op">)</span>
 
@@ -841,7 +838,7 @@
 ## 10 P     -930605. -740730.         37
 ## 11 T     -930605. -740730.         16</code></pre>
 <p>We can use this to plot the facilities on a map and connect them by closely related pairs (here we use the under 7 threshold for visualization purposes). Point size represents number of isolates collected from a facility and transparency represents the number of closely related isolate pairs.</p>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># merge facil_info and facil_geo</span>
 <span class="va">snv_geo</span> <span class="op">&lt;-</span> <span class="va">pair_info</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">facil_geo</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"loc1"</span> <span class="op">=</span> <span class="st">"facil"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> 
@@ -863,11 +860,11 @@
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/labs.html">labs</a></span><span class="op">(</span>size <span class="op">=</span> <span class="st">'Number of samples'</span>, alpha <span class="op">=</span> <span class="st">'Number of closely related\npairs (≤ 6 SNVs)'</span><span class="op">)</span></code></pre></div>
 <p><img src="Introduction_files/figure-html/unnamed-chunk-45-1.png" width="700"></p>
 <p>We can also look at the relationship between physical distance between facilities and number of closely related pairs. First, we have to get the physical distance between facilities:</p>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">snv_geo</span> <span class="op">&lt;-</span> <span class="va">snv_geo</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/mutate.html">mutate</a></span><span class="op">(</span>geo_dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="op">(</span><span class="va">facil_1_long</span><span class="op">-</span><span class="va">facil_2_long</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">+</span><span class="op">(</span><span class="va">facil_1_lat</span><span class="op">-</span><span class="va">facil_2_lat</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Then we can plot the relationship between physical distance and summary metrics. Here is an example using the number of pairs under a pairwise SNV distance of 11 between facility pairs:</p>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">snv_geo</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">geo_dist</span>, y <span class="op">=</span> <span class="va">leq_10</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/geom_smooth.html">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">'lm'</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://rdrr.io/pkg/ggplot2/man/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">'Physical distance between facilities'</span>, y <span class="op">=</span> <span class="st">'# closely related pairs\n(≤ 10 SNVs)'</span><span class="op">)</span></code></pre></div>
@@ -878,7 +875,7 @@
 <h1 class="hasAnchor">
 <a href="#a-note-on-additional-metadata" class="anchor"></a>A note on additional metadata</h1>
 <p>Sometimes it’s useful to make plots faceted or subsetted based on various information from metadata such as collection date, sequence type, etc. To do this, you can merge the <code>pair_types</code> object with the <code>metadata</code> object as follows (modifying the code as fit for your dataset):</p>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># merge pair_types and metadata, and find time difference</span>
 <span class="va">snv_and_metadat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">pair_types</span>, <span class="va">metadata</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'isolate1'</span> <span class="op">=</span> <span class="st">'isolate_id'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> 
   <span class="fu"><a href="https://rdrr.io/pkg/dplyr/man/rename.html">rename</a></span><span class="op">(</span>patient_id_1 <span class="op">=</span> <span class="va">patient_id</span>, collection_date_1 <span class="op">=</span> <span class="va">collection_date</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/pkg/magrittr/man/pipe.html">%&gt;%</a></span> 
@@ -910,8 +907,8 @@
 <h1 class="hasAnchor">
 <a href="#making-your-code-run-faster" class="anchor"></a>Making your code run faster</h1>
 <p>For some functions, we have used <code>future.apply()</code> to enable you to make it run faster. Currently, this is only an option for <code><a href="../reference/get_clusters.html">get_clusters()</a></code>, but we plan to implement it for <code><a href="../reference/get_genetic_flow.html">get_genetic_flow()</a></code> as well, and possibly others. To decrease runtime in this way, you have to register a future plan prior to calling the function. This code says to use a multisession plan to split the work across 4 cores, instead of the deafult of 1. You can look at the <a href="https://cran.r-project.org/web/packages/future/vignettes/future-1-overview.html"><code>future</code> documentation</a> to figure out what plan is best for what you’re doing. Note that only multisession works for RStudio, but multicore might work better for some purposes, such as working on a computing cluster. After registering a future plan, you can call <code><a href="../reference/get_clusters.html">get_clusters()</a></code> like normal and it should run faster!</p>
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">doFuture</span><span class="fu">::</span><span class="fu">registerDoFuture</span><span class="op">(</span><span class="op">)</span>
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">doFuture</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/doFuture/man/registerDoFuture.html">registerDoFuture</a></span><span class="op">(</span><span class="op">)</span>
 <span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/future/man/plan.html">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/future/man/multisession.html">multisession</a></span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>
 
 <span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_clusters.html">get_clusters</a></span><span class="op">(</span><span class="va">tr</span>, <span class="va">locs</span><span class="op">)</span></code></pre></div>
