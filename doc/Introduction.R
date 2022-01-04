@@ -195,7 +195,7 @@ snv_hist
 ## ---- message=FALSE-----------------------------------------------------------
 snv_hist + xlim(c(0,50))
 
-## -----------------------------------------------------------------------------
+## ---- warning = FALSE, message = FALSE----------------------------------------
 left_join(pair_types, days_between_isolates) %>% 
   ggplot(aes(x = days_diff, y = pairwise_dist)) +
   geom_bin_2d() +
