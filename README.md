@@ -4,7 +4,7 @@
 
 Website: https://snitkin-lab-umich.github.io/regentrans/
 
-Preprint: https://www.medrxiv.org/content/10.1101/2021.07.25.21261097v2
+Manuscript: https://www.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000747
 
 `regentrans` can be installed using the command `devtools::install_github('Snitkin-Lab-Umich/regentrans')` in R 
 
